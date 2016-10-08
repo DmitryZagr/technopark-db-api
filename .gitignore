@@ -41,3 +41,8 @@ nosetests.xml
 
 # MySQLWorkBench
 *.mwb.bak
+
+#Idea
+*.imi
+target
+.idea
