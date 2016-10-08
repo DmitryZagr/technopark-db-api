@@ -1,11 +1,14 @@
 package ru.mail.park.model;
 
+import org.springframework.web.bind.annotation.ModelAttribute;
+
 /**
  * Created by admin on 08.10.16.
  */
 public class User {
 
 //    Requried
+    private Integer id;
     private String username;
     private String about;
     private String name;
@@ -14,13 +17,39 @@ public class User {
 //    Optional
     private boolean isAnonymous = true;
 
+    public User() {
+    }
+
     public User(String username, String about, String name,
-                                String email, boolean isAnonymous) {
+                String email, boolean isAnonymous) {
         this.username    = username;
         this.about       = about;
         this.name        = name;
         this.email       = email;
         this.isAnonymous = isAnonymous;
+    }
+
+    @ModelAttribute("user")
+    public User getUser(){
+        return new User();
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return "\"id\":" + id.intValue() + ',' +
+                "\"username\":\"" + username + "\"," +
+                "\"about\":\"" + about + "\","  +
+                "\"name\":\""  + name  + "\","  +
+                "\"email\":\":" + email + "\","  +
+                "\"isAnonymous\":\"" + isAnonymous + "\"";
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUsername() {
