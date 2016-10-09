@@ -1,16 +1,15 @@
 package ru.mail.park.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.*;
+import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.User;
 import ru.mail.park.service.implementation.UserServiceImpl;
 import ru.mail.park.service.interfaces.IUserService;
 
-import javax.servlet.http.HttpSession;
 
 /**
  * Created by admin on 08.10.16.
@@ -27,13 +26,35 @@ public class UserController {
 
     @RequestMapping(path = "/db/api/user/create/", method = RequestMethod.POST,
             produces = "application/json")
-    public ResponseEntity createUser(@ModelAttribute("user") User user) {
+    public ResponseEntity createUser(@RequestBody User user) {
         int code = userService.create(user);
+        String status;
+
+        if(code != 0) {
+            status = ResponseStatus.getErrorMessage(code, ResponseStatus.FORMAT_JSON);
+//            String respStr =
+//                    "{" +
+//                            "\"code\":" + code + "," +
+//                            "\"response\":\"" + status +
+//                            "\" }";
+            return ResponseEntity.ok(status);
+        }
+        else status = user.toString();
+
         String respStr =
                 "{" +
                     "\"code\":" + code + "," +
-                    "\"response\":{" + user.toString() +
+                    "\"response\":{" + status +
                 "} }";
         return ResponseEntity.ok(respStr);
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class})
+    @ResponseBody
+    public String resolveException() {
+        return ResponseStatus.getErrorMessage(
+                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ResponseStatus.FORMAT_JSON
+        );
     }
 }

@@ -2,10 +2,14 @@ package ru.mail.park.model;
 
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.io.Serializable;
+
 /**
  * Created by admin on 08.10.16.
  */
-public class User {
+public class User implements Serializable{
+
+    private static final long serialVersionUID = -5527566248002296042L;
 
 //    Requried
     private Integer id;
@@ -15,7 +19,7 @@ public class User {
     private String email;
 
 //    Optional
-    private boolean isAnonymous = true;
+    private boolean isAnonymous = false;
 
     public User() {
     }
@@ -41,10 +45,10 @@ public class User {
     @Override
     public String toString() {
         return "\"id\":" + id.intValue() + ',' +
-                "\"username\":\"" + username + "\"," +
-                "\"about\":\"" + about + "\","  +
-                "\"name\":\""  + name  + "\","  +
-                "\"email\":\":" + email + "\","  +
+                "\"username\":\""    + username + "\"," +
+                "\"about\":\""       + about + "\","  +
+                "\"name\":\""        + name  + "\","  +
+                "\"email\":\":"      + email + "\","  +
                 "\"isAnonymous\":\"" + isAnonymous + "\"";
     }
 

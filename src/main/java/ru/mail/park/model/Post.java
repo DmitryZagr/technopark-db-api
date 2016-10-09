@@ -1,11 +1,14 @@
 package ru.mail.park.model;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 /**
  * Created by admin on 08.10.16.
  */
-public class Post {
+public class Post implements Serializable{
+
+    private static final long serialVersionUID = -5527566248002296042L;
 
 //    Requried
     Calendar date;

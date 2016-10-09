@@ -1,9 +1,13 @@
 package ru.mail.park.model;
 
+import java.io.Serializable;
+
 /**
  * Created by admin on 08.10.16.
  */
-public class Forum {
+public class Forum implements Serializable{
+
+    private static final long serialVersionUID = -5527566248002296042L;
 
     private String name;
     private String short_name;
