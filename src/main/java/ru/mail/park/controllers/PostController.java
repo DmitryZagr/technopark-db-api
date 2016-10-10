@@ -6,30 +6,26 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.mail.park.api.status.*;
-import ru.mail.park.model.Forum;
-import ru.mail.park.service.implementation.ForumServiceImpl;
-import ru.mail.park.service.interfaces.IForumService;
-
-import javax.servlet.http.HttpSession;
+import ru.mail.park.model.Post;
+import ru.mail.park.service.implementation.PostServiceImpl;
+import ru.mail.park.service.interfaces.IPostService;
 
 /**
- * Created by admin on 08.10.16.
+ * Created by admin on 09.10.16.
  */
 @RestController
-public class ForumController {
-
-    private final IForumService forumService;
+public class PostController  {
+    private final IPostService postService;
 
     @Autowired
-    public ForumController(ForumServiceImpl forumService) {
-        this.forumService = forumService;
+    public PostController(PostServiceImpl postService) {
+        this.postService = postService;
     }
 
-
-    @RequestMapping(path = "/db/api/forum/create/", method = RequestMethod.POST,
-                                         produces = "application/json")
-    public ResponseEntity create(@RequestBody Forum forum) {
-        return ResponseEntity.ok(forumService.create(forum));
+    @RequestMapping(path = "/db/api/post/create/", method = RequestMethod.POST,
+            produces = "application/json")
+    public ResponseEntity createUser(@RequestBody Post post) {
+        return ResponseEntity.ok(postService.create(post));
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class})
@@ -40,5 +36,4 @@ public class ForumController {
                 ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
         );
     }
-
 }

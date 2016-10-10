@@ -1,5 +1,7 @@
 package ru.mail.park.model;
 
+import org.springframework.web.bind.annotation.ModelAttribute;
+
 import java.io.Serializable;
 
 /**
@@ -9,6 +11,7 @@ public class Forum implements Serializable{
 
     private static final long serialVersionUID = -5527566248002296042L;
 
+    private long id;
     private String name;
     private String short_name;
     private String user;
@@ -17,6 +20,21 @@ public class Forum implements Serializable{
         this.name       = name;
         this.short_name = short_name;
         this.user       = user;
+    }
+
+    public Forum() {}
+
+    @ModelAttribute("forum")
+    public Forum getForum(){
+        return new Forum();
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -41,6 +59,14 @@ public class Forum implements Serializable{
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    @Override
+    public String toString() {
+        return "\"id\":" + id +
+                ", \"name\":" + "\"" + name + "\""  +
+                ", \"short_name\":" + "\"" + short_name + "\"" +
+                ", \"user\":" +  "\"" + user + "\"";
     }
 
 }

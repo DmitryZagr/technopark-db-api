@@ -3,11 +3,14 @@ package ru.mail.park.service.implementation;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import org.springframework.stereotype.Component;
+import ru.mail.park.api.common.Result;
+import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Table;
 import ru.mail.park.model.User;
 import ru.mail.park.service.interfaces.IUserService;
 import ru.mail.park.util.ConnectionToMySQL;
+import ru.mail.park.util.MySqlUtilRequests;
 
 import java.sql.*;
 
@@ -18,51 +21,50 @@ import java.sql.*;
 public class UserServiceImpl implements IUserService, AutoCloseable{
 
 //    private static final String tableName = "`forum`.`User`";
-    private static Connection connection;
-    private static Statement statement;
-    private static ResultSet resultSet;
+    private Connection connection;
+    private Statement statement;
+    private ResultSet resultSet;
     PreparedStatement preparedStatement;
 
     @Override
-    public int create(User user) {
-//        int userID = 0;
+    public String create(User user) {
         connection =  ConnectionToMySQL.getConnection();
 
-        String sql = "select count(*) from " + Table.User.TABLE_USER;
-
-        try {
-            statement   = connection.createStatement();
-            resultSet = statement.executeQuery(sql);
-            while (resultSet.next()) { user.setId(resultSet.getInt(1) + 1); }
-//            user.setId(userID + 1);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        user.setId(MySqlUtilRequests.countRowsInTable(Table.User.TABLE_USER) + 1);
 
         String sqlInsert = "INSERT INTO " + Table.User.TABLE_USER + " ( " +
-                Table.User.COLUMN_ID_USER + ',' + Table.User.COLUMN_USERNAME + ',' +
+                Table.User.COLUMN_USERNAME + ',' +
                 Table.User.COLUMN_ABOUT + ',' + Table.User.COLUMN_IS_ANONYMOUS + ',' +
                 Table.User.COLUMN_NAME + ',' + Table.User.COLUMN_EMAIL + " ) " +
-                "VALUES (?, ?, ?, ?, ?, ?);";
+                "VALUES ( ?, ?, ?, ?, ?); "
+                ;
 
         try {
-            preparedStatement = connection.prepareStatement(sqlInsert);
-            preparedStatement.setInt(1, user.getId());
-            preparedStatement.setString(2, user.getUsername());
-            preparedStatement.setString(3, user.getAbout());
-            preparedStatement.setBoolean(4, user.isAnonymous());
-            preparedStatement.setString(5, user.getName());
-            preparedStatement.setString(6, user.getEmail());
-            preparedStatement.execute();
+            preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+//            preparedStatement.setInt(1, user.getId());
+            preparedStatement.setString(1, user.getUsername());
+            preparedStatement.setString(2, user.getAbout());
+            preparedStatement.setBoolean(3, user.isAnonymous());
+            preparedStatement.setString(4, user.getName());
+            preparedStatement.setString(5, user.getEmail());
+            preparedStatement.executeUpdate();
+            resultSet = preparedStatement.getGeneratedKeys();
+            while(resultSet.next())
+                user.setId(resultSet.getLong(1));
         } catch (MySQLIntegrityConstraintViolationException e) {
-            return ResponseStatus.ResponceCode.USER_EXIST.ordinal();
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.USER_EXIST.ordinal(), ResponseStatus.FORMAT_JSON);
         } catch (MySQLSyntaxErrorException e) {
-            return ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal();
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return ResponseStatus.ResponceCode.OK.ordinal();
+        String json = (new ResultJson<User>(
+                ResponseStatus.ResponceCode.OK.ordinal(), user)).getStringResult();
+
+        return json;
     }
 
     @Override

@@ -11,14 +11,15 @@ public class Post implements Serializable{
     private static final long serialVersionUID = -5527566248002296042L;
 
 //    Requried
-    Calendar date;
-    Integer thread = null;
+    long   idPost = 0;
+    String date;
+    long   thread ;
     String message;
     String user;
     String forum;
 
 //    Optional
-    Integer parent        = null;
+    long parent;
     boolean isApproved    = false;
     boolean isHighlighted = false;
     boolean isEdited      = false;
@@ -28,7 +29,7 @@ public class Post implements Serializable{
     public Post() {
     }
 
-    public Post(Calendar date, int thread, String message, String user, String forum) {
+    public Post(String date, int thread, String message, String user, String forum) {
         this.date = date;
         this.thread = thread;
         this.message = message;
@@ -36,16 +37,28 @@ public class Post implements Serializable{
         this.forum = forum;
     }
 
-    public Calendar getDate() {
+    public String getDate() {
 
         return date;
     }
 
-    public void setDate(Calendar date) {
+    public long getIdPost() {
+        return idPost;
+    }
+
+    public void setIdPost(long idPost) {
+        this.idPost = idPost;
+    }
+
+    public void setThread(Integer thread) {
+        this.thread = thread;
+    }
+
+    public void setDate(String date) {
         this.date = date;
     }
 
-    public int getThread() {
+    public long getThread() {
         return thread;
     }
 
@@ -77,7 +90,7 @@ public class Post implements Serializable{
         this.forum = forum;
     }
 
-    public Integer getParent() {
+    public long getParent() {
         return parent;
     }
 
@@ -123,5 +136,23 @@ public class Post implements Serializable{
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+
+    @Override
+    public String toString() {
+        return "" +
+                "\"id\":" + idPost +
+                ", \"date\": \"" + date + '\"' +
+                ", \"thread\":" + thread +
+                ", \"message\": \"" + message + '\"' +
+                ", \"user\": \"" + user + '\"' +
+                ", \"forum\": \"" + forum + '\"' +
+                ", \"parent\":" + parent +
+                ", \"isApproved\":" + isApproved +
+                ", \"isHighlighted\":" + isHighlighted +
+                ", \"isEdited\":" + isEdited +
+                ", \"isSpam\":" + isSpam +
+                ", \"isDeleted\":" + isDeleted
+                ;
     }
 }

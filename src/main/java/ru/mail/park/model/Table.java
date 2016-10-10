@@ -10,13 +10,23 @@ public class Table {
         public static final String COLUMN_ID_FORUM   = "`forum`.`Forum`.`idForum`";
         public static final String COLUMN_NAME       = "`forum`.`Forum`.`name`";
         public static final String COLUMN_SHORT_NAME = "`forum`.`Forum`.`short_name`";
-        public static final String COLUMN_SLUG       = "`forum`.`Forum`.`slug`";
         public static final String COLUMN_USER       = "`forum`.`Forum`.`user`";
     }
 
     public static final class Post {
         public static final String TABLE_POST = "`forum`.`Post`";
         public static final String COLUMN_ID_POST = "`forum`.`Post`.`idPost`";
+        public static final String COLUMN_DATE = "`forum`.`Post`.`date`";
+        public static final String COLUMN_THREAD = "`forum`.`Post`.`thread`";
+        public static final String COLUMN_MESSAGE = "`forum`.`Post`.`message`";
+        public static final String COLUMN_USER = "`forum`.`Post`.`user`";
+        public static final String COLUMN_FORUM = "`forum`.`Post`.`forum`";
+        public static final String COLUMN_PARENT = "`forum`.`Post`.`parent`";
+        public static final String COLUMN_IS_APPROVED = "`forum`.`Post`.`isApproved`";
+        public static final String COLUMN_IS_HIGHLIGHED = "`forum`.`Post`.`isHighlighted`";
+        public static final String COLUMN_IS_EDITED = "`forum`.`Post`.`isEdited`";
+        public static final String COLUMN_IS_SPAM = "`forum`.`Post`.`isSpam`";
+        public static final String COLUMN_IS_DELETED = "`forum`.`Post`.`isDeleted`";
     }
 
     public static final class Thread {

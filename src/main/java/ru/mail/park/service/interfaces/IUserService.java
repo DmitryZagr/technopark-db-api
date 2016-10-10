@@ -8,5 +8,5 @@ import ru.mail.park.model.User;
  */
 @Component
 public interface IUserService {
-    int create(User ucr);
+    String create(User ucr);
 }

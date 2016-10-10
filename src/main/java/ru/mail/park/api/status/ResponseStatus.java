@@ -12,11 +12,11 @@ public class ResponseStatus {
 
     public static final String FORMAT_JSON = "JSON";
 
-    public static String OK() {
-        return "OK";
-    }
+//    public static String OK() {
+//        return "OK";
+//    }
 
-    public static String getErrorMessage(int code, String format) {
+    public static String getMessage(int code, String format) {
         switch (code) {
             case 0:
                 if(format.equals(ResponseStatus.FORMAT_JSON))
@@ -76,7 +76,7 @@ public class ResponseStatus {
                 "\"response\":\"" + errorMessage.IVALID_REQUEST +
                 "\" }";
         public static final String UNKNOWN_ERROR = "{" +
-                "\"code\":" + ResponceCode.UNKNOWN_ERROR + "," +
+                "\"code\":" + ResponceCode.UNKNOWN_ERROR.ordinal() + "," +
                 "\"response\":\"" + errorMessage.UNKNOWN_ERROR +
                 "\" }";
         public static final String USER_EXIST = "{" +

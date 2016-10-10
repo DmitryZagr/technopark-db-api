@@ -23,14 +23,8 @@ public class CommonController {
     public ResponseEntity clear() {
         int code = commonService.clear();
         String status;
-        status = ru.mail.park.api.status.ResponseStatus.getErrorMessage(code,
+        status = ru.mail.park.api.status.ResponseStatus.getMessage(code,
                                         ru.mail.park.api.status.ResponseStatus.FORMAT_JSON);
-//        String respStr =
-//                "{" +
-//                        "\"code\":" + code + "," +
-//                        "\"response\":\"" + status +
-//                        "\" " +
-//                "}";
         return ResponseEntity.ok(status);
     }
 
@@ -44,14 +38,11 @@ public class CommonController {
     @ResponseBody
     public String resolveException() {
         return
-                ru.mail.park.api.status.ResponseStatus.getErrorMessage(
+                ru.mail.park.api.status.ResponseStatus.getMessage(
                         ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
                         ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
                 );
-//                "{" +
-//                "\"code\":" + ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal() + "," +
-//                "\"response\":\"" + ru.mail.park.api.status.ResponseStatus.errorMessage.NOT_VALID +
-//                "\" }";
     }
+
 
 }

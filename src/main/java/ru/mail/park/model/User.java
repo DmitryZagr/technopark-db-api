@@ -12,7 +12,7 @@ public class User implements Serializable{
     private static final long serialVersionUID = -5527566248002296042L;
 
 //    Requried
-    private Integer id;
+    private long id;
     private String username;
     private String about;
     private String name;
@@ -33,26 +33,26 @@ public class User implements Serializable{
         this.isAnonymous = isAnonymous;
     }
 
-    @ModelAttribute("user")
-    public User getUser(){
-        return new User();
-    }
+//    @ModelAttribute("user")
+//    public User getUser(){
+//        return new User();
+//    }
 
-    public Integer getId() {
+    public long getId() {
         return id;
     }
 
-    @Override
-    public String toString() {
-        return "\"id\":" + id.intValue() + ',' +
-                "\"username\":\""    + username + "\"," +
-                "\"about\":\""       + about + "\","  +
-                "\"name\":\""        + name  + "\","  +
-                "\"email\":\":"      + email + "\","  +
-                "\"isAnonymous\":\"" + isAnonymous + "\"";
-    }
+//    @Override
+//    public String toString() {
+//        return "\"id\":" + id.intValue() + ',' +
+//                "\"username\":\""    + username + "\"," +
+//                "\"about\":\""       + about + "\","  +
+//                "\"name\":\""        + name  + "\","  +
+//                "\"email\":\":"      + email + "\","  +
+//                "\"isAnonymous\":\"" + isAnonymous + "\"";
+//    }
 
-    public void setId(Integer id) {
+    public void setId(long id) {
         this.id = id;
     }
 

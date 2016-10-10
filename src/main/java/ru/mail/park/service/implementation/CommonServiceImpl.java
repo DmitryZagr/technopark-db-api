@@ -19,9 +19,9 @@ import java.sql.Statement;
 @Component
 public class CommonServiceImpl implements ICommonService, AutoCloseable{
 
-    private static Connection connection;
-    private static Statement  statement;
-    private static ResultSet  resultSet;
+    private Connection connection;
+    private Statement  statement;
+    private ResultSet  resultSet;
 
     @Override
     public int clear() {
@@ -62,7 +62,7 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
         int countForum, countPost, countThread, countUser;
         countForum = countPost = countThread = countUser = 0;
         int code = 0;
-        String response ;
+//        String response ;
 
         try {
             connection = ConnectionToMySQL.getConnection();
@@ -80,11 +80,11 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
             while (resultSet.next()) countPost   = resultSet.getInt(1);
 
         } catch (MySQLSyntaxErrorException e) {
-            return ResponseStatus.getErrorMessage(
+            return ResponseStatus.getMessage(
                         ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
                         ResponseStatus.FORMAT_JSON);
         } catch (SQLException e) {
-            return ResponseStatus.getErrorMessage(
+            return ResponseStatus.getMessage(
                     ResponseStatus.ResponceCode.UNKNOWN_ERROR.ordinal(),
                     ResponseStatus.FORMAT_JSON);
         }
