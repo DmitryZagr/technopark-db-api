@@ -5,6 +5,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationExceptio
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import org.springframework.stereotype.Component;
 import ru.mail.park.api.common.Result;
+import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.forum.ForumCreateRequest;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Forum;
@@ -22,6 +23,7 @@ import java.sql.*;
 public class ForumServiceImpl implements IForumService, AutoCloseable{
     private Connection connection;
     private PreparedStatement preparedStatement;
+    private ResultSet resultSet;
 
     @Override
     public String create(Forum forum) {
@@ -29,9 +31,9 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
         connection =  ConnectionToMySQL.getConnection();
 
         String sqlInsert = "INSERT INTO " + Table.Forum.TABLE_FORUM + " ( " +
-                Table.Forum.COLUMN_ID_FORUM + ',' + Table.Forum.COLUMN_NAME + ',' +
+                Table.Forum.COLUMN_NAME + ',' +
                 Table.Forum.COLUMN_SHORT_NAME + ',' + Table.Forum.COLUMN_USER + ')' +
-                "VALUES (?, ?, ?, ?);";
+                "VALUES (?, ?, ?);";
 
         try {
             forum.setId(ForumCreateRequest.getExistingId(forum.getName(), forum.getShort_name()));
@@ -40,18 +42,20 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                     ResponseStatus.ResponceCode.UNKNOWN_ERROR.ordinal(),
                     ResponseStatus.FORMAT_JSON);
 
-            if(forum.getId() != 0)
-                return "{ \"code\":" + ResponseStatus.ResponceCode.OK.ordinal() +
-                        ",\"responce\": {" + forum.toString() + "}}";
+            if(forum.getId() != 0) {
+                String json = (new ResultJson<Forum>(
+                        ResponseStatus.ResponceCode.OK.ordinal(), forum)).getStringResult();
+                return json;
+            }
 
-            forum.setId(MySqlUtilRequests.countRowsInTable(Table.Forum.TABLE_FORUM) + 1);
-
-            preparedStatement = connection.prepareStatement(sqlInsert);
-            preparedStatement.setLong(1, forum.getId());
-            preparedStatement.setString(2, forum.getName());
-            preparedStatement.setString(3, forum.getShort_name());
-            preparedStatement.setString(4, forum.getUser());
-            preparedStatement.execute();
+            preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, forum.getName());
+            preparedStatement.setString(2, forum.getShort_name());
+            preparedStatement.setString(3, forum.getUser());
+            preparedStatement.executeUpdate();
+            resultSet = preparedStatement.getGeneratedKeys();
+            while(resultSet.next())
+                forum.setId(resultSet.getLong(1));
 
         }
 //        catch (MySQLIntegrityConstraintViolationException e) {
@@ -67,10 +71,10 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
             e.printStackTrace();
         }
 
+        String json = (new ResultJson<Forum>(
+                ResponseStatus.ResponceCode.OK.ordinal(), forum)).getStringResult();
 
-
-        return "{ \"code\":" + ResponseStatus.ResponceCode.OK.ordinal() +
-                ",\"responce\": {" + forum.toString() + "}}";
+        return json;
     }
 
     @Override

@@ -22,8 +22,8 @@ public class Thread implements Serializable{
 //    Optional
     private boolean isDeleted = false;
 
-    public Thread() {
-    }
+//    public Thread() {
+//    }
 
     public Thread(String forum, String title, boolean isClosed,
                   String email, Calendar date,
@@ -37,10 +37,10 @@ public class Thread implements Serializable{
         this.slug = slug;
     }
 
-    public String getForum() {
-
-        return forum;
-    }
+//    public String getForum() {
+//
+//        return forum;
+//    }
 
     public void setForum(String forum) {
         this.forum = forum;

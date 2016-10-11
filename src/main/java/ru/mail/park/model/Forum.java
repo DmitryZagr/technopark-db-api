@@ -24,10 +24,10 @@ public class Forum implements Serializable{
 
     public Forum() {}
 
-    @ModelAttribute("forum")
-    public Forum getForum(){
-        return new Forum();
-    }
+//    @ModelAttribute("forum")
+//    public Forum getForum(){
+//        return new Forum();
+//    }
 
     public long getId() {
         return id;

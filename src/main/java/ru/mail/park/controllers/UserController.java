@@ -26,25 +26,7 @@ public class UserController {
     @RequestMapping(path = "/db/api/user/create/", method = RequestMethod.POST,
             produces = "application/json")
     public ResponseEntity createUser(@RequestBody User user) {
-//        int code = userService.create(user);
         String status;
-
-//        if(code != 0) {
-//            status = ResponseStatus.getMessage(code, ResponseStatus.FORMAT_JSON);
-////            String respStr =
-////                    "{" +
-////                            "\"code\":" + code + "," +
-////                            "\"response\":\"" + status +
-////                            "\" }";
-//            return ResponseEntity.ok(status);
-//        }
-//        else status = user.toString();
-//
-//        String respStr =
-//                "{" +
-//                    "\"code\":" + code + "," +
-//                    "\"response\":{" + status +
-//                "} }";
         return ResponseEntity.ok(userService.create(user));
     }
 

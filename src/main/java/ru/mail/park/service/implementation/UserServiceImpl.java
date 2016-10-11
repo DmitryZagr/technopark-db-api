@@ -30,18 +30,14 @@ public class UserServiceImpl implements IUserService, AutoCloseable{
     public String create(User user) {
         connection =  ConnectionToMySQL.getConnection();
 
-//        user.setId(MySqlUtilRequests.countRowsInTable(Table.User.TABLE_USER) + 1);
-
         String sqlInsert = "INSERT INTO " + Table.User.TABLE_USER + " ( " +
                 Table.User.COLUMN_USERNAME + ',' +
                 Table.User.COLUMN_ABOUT + ',' + Table.User.COLUMN_IS_ANONYMOUS + ',' +
                 Table.User.COLUMN_NAME + ',' + Table.User.COLUMN_EMAIL + " ) " +
-                "VALUES ( ?, ?, ?, ?, ?); "
-                ;
+                "VALUES ( ?, ?, ?, ?, ?); ";
 
         try {
             preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
-//            preparedStatement.setInt(1, user.getId());
             preparedStatement.setString(1, user.getUsername());
             preparedStatement.setString(2, user.getAbout());
             preparedStatement.setBoolean(3, user.isAnonymous());
