@@ -29,9 +29,25 @@ public class Table {
         public static final String COLUMN_IS_DELETED = "`forum`.`Post`.`isDeleted`";
     }
 
+    public static final class VotePost {
+        public static final String TABLE_VOTE_POST = "`forum`.`VotePost`";
+        public static final String COLUMN_ID_POST = "`forum`.`VotePost`.`idPost`";
+        public static final String COLUMN_LIKE = "`forum`.`VotePost`.`like`";
+        public static final String COLUMN_DISLIKE = "`forum`.`VotePost`.`dislike`";
+    }
+
+
     public static final class Thread {
         public static final String TABLE_THREAD     = "`forum`.`Thread`";
         public static final String COLUMN_ID_THREAD = "`forum`.`Thread`.`idThread`";
+        public static final String COLUMN_FORUM = "`forum`.`Thread`.`forum`";
+        public static final String COLUMN_TITLE = "`forum`.`Thread`.`title`";
+        public static final String COLUMN_IS_CLOSED = "`forum`.`Thread`.`isClosed`";
+        public static final String COLUMN_USER = "`forum`.`Thread`.`user`";
+        public static final String COLUMN_DATE = "`forum`.`Thread`.`date`";
+        public static final String COLUMN_MESSAGE = "`forum`.`Thread`.`message`";
+        public static final String COLUMN_SLUG = "`forum`.`Thread`.`slug`";
+        public static final String COLUMN_IS_DELETED = "`forum`.`Thread`.`isDeleted`";
     }
 
     public static final class User {
@@ -43,6 +59,12 @@ public class Table {
         public static final String COLUMN_ABOUT        = "`forum`.`User`.`about`";
         public static final String COLUMN_IS_ANONYMOUS = "`forum`.`User`.`isAnonymous`";
 
+    }
+
+    public static final class ThreadSubscribe{
+        public static final String TABLE_ThreadSubscribe = "`forum`.`ThreadSubscribe`";
+        public static final String COLUMN_THREAD         = "`forum`.`ThreadSubscribe`.`thread`";
+        public static final String COLUMN_USERNAME       = "`forum`.`ThreadSubscribe`.`user`";
     }
 
 }

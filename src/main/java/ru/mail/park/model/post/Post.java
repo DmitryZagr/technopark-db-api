@@ -1,4 +1,4 @@
-package ru.mail.park.model;
+package ru.mail.park.model.post;
 
 import java.io.Serializable;
 import java.util.Calendar;

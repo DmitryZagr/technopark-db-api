@@ -3,14 +3,12 @@ package ru.mail.park.service.implementation;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import org.springframework.stereotype.Component;
-import ru.mail.park.api.common.Result;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Table;
-import ru.mail.park.model.User;
+import ru.mail.park.model.user.User;
 import ru.mail.park.service.interfaces.IUserService;
 import ru.mail.park.util.ConnectionToMySQL;
-import ru.mail.park.util.MySqlUtilRequests;
 
 import java.sql.*;
 
@@ -20,15 +18,18 @@ import java.sql.*;
 @Component
 public class UserServiceImpl implements IUserService, AutoCloseable{
 
-//    private static final String tableName = "`forum`.`User`";
     private Connection connection;
     private Statement statement;
     private ResultSet resultSet;
-    PreparedStatement preparedStatement;
+    private PreparedStatement preparedStatement;
 
     @Override
     public String create(User user) {
         connection =  ConnectionToMySQL.getConnection();
+
+        if(user.isEmpty())
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
 
         String sqlInsert = "INSERT INTO " + Table.User.TABLE_USER + " ( " +
                 Table.User.COLUMN_USERNAME + ',' +

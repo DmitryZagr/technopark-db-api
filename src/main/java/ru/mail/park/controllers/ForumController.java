@@ -4,13 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.mail.park.api.status.*;
-import ru.mail.park.model.Forum;
+import ru.mail.park.model.forum.Forum;
 import ru.mail.park.service.implementation.ForumServiceImpl;
 import ru.mail.park.service.interfaces.IForumService;
-
-import javax.servlet.http.HttpSession;
 
 /**
  * Created by admin on 08.10.16.

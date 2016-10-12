@@ -2,7 +2,7 @@ package ru.mail.park.service.interfaces;
 
 
 import org.springframework.stereotype.Component;
-import ru.mail.park.model.Forum;
+import ru.mail.park.model.forum.Forum;
 
 /**
  * Created by admin on 08.10.16.
@@ -10,4 +10,5 @@ import ru.mail.park.model.Forum;
 @Component
 public interface IForumService {
     String create(Forum forum);
+//    String remove();
 }

@@ -1,4 +1,4 @@
-package ru.mail.park.model;
+package ru.mail.park.model.forum;
 
 import org.springframework.web.bind.annotation.ModelAttribute;
 

@@ -1,18 +1,14 @@
 package ru.mail.park.service.implementation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import org.springframework.stereotype.Component;
-import ru.mail.park.api.common.Result;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.forum.ForumCreateRequest;
 import ru.mail.park.api.status.ResponseStatus;
-import ru.mail.park.model.Forum;
+import ru.mail.park.model.forum.Forum;
 import ru.mail.park.model.Table;
 import ru.mail.park.service.interfaces.IForumService;
 import ru.mail.park.util.ConnectionToMySQL;
-import ru.mail.park.util.MySqlUtilRequests;
 
 import java.sql.*;
 

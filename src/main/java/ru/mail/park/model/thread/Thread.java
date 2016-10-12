@@ -1,4 +1,4 @@
-package ru.mail.park.model;
+package ru.mail.park.model.thread;
 
 import java.io.Serializable;
 import java.util.Calendar;
@@ -10,28 +10,29 @@ public class Thread implements Serializable{
 
     private static final long serialVersionUID = -5527566248002296042L;
 
-//    Requried
+    //    Requried
+    private long id;
     private String forum;
     private String title;
     private boolean isClosed;
-    private String email;
-    private Calendar date;
+    private String user;
+    private String date;
     private String message;
     private String slug;
 
 //    Optional
     private boolean isDeleted = false;
 
-//    public Thread() {
-//    }
+    public Thread() {
+    }
 
     public Thread(String forum, String title, boolean isClosed,
-                  String email, Calendar date,
+                  String user, String date,
                   String message, String slug) {
         this.forum = forum;
         this.title = title;
         this.isClosed = isClosed;
-        this.email = email;
+        this.user = user;
         this.date = date;
         this.message = message;
         this.slug = slug;
@@ -44,6 +45,18 @@ public class Thread implements Serializable{
 
     public void setForum(String forum) {
         this.forum = forum;
+    }
+
+    public String getForum() {
+        return forum;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -62,19 +75,19 @@ public class Thread implements Serializable{
         isClosed = closed;
     }
 
-    public String getEmail() {
-        return email;
+    public String getUser() {
+        return user;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setUser(String email) {
+        this.user = email;
     }
 
-    public Calendar getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Calendar date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

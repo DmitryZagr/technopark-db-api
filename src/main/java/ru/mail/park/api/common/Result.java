@@ -1,10 +1,5 @@
 package ru.mail.park.api.common;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import ru.mail.park.api.status.ResponseStatus;
-import ru.mail.park.model.Post;
-
 /**
  * Created by admin on 11.10.16.
  */

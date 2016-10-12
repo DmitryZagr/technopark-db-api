@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 import ru.mail.park.api.status.ResponseStatus;
-import ru.mail.park.model.User;
+import ru.mail.park.model.user.User;
 import ru.mail.park.service.implementation.UserServiceImpl;
 import ru.mail.park.service.interfaces.IUserService;
 

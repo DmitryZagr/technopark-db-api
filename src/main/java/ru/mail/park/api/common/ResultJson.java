@@ -27,5 +27,4 @@ public class ResultJson<V> {
 
         return json;
     }
-
 }

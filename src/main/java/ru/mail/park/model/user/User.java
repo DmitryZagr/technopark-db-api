@@ -1,4 +1,4 @@
-package ru.mail.park.model;
+package ru.mail.park.model.user;
 
 import org.springframework.web.bind.annotation.ModelAttribute;
 
@@ -42,16 +42,6 @@ public class User implements Serializable{
         return id;
     }
 
-//    @Override
-//    public String toString() {
-//        return "\"id\":" + id.intValue() + ',' +
-//                "\"username\":\""    + username + "\"," +
-//                "\"about\":\""       + about + "\","  +
-//                "\"name\":\""        + name  + "\","  +
-//                "\"email\":\":"      + email + "\","  +
-//                "\"isAnonymous\":\"" + isAnonymous + "\"";
-//    }
-
     public void setId(long id) {
         this.id = id;
     }
@@ -94,5 +84,11 @@ public class User implements Serializable{
 
     public void setAnonymous(boolean anonymous) {
         isAnonymous = anonymous;
+    }
+
+    public boolean isEmpty() {
+        if(email.equals("") || username.equals("") || about.equals("") || name.equals(""))
+            return true;
+        return false;
     }
 }

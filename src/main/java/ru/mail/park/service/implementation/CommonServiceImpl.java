@@ -61,8 +61,6 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
 
         int countForum, countPost, countThread, countUser;
         countForum = countPost = countThread = countUser = 0;
-        int code = 0;
-//        String response ;
 
         try {
             connection = ConnectionToMySQL.getConnection();
