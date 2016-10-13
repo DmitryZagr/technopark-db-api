@@ -9,4 +9,5 @@ import ru.mail.park.model.user.User;
 @Component
 public interface IUserService {
     String create(User ucr);
+    String follow(String followerFollowee);
 }

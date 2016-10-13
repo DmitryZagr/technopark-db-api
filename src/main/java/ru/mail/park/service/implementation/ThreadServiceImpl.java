@@ -11,7 +11,9 @@ import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Table;
 import ru.mail.park.model.thread.Thread;
+import ru.mail.park.model.thread.ThreadID;
 import ru.mail.park.model.thread.ThreadSubscribe;
+import ru.mail.park.model.thread.ThreadVote;
 import ru.mail.park.service.interfaces.IThreadService;
 import ru.mail.park.util.ConnectionToMySQL;
 import sun.jvm.hotspot.opto.RootNode;
@@ -59,8 +61,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             while(resultSet.next())
                 thread.setId(resultSet.getLong(1));
         } catch (MySQLIntegrityConstraintViolationException e) {
-            return ResponseStatus.getMessage(
-                    ResponseStatus.ResponceCode.USER_EXIST.ordinal(), ResponseStatus.FORMAT_JSON);
+            String json = (new ResultJson<Thread>(
+                    ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
         } catch (MySQLSyntaxErrorException e) {
             return ResponseStatus.getMessage(
                     ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
@@ -136,6 +138,204 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
         }
         json = (new ResultJson<ThreadSubscribe>(
                 ResponseStatus.ResponceCode.OK.ordinal(), threadSubscribe)).getStringResult();
+        return json;
+    }
+
+    @Override
+    public String open(ThreadID thread) {
+        connection =  ConnectionToMySQL.getConnection();
+        String sql = "UPDATE " + Table.Thread.TABLE_THREAD +
+                " SET " + Table.Thread.COLUMN_IS_CLOSED +
+                " =0 WHERE " + Table.Thread.COLUMN_ID_THREAD + "=" + thread.getThread();
+
+        String json;
+        int updRows;
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            updRows = preparedStatement.executeUpdate();
+            if(updRows == 0)
+                return ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                        ResponseStatus.FORMAT_JSON);
+        } catch (MySQLIntegrityConstraintViolationException e) {
+            json = (new ResultJson<ThreadID>(
+                    ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
+            return json;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        json = (new ResultJson<ThreadID>(
+                ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
+        return json;
+    }
+
+    @Override
+    public String close(ThreadID thread) {
+        connection =  ConnectionToMySQL.getConnection();
+        String sql = "UPDATE " + Table.Thread.TABLE_THREAD +
+                " SET " + Table.Thread.COLUMN_IS_CLOSED +
+                " =1 WHERE " + Table.Thread.COLUMN_ID_THREAD + "=" + thread.getThread();
+
+        String json;
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            if(preparedStatement.executeUpdate() == 0)
+                return ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                        ResponseStatus.FORMAT_JSON);
+        } catch (MySQLIntegrityConstraintViolationException e) {
+            json = (new ResultJson<ThreadID>(
+                    ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
+            return json;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        json = (new ResultJson<ThreadID>(
+                ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
+        return json;
+    }
+
+    @Override
+    public String remove(ThreadID thread) {
+        connection =  ConnectionToMySQL.getConnection();
+        String sqlUpdTH = "UPDATE " + Table.Thread.TABLE_THREAD +
+                " SET " + Table.Thread.COLUMN_IS_DELETED +
+                " =1 WHERE " + Table.Thread.COLUMN_ID_THREAD + "=" +
+                thread.getThread() + ";" ;
+        String sqlUpdPost = "UPDATE " + Table.Post.TABLE_POST + " SET " +
+                Table.Post.COLUMN_IS_DELETED + "=1 WHERE " + Table.Post.COLUMN_THREAD + "=" +
+                thread.getThread();
+
+        String json;
+
+        try {
+            preparedStatement = connection.prepareStatement(sqlUpdTH);
+            if(preparedStatement.executeUpdate() == 0)
+                return ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                        ResponseStatus.FORMAT_JSON);
+            preparedStatement.executeUpdate(sqlUpdPost);
+        } catch (MySQLIntegrityConstraintViolationException e) {
+            json = (new ResultJson<ThreadID>(
+                    ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
+            return json;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        json = (new ResultJson<ThreadID>(
+                ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
+        return json;
+    }
+
+    @Override
+    public String restore(ThreadID thread) {
+        connection =  ConnectionToMySQL.getConnection();
+        String sqlUpdTH = "UPDATE " + Table.Thread.TABLE_THREAD +
+                " SET " + Table.Thread.COLUMN_IS_DELETED +
+                " =0 WHERE " + Table.Thread.COLUMN_ID_THREAD + "=" +
+                thread.getThread() + ";" ;
+        String sqlUpdPost = "UPDATE " + Table.Post.TABLE_POST + " SET " +
+                Table.Post.COLUMN_IS_DELETED + "=0 WHERE " + Table.Post.COLUMN_THREAD + "=" +
+                thread.getThread();
+
+        String json;
+
+        try {
+            preparedStatement = connection.prepareStatement(sqlUpdTH);
+            if(preparedStatement.executeUpdate() == 0)
+                return ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                        ResponseStatus.FORMAT_JSON);
+            preparedStatement.executeUpdate(sqlUpdPost);
+        } catch (MySQLIntegrityConstraintViolationException e) {
+            json = (new ResultJson<ThreadID>(
+                    ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
+            return json;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        json = (new ResultJson<ThreadID>(
+                ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
+        return json;
+    }
+
+    @Override
+    public String vote(String voteThread) {
+        connection =  ConnectionToMySQL.getConnection();
+
+        String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_THREAD + ") AS posts FROM " +
+                Table.Thread.TABLE_THREAD + "INNER JOIN " +
+                Table.ThreadVote.TABLE_THREAD_VOTE + " ON " +
+                Table.ThreadVote.COLUMN_ID_THREAD   + "=? INNER JOIN " + Table.Post.TABLE_POST +
+                " ON " + Table.Post.COLUMN_THREAD + "=? AND " + Table.Post.COLUMN_IS_DELETED + "!= FALSE " ;
+
+        int _vote = 0;
+        int idThread = 0;
+
+        try {
+            ObjectNode root = (ObjectNode) mapper.readTree(voteThread);
+            _vote = root.get("vote").asInt();
+            idThread = root.get("thread").asInt();
+            if((_vote > 1 || _vote < -1) || _vote == 0 )
+                return ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                        ResponseStatus.FORMAT_JSON);
+        } catch (IOException e ) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        } catch (java.lang.NullPointerException e ) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        }
+
+        String sqlCol = (_vote == 1) ? Table.ThreadVote.COLUMN_LIKES : Table.ThreadVote.COLUMN_DISLIKES;
+
+        String sqlUpd = "UPDATE " + Table.ThreadVote.TABLE_THREAD_VOTE + " SET " +
+                sqlCol + "=? WHERE " +
+                Table.ThreadVote.COLUMN_ID_THREAD + "=?;";
+        ThreadVote threadVote = new ThreadVote();
+        try {
+            preparedStatement = connection.prepareStatement(sqlSel);
+            preparedStatement.setLong(1, idThread);
+            preparedStatement.setLong(2, idThread);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                threadVote.setDate(resultSet.getString("date"));
+                threadVote.setForum(resultSet.getString("forum"));
+                threadVote.setId(resultSet.getLong("idThread"));
+                threadVote.setClosed(resultSet.getBoolean("isClosed"));
+                threadVote.setDeleted(resultSet.getBoolean("isDeleted"));
+                threadVote.setMessage(resultSet.getString("message"));
+                threadVote.setPosts(resultSet.getLong("posts"));
+                threadVote.setSlug(resultSet.getString("slug"));
+                threadVote.setTitle(resultSet.getString("title"));
+                threadVote.setUser(resultSet.getString("user"));
+                threadVote.setLikes(resultSet.getLong("likes"));
+                threadVote.setDislikes(resultSet.getLong("dislikes"));
+                if(_vote == 1) threadVote.setLikes(threadVote.getLikes() + 1);
+                else threadVote.setDislikes(threadVote.getDislikes() + 1);
+                threadVote.setPoints();
+            }
+            preparedStatement = connection.prepareStatement(sqlUpd);
+            if(_vote == 1) preparedStatement.setLong(1, threadVote.getLikes());
+            else preparedStatement.setLong(1, threadVote.getDislikes());
+            preparedStatement.setLong(2, threadVote.getId());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String json = (new ResultJson<>(
+                ResponseStatus.ResponceCode.OK.ordinal(), threadVote)).getStringResult();
+
         return json;
     }
 

@@ -131,6 +131,10 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             return ResponseStatus.getMessage(
                     ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
                     ResponseStatus.FORMAT_JSON);
+        } catch (java.lang.NullPointerException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
         }
 
         String sqlCol = (_vote == 1) ? Table.VotePost.COLUMN_LIKE : Table.VotePost.COLUMN_DISLIKE;
@@ -248,14 +252,14 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 Table.VotePost.COLUMN_ID_POST + "=" + Table.Post.COLUMN_ID_POST +
                 " AND " + reqCondition + "=?"  ;
 
-        dateContidion = (since != null) ?  " AND " + Table.Post.COLUMN_DATE + ">=\'" + since + "\'": "";
+        dateContidion = (since != null) ?  " AND " + Table.Post.COLUMN_DATE + ">=\'" + since + "\'": " ";
         sqlSel = sqlSel + dateContidion;
 
         orderCondition = (order != null) ? " ORDER BY " + Table.Post.COLUMN_DATE +
-                                                                "" + order + "": "";
+                                                                " " + order + " ": " ";
         sqlSel = sqlSel + orderCondition;
 
-        limitCondition = (limit != null) ? " LIMIT " + "\'" + limit.longValue() + "\'" : "";
+        limitCondition = (limit != null) ? " LIMIT "+ limit.longValue()  : " ";
         sqlSel = sqlSel +  limitCondition;
 
         ArrayList<VotePost> votePosts = new ArrayList<>();

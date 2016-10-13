@@ -58,13 +58,25 @@ public class Table {
         public static final String COLUMN_EMAIL        = "`forum`.`User`.`email`";
         public static final String COLUMN_ABOUT        = "`forum`.`User`.`about`";
         public static final String COLUMN_IS_ANONYMOUS = "`forum`.`User`.`isAnonymous`";
+    }
 
+    public static final class Followers {
+        public static final String TABLE_FOLLOWERS    = "`forum`.`Followers`";
+        public static final String COLUMN_FOLLOWER     = "`forum`.`Followers`.`follower`";
+        public static final String COLUMN_FOLLOWEE     = "`forum`.`Followers`.`followee`";
     }
 
     public static final class ThreadSubscribe{
         public static final String TABLE_ThreadSubscribe = "`forum`.`ThreadSubscribe`";
         public static final String COLUMN_THREAD         = "`forum`.`ThreadSubscribe`.`thread`";
         public static final String COLUMN_USERNAME       = "`forum`.`ThreadSubscribe`.`user`";
+    }
+
+    public static final class ThreadVote{
+        public static final String TABLE_THREAD_VOTE = "`forum`.`ThreadVote`";
+        public static final String COLUMN_ID_THREAD  = "`forum`.`ThreadVote`.`idThread`";
+        public static final String COLUMN_LIKES      = "`forum`.`ThreadVote`.`likes`";
+        public static final String COLUMN_DISLIKES   = "`forum`.`ThreadVote`.`dislikes`";
     }
 
 }
