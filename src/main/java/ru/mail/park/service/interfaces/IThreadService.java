@@ -12,7 +12,7 @@ import ru.mail.park.model.thread.Thread;
 @Component
 public interface IThreadService {
     String create(Thread thread); //+
-    String update(Thread thread);
+    String update(String json); //+
 
     String subscribeUnSub(ThreadSubscribe threadSubscribe, boolean subs); //+
     String open(ThreadID thread); //+
@@ -20,4 +20,5 @@ public interface IThreadService {
     String remove(ThreadID thread);//+
     String restore(ThreadID thread);//+
     String vote (String votePost); //+
+    String list(String user, String forum, String since, Integer limit, String order);//+
 }

@@ -3,6 +3,7 @@ package ru.mail.park.service.implementation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mysql.jdbc.*;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import javafx.scene.control.Tab;
@@ -20,6 +21,10 @@ import sun.jvm.hotspot.opto.RootNode;
 
 import java.io.IOException;
 import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.ArrayList;
 
 /**
  * Created by admin on 08.10.16.
@@ -44,7 +49,11 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 Table.Thread.COLUMN_USER + ',' + Table.Thread.COLUMN_DATE + " , " +
                 Table.Thread.COLUMN_MESSAGE + ',' + Table.Thread.COLUMN_SLUG+ " , " +
                 Table.Thread.COLUMN_IS_DELETED + " ) " +
-                "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?); ";
+                "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?); " ;
+
+        String sqlVoteTabel = "INSERT INTO " + Table.ThreadVote.TABLE_THREAD_VOTE + "( " +
+                Table.ThreadVote.COLUMN_ID_THREAD + " ) " +
+                "VALUES (?);" ;
 
         try {
             preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
@@ -58,8 +67,10 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             preparedStatement.setBoolean(8, thread.isDeleted());
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
-            while(resultSet.next())
-                thread.setId(resultSet.getLong(1));
+            while(resultSet.next())  thread.setId(resultSet.getLong(1));
+            preparedStatement = connection.prepareStatement(sqlVoteTabel);
+            preparedStatement.setLong(1, thread.getId());
+            preparedStatement.execute();
         } catch (MySQLIntegrityConstraintViolationException e) {
             String json = (new ResultJson<Thread>(
                     ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
@@ -74,35 +85,6 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
 
         return json;
-    }
-
-    @Override
-    public String update(Thread thread) {
-//        connection =  ConnectionToMySQL.getConnection();
-//        String sql = "UPDATE " + Table.Thread.TABLE_THREAD + " SET " +
-//                Table.Thread.COLUMN_MESSAGE + "=?, " + Table.Thread.COLUMN_SLUG + " =?, " +
-//                "WHERE " + Table.Thread.COLUMN_ID_THREAD + "=?; " +
-//                "SELECT * FROM " + Table.Thread.TABLE_THREAD + " WHERE "
-//                + Table.Thread.COLUMN_ID_THREAD + "=?";
-//        try {
-//            preparedStatement = connection.prepareStatement(sql);
-//            preparedStatement.setString(1, thread.getMessage());
-//            preparedStatement.setString(2, thread.getSlug());
-//            preparedStatement.setLong(3, thread.getId());
-//            preparedStatement.setLong(4, thread.getId());
-//            resultSet = preparedStatement.executeQuery();
-//            while (resultSet.next()) {
-//                thread.setDate(resultSet.getString("date"));
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        String json = (new ResultJson<IdPost>(
-//                ResponseStatus.ResponceCode.OK.ordinal(), rmPost)).getStringResult();
-//
-//        return json;
-        return null;
     }
 
     @Override
@@ -334,6 +316,148 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
         }
 
         String json = (new ResultJson<>(
+                ResponseStatus.ResponceCode.OK.ordinal(), threadVote)).getStringResult();
+
+        return json;
+    }
+
+    @Override
+    public String list(String user, String forum, String since, Integer limit, String order) {
+        connection =  ConnectionToMySQL.getConnection();
+        String reqCondition, dateContidion, orderCondition, limitCondition;
+        reqCondition = (forum != null) ? Table.Thread.COLUMN_FORUM : Table.Thread.COLUMN_USER;
+
+        String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_THREAD + ") AS posts  FROM " +
+                Table.Thread.TABLE_THREAD + "INNER JOIN " +
+                Table.ThreadVote.TABLE_THREAD_VOTE + " ON " +
+                Table.ThreadVote.COLUMN_ID_THREAD + "=" + Table.Thread.COLUMN_ID_THREAD +
+                " AND " + reqCondition + "=? "  ;
+
+        dateContidion = (since != null) ?  " AND " + Table.Thread.COLUMN_DATE + ">=\'"
+                + since + "\'": " ";
+        sqlSel = sqlSel + dateContidion;
+
+        sqlSel = sqlSel + " LEFT JOIN " + Table.Post.TABLE_POST +
+        " ON " + Table.Post.COLUMN_THREAD + "=" + Table.Thread.COLUMN_ID_THREAD +
+                " AND " + Table.Post.COLUMN_IS_DELETED + "= FALSE ";
+
+        sqlSel = sqlSel + " GROUP BY " + Table.Thread.COLUMN_ID_THREAD + " ";
+
+        orderCondition = (order != null) ? " ORDER BY " + Table.Thread.COLUMN_DATE +
+                " " + order + " ": " ORDER BY " + Table.Thread.COLUMN_DATE + " DESC ";
+        sqlSel = sqlSel + orderCondition;
+
+        limitCondition = (limit != null) ? " LIMIT "+ limit.longValue()  : " ";
+        sqlSel = sqlSel +  limitCondition;
+
+        ArrayList<ThreadVote> threadVotes = new ArrayList<>();
+
+        try {
+            preparedStatement = connection.prepareStatement(sqlSel);
+            if(forum != null) preparedStatement.setString(1, forum);
+            else preparedStatement.setString(1, user);
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()) {
+                ThreadVote tv  = new ThreadVote();
+                tv.setDate(resultSet.getString("date"));
+                tv.setForum(resultSet.getString("forum"));
+                tv.setId(resultSet.getLong("idThread"));
+                tv.setClosed(resultSet.getBoolean("isClosed"));
+                tv.setDeleted(resultSet.getBoolean("isDeleted"));
+                tv.setMessage(resultSet.getString("message"));
+                tv.setPosts(resultSet.getLong("posts"));
+                tv.setSlug(resultSet.getString("slug"));
+                tv.setTitle(resultSet.getString("title"));
+                tv.setUser(resultSet.getString("user"));
+                tv.setLikes(resultSet.getLong("likes"));
+                tv.setDislikes(resultSet.getLong("dislikes"));
+                tv.setPoints();
+                threadVotes.add(tv);
+            }
+        } catch (MySQLIntegrityConstraintViolationException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        } catch (MySQLSyntaxErrorException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String json = (new ResultJson<ArrayList<ThreadVote>>(
+                ResponseStatus.ResponceCode.OK.ordinal(), threadVotes)).getStringResult();
+
+        return json;
+    }
+
+    @Override
+    public String update(String updJson) {
+        connection =  ConnectionToMySQL.getConnection();
+        String sql = "UPDATE " + Table.Thread.TABLE_THREAD + " SET " +
+                Table.Thread.COLUMN_MESSAGE + "=?, " + Table.Thread.COLUMN_SLUG + " =? " +
+                "WHERE " + Table.Thread.COLUMN_ID_THREAD + "=?; ";
+
+        String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_THREAD + ") AS posts FROM " +
+                Table.Thread.TABLE_THREAD + " INNER JOIN " +
+                Table.ThreadVote.TABLE_THREAD_VOTE + " ON " +
+                Table.ThreadVote.COLUMN_ID_THREAD   + "=? LEFT JOIN " + Table.Post.TABLE_POST +
+                " ON " + Table.Post.COLUMN_THREAD + "=? AND " + Table.Post.COLUMN_IS_DELETED + "!= FALSE " ;
+
+        String message, slug;
+        int thread;
+
+        try {
+            ObjectNode root = (ObjectNode) mapper.readTree(updJson);
+            message = root.get("message").asText();
+            slug    = root.get("slug").asText();
+            thread  = root.get("thread").asInt();
+        } catch (IOException e ) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        } catch (java.lang.NullPointerException e ) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        }
+
+        ThreadVote threadVote = new ThreadVote();
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, message);
+            preparedStatement.setString(2, slug);
+            preparedStatement.setLong(3, thread);
+            if(preparedStatement.executeUpdate() == 0) {
+                return ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
+                        ResponseStatus.FORMAT_JSON);
+            }
+            preparedStatement = connection.prepareStatement(sqlSel);
+            preparedStatement.setLong(1, thread);
+            preparedStatement.setLong(2, thread);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                threadVote.setDate(resultSet.getString("date"));
+                threadVote.setForum(resultSet.getString("forum"));
+                threadVote.setId(resultSet.getLong("idThread"));
+                threadVote.setClosed(resultSet.getBoolean("isClosed"));
+                threadVote.setDeleted(resultSet.getBoolean("isDeleted"));
+                threadVote.setMessage(resultSet.getString("message"));
+                threadVote.setPosts(resultSet.getLong("posts"));
+                threadVote.setSlug(resultSet.getString("slug"));
+                threadVote.setTitle(resultSet.getString("title"));
+                threadVote.setUser(resultSet.getString("user"));
+                threadVote.setLikes(resultSet.getLong("likes"));
+                threadVote.setDislikes(resultSet.getLong("dislikes"));
+                threadVote.setPoints();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String json = (new ResultJson<ThreadVote>(
                 ResponseStatus.ResponceCode.OK.ordinal(), threadVote)).getStringResult();
 
         return json;

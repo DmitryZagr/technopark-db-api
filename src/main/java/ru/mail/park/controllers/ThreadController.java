@@ -39,16 +39,7 @@ public class ThreadController {
             produces = "application/json")
     public ResponseEntity updateThread(HttpEntity<String> httpEntity) {
         String json = httpEntity.getBody();
-        Thread thread = new Thread();
-        try {
-            JsonNode root = mapper.readTree(json);
-            thread.setId(root.get("thread").asInt());
-            thread.setSlug(root.get("slug").asText());
-            thread.setMessage(root.get("message").asText());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return ResponseEntity.ok(threadService.update(thread));
+        return ResponseEntity.ok(threadService.update(json));
     }
 
     @RequestMapping(path = "/db/api/thread/subscribe/", method = RequestMethod.POST,
@@ -91,6 +82,18 @@ public class ThreadController {
             produces = "application/json")
     public ResponseEntity voteThread(HttpEntity<String> httpEntity) {
         return ResponseEntity.ok(threadService.vote(httpEntity.getBody()));
+    }
+
+    @RequestMapping(path = "/db/api/thread/list/", method = RequestMethod.GET,
+            produces = "application/json")
+    public ResponseEntity listPost(@RequestParam(name = "user",  required = false) String user,
+                                   @RequestParam(name = "forum", required = false) String forum,
+                                   @RequestParam(name = "since", required = false) String since,
+                                   @RequestParam(name = "limit", required = false) Integer limit,
+                                   @RequestParam(name = "order", required = false) String order) {
+
+
+        return ResponseEntity.ok(threadService.list( user, forum, since, limit, order));
     }
 
 
