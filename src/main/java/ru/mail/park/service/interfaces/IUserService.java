@@ -8,6 +8,11 @@ import ru.mail.park.model.user.User;
  */
 @Component
 public interface IUserService {
-    String create(User ucr);
-    String follow(String followerFollowee);
+    String create(User ucr); //+
+    String details(String email);//+
+    String follow(String followerFollowee); //+
+    String listFollowers(String user, Integer limit, String order, Integer id);
+    String listFollowing(String user, Integer limit, String order, Integer id);
+    String unFollow(String followerFollowee);//+
+    String updateProfile(String json); //+
 }

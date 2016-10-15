@@ -25,19 +25,31 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
 
     @Override
     public int clear() {
-        String tranckateForum  = "TRUNCATE " + Table.Forum.TABLE_FORUM;
-        String tranckatePost   = "TRUNCATE " + Table.Post.TABLE_POST ;
-        String tranckateThread = "TRUNCATE " + Table.Thread.TABLE_THREAD;
-        String tranckateUser   = "TRUNCATE " + Table.User.TABLE_USER;
-
+        String unsafeMod = "SET SQL_SAFE_UPDATES = 0;";
+        String tranckateForum  = "DELETE FROM " + Table.Forum.TABLE_FORUM;
+        String tranckatePost   = "DELETE FROM " + Table.Post.TABLE_POST;
+        String tranckateThread = "DELETE FROM " + Table.Thread.TABLE_THREAD ;
+        String tranckateUser   = "DELETE FROM " + Table.User.TABLE_USER ;
+        String userFollower    = "DELETE FROM " + Table.Followers.TABLE_FOLLOWERS;
+        String threadSubscribe = "DELETE FROM " + Table.ThreadSubscribe.TABLE_ThreadSubscribe;
+        String threadVote      = "DELETE FROM " + Table.ThreadVote.TABLE_THREAD_VOTE;
+        String votePost        = "DELETE FROM " + Table.VotePost.TABLE_VOTE_POST;
+        String safeMode        = "SET SQL_SAFE_UPDATES = 1;";
         try {
             connection = ConnectionToMySQL.getConnection();
-            connection.createStatement().execute(tranckateForum);
-            connection.createStatement().execute(tranckatePost);
-            connection.createStatement().execute(tranckateThread);
+            connection.createStatement().execute(unsafeMod);
             connection.createStatement().execute(tranckateUser);
+            connection.createStatement().execute(tranckateForum);
+            connection.createStatement().execute(tranckateThread);
+            connection.createStatement().execute(tranckatePost);
+            connection.createStatement().execute(threadSubscribe);
+            connection.createStatement().execute(threadVote);
+            connection.createStatement().execute(votePost);
+            connection.createStatement().execute(userFollower);
+            connection.createStatement().execute(safeMode);
+
         } catch (MySQLIntegrityConstraintViolationException e) {
-            return ResponseStatus.ResponceCode.USER_EXIST.ordinal();
+            e.printStackTrace();
         } catch (MySQLSyntaxErrorException e) {
             return ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal();
         } catch (SQLException e) {

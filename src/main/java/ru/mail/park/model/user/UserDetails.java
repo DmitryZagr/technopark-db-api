@@ -5,46 +5,63 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by admin on 08.10.16.
  */
-public class User implements Serializable{
+public class UserDetails implements Serializable{
 
     private static final long serialVersionUID = -5527566248002296042L;
 
-//    Requried
-    private long id;
+    //    Requried
+    private Long id;
     private String username;
     private String about;
     private String name;
     private String email;
 
-//    Optional
+    //    Optional
     private boolean isAnonymous = false;
 
-    public User() {
+    protected ArrayList<String> followers = new ArrayList<>();
+    protected ArrayList<String> following = new ArrayList<>();
+    protected ArrayList<Integer> subscriptions = new ArrayList<>();
+
+    public ArrayList<String> getFollowers() {
+        return followers;
     }
 
-    public User(String username, String about, String name,
-                String email, boolean isAnonymous) {
-        this.username    = username;
-        this.about       = about;
-        this.name        = name;
-        this.email       = email;
-        this.isAnonymous = isAnonymous;
+    public ArrayList<Integer> getSubscriptions() {
+        return subscriptions;
     }
 
-//    @ModelAttribute("user")
-//    public User getUser(){
-//        return new User();
-//    }
+    public void setSubscriptions(ArrayList<Integer> subscriptions) {
+        this.subscriptions = subscriptions;
+    }
 
-    public long getId() {
+    public void setFollowers(ArrayList<String> followers) {
+        this.followers = followers;
+    }
+
+    public ArrayList<String> getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(ArrayList<String> following) {
+        this.following = following;
+    }
+
+
+    public UserDetails() {
+    }
+
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -111,10 +111,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             preparedStatement.setString(2, threadSubscribe.getUser());
             preparedStatement.execute();
         } catch (MySQLIntegrityConstraintViolationException e) {
-            json = (new ResultJson<ThreadSubscribe>(
-                    ResponseStatus.ResponceCode.OK.ordinal(), threadSubscribe)).getStringResult();
-            return json;
-
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
         } catch (SQLException e) {
             e.printStackTrace();
         }
