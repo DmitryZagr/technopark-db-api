@@ -6,14 +6,22 @@ import com.mysql.jdbc.Statement;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
+import ru.mail.park.model.forum.Forum;
+import ru.mail.park.model.post.DetailPost;
 import ru.mail.park.model.post.IdPost;
 import ru.mail.park.model.post.Post;
 import ru.mail.park.model.Table;
 import ru.mail.park.model.post.VotePost;
+import ru.mail.park.model.thread.Thread;
+import ru.mail.park.model.thread.ThreadVote;
+import ru.mail.park.model.user.User;
+import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IPostService;
 import ru.mail.park.util.ConnectionToMySQL;
+import ru.mail.park.util.MyJsonUtils;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -112,6 +120,8 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
     public String vote(String vote) {
         connection =  ConnectionToMySQL.getConnection();
 
+        vote = MyJsonUtils.replaceOneQuoteTwoQuotes(vote);
+
         String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
                 Table.VotePost.TABLE_VOTE_POST + " ON " +
                 Table.VotePost.COLUMN_ID_POST + "=?;";
@@ -184,6 +194,8 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
     @Override
     public String update(String update) {
         connection =  ConnectionToMySQL.getConnection();
+
+        update = MyJsonUtils.replaceOneQuoteTwoQuotes(update);
 
         String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
                 Table.VotePost.TABLE_VOTE_POST + " ON " +
@@ -303,6 +315,95 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
         String json = (new ResultJson<ArrayList<VotePost>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), votePosts)).getStringResult();
 
+        return json;
+    }
+
+    @Override
+    public String details(Integer post, String related) {
+        connection =  ConnectionToMySQL.getConnection();
+
+        String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
+                Table.VotePost.TABLE_VOTE_POST + " ON " +
+                Table.Post.COLUMN_ID_POST + "="+ Table.VotePost.COLUMN_ID_POST + " AND " +
+                Table.VotePost.COLUMN_ID_POST + "=?;";
+
+//        String typeUser = (related.contains("user")) ?
+//                "ru.mail.park.model.user.UserDetails" : "java.lang.String";
+//
+//        String typeThread = (related.contains("thread")) ?
+//                "ru.mail.park.model.thread.ThreadVote" : "java.lang.Integer;";
+//        String typeForum = (related.contains("forum")) ?
+//                "ru.mail.park.model.forum.Forum" : "java.lang.String";
+
+
+        DetailPost<Object, Object, Object> postDetail = new DetailPost<>();
+        UserDetails userDetails = new UserDetails();
+        ThreadVote threadVote = new ThreadVote();
+//        VotePost votePost = new VotePost();
+
+        try {
+            preparedStatement = connection.prepareStatement(sqlSel);
+            preparedStatement.setLong(1, post.intValue());
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()) {
+                postDetail.setDate(resultSet.getString("date"));
+                postDetail.setForum(resultSet.getString("forum"));
+                postDetail.setIdPost(resultSet.getLong("idPost"));
+                postDetail.setApproved(resultSet.getBoolean("isApproved"));
+                postDetail.setDeleted(resultSet.getBoolean("isDeleted"));
+                postDetail.setEdited(resultSet.getBoolean("isEdited"));
+                postDetail.setHighlighted(resultSet.getBoolean("isHighlighted"));
+                postDetail.setSpam(resultSet.getBoolean("isSpam"));
+                postDetail.setMessage(resultSet.getString("message"));
+                postDetail.setParent(resultSet.getInt("parent"));
+                postDetail.setThread(resultSet.getInt("thread"));
+                postDetail.setUser(resultSet.getString("user"));
+                postDetail.setLike(resultSet.getInt("like"));
+                postDetail.setDislike(resultSet.getInt("dislike"));
+                postDetail.setPoints();
+
+                if(!StringUtils.isEmpty(related) && related.contains("forum")) {
+                    ForumServiceImpl fsi = new ForumServiceImpl();
+                    postDetail.setForum( fsi.getForum((String)postDetail.getForum()));
+                }
+
+                if(!StringUtils.isEmpty(related) && related.contains("thread")) {
+                    ThreadServiceImpl tsi = new ThreadServiceImpl();
+                    postDetail.setThread(tsi.getThreadDetatils((Integer)postDetail.getThread(), null));
+                }
+
+                if(!StringUtils.isEmpty(related) && related.contains("user")) {
+                    UserServiceImpl usi = new UserServiceImpl();
+                    usi.getUserDetatil((String)postDetail.getUser());
+                    postDetail.setUser(usi.getUserDetatil((String)postDetail.getUser()));
+                }
+
+            }
+        } catch (MySQLIntegrityConstraintViolationException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        } catch (MySQLSyntaxErrorException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+//        if(related.contains("forum"))
+
+
+//        DetailPost detailPost;
+//        if(related == null) {
+//            detailPost = new DetailPost<String, Integer, String>();
+//        }
+
+
+
+
+        String json = (new ResultJson<DetailPost<Object, Object, Object>>(
+                ResponseStatus.ResponceCode.OK.ordinal(), postDetail)).getStringResult();
         return json;
     }
 

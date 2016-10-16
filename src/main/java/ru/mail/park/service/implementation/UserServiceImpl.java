@@ -4,17 +4,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
+import com.sun.org.apache.bcel.internal.generic.RETURN;
 import org.springframework.stereotype.Component;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Table;
+import ru.mail.park.model.post.VotePost;
 import ru.mail.park.model.user.User;
 import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IUserService;
 import ru.mail.park.util.ConnectionToMySQL;
+import ru.mail.park.util.MyJsonUtils;
 
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 
 /**
  * Created by admin on 08.10.16.
@@ -23,6 +27,13 @@ import java.sql.*;
 public class UserServiceImpl implements IUserService, AutoCloseable {
 
     private ObjectMapper mapper = new ObjectMapper();
+
+    private ArrayList<UserDetails> usersDetail;
+    public UserDetails userDetails;
+
+//    public ArrayList<UserDetails> getUsersDetail() {
+//        return usersDetail;
+//    }
 
     private Connection connection;
     private Statement statement;
@@ -75,6 +86,8 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         connection =  ConnectionToMySQL.getConnection();
         String follower, followee;
 
+        followerFollowee = MyJsonUtils.replaceOneQuoteTwoQuotes(followerFollowee);
+
         try {
             ObjectNode root = (ObjectNode) mapper.readTree(followerFollowee);
             follower = root.get("follower").asText();
@@ -114,8 +127,180 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     }
 
     @Override
+    public String listFollowers(String user, Integer limit, String order, Integer sinceId) {
+        connection =  ConnectionToMySQL.getConnection();
+
+        String sqlSelectFollowers = "SELECT * "   +
+                "  FROM " + Table.Followers.TABLE_FOLLOWERS +
+                " INNER JOIN " + Table.User.TABLE_USER +
+                " ON " + Table.User.COLUMN_EMAIL + "=" + Table.Followers.COLUMN_FOLLOWER +
+                " AND " + Table.Followers.COLUMN_FOLLOWEE + "=?";
+
+        if(sinceId != null)
+        sqlSelectFollowers =  sqlSelectFollowers +
+               " AND  " + Table.User.COLUMN_ID_USER + ">=" + sinceId.intValue() + " ";
+//
+        if(order == null) order = "DESC";
+        sqlSelectFollowers = sqlSelectFollowers + " ORDER BY " + Table.User.COLUMN_NAME + " " + order;
+//
+        if(limit != null)
+        sqlSelectFollowers = sqlSelectFollowers +  " LIMIT " + limit.intValue();
+
+        ArrayList<String> followers = new ArrayList<>();
+        usersDetail = null;
+        try {
+            preparedStatement = connection.prepareStatement(sqlSelectFollowers);
+            preparedStatement.setString(1, user);
+            resultSet = preparedStatement.executeQuery();
+            usersDetail = new ArrayList<>();
+            while (resultSet.next()) {
+                followers.add(resultSet.getString("follower"));
+            }
+        } catch (MySQLSyntaxErrorException e) {
+            usersDetail = null;
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
+        } catch (SQLException e) {
+            usersDetail = null;
+            e.printStackTrace();
+        }
+
+        for(int i = 0; i < followers.size(); i++) {
+            details(followers.get(i));
+        }
+
+        String json = (new ResultJson<ArrayList<UserDetails>>(
+                ResponseStatus.ResponceCode.OK.ordinal(), usersDetail)).getStringResult();
+        usersDetail = null;
+        return json;
+    }
+
+    @Override
+    public String listFollowing(String user, Integer limit, String order, Integer sinceId) {
+        connection =  ConnectionToMySQL.getConnection();
+
+        String sqlSelectFollowing = "SELECT * "   +
+                "  FROM " + Table.Followers.TABLE_FOLLOWERS +
+                " INNER JOIN " + Table.User.TABLE_USER +
+                " ON " + Table.User.COLUMN_EMAIL + "=" + Table.Followers.COLUMN_FOLLOWER +
+                " AND " + Table.Followers.COLUMN_FOLLOWER + "=?";
+
+        if(sinceId != null)
+            sqlSelectFollowing =  sqlSelectFollowing +
+                    " AND  " + Table.User.COLUMN_ID_USER + ">=" + sinceId.intValue() + " ";
+//
+        if(order == null) order = "DESC";
+        sqlSelectFollowing = sqlSelectFollowing + " ORDER BY " + Table.User.COLUMN_NAME + " " + order;
+//
+        if(limit != null)
+            sqlSelectFollowing = sqlSelectFollowing +  " LIMIT " + limit.intValue();
+
+        ArrayList<String> followers = new ArrayList<>();
+        usersDetail = null;
+        try {
+            preparedStatement = connection.prepareStatement(sqlSelectFollowing);
+            preparedStatement.setString(1, user);
+            resultSet = preparedStatement.executeQuery();
+            usersDetail = new ArrayList<>();
+            while (resultSet.next()) {
+                followers.add(resultSet.getString("followee"));
+            }
+        } catch (MySQLSyntaxErrorException e) {
+            usersDetail = null;
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
+        } catch (SQLException e) {
+            usersDetail = null;
+            e.printStackTrace();
+        }
+
+        for(int i = 0; i < followers.size(); i++) {
+            details(followers.get(i));
+        }
+
+        String json = (new ResultJson<ArrayList<UserDetails>>(
+                ResponseStatus.ResponceCode.OK.ordinal(), usersDetail)).getStringResult();
+        usersDetail = null;
+        return json;
+    }
+
+    public String getUserDetailsListJSON(ArrayList<String> emails) {
+        usersDetail = new ArrayList<>();
+        for(int i =0; i < emails.size(); i++)
+            details(emails.get(i));
+        String json = (new ResultJson<ArrayList<UserDetails>>(
+                ResponseStatus.ResponceCode.OK.ordinal(), usersDetail)).getStringResult();
+        usersDetail = null;
+        return json;
+    }
+
+    @Override
+    public String listPosts(String user, String since, Integer limit, String order) {
+        connection =  ConnectionToMySQL.getConnection();
+        String  dateContidion, orderCondition, limitCondition;
+
+        String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
+                Table.VotePost.TABLE_VOTE_POST + " ON " +
+                Table.VotePost.COLUMN_ID_POST + "=" + Table.Post.COLUMN_ID_POST +
+                " AND " + Table.Post.COLUMN_USER + "=? ";
+        dateContidion = (since != null) ?  " AND " + Table.Post.COLUMN_DATE + ">=\'" + since + "\'": " ";
+        sqlSel = sqlSel + dateContidion;
+
+        orderCondition = (order != null) ? " ORDER BY " + Table.Post.COLUMN_DATE +
+                " " + order + " ": " DESC ";
+        sqlSel = sqlSel + orderCondition;
+
+        limitCondition = (limit != null) ? " LIMIT "+ limit.longValue()  : " ";
+        sqlSel = sqlSel +  limitCondition;
+
+        ArrayList<VotePost> votePosts = new ArrayList<>();
+
+        try {
+            preparedStatement = connection.prepareStatement(sqlSel);
+            preparedStatement.setString(1, user);
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()) {
+                VotePost vp  = new VotePost();
+                vp.setDate(resultSet.getString("date"));
+                vp.setForum(resultSet.getString("forum"));
+                vp.setIdPost(resultSet.getLong("idPost"));
+                vp.setApproved(resultSet.getBoolean("isApproved"));
+                vp.setDeleted(resultSet.getBoolean("isDeleted"));
+                vp.setEdited(resultSet.getBoolean("isEdited"));
+                vp.setHighlighted(resultSet.getBoolean("isHighlighted"));
+                vp.setSpam(resultSet.getBoolean("isSpam"));
+                vp.setMessage(resultSet.getString("message"));
+                vp.setParent(resultSet.getInt("parent"));
+                vp.setThread(resultSet.getInt("thread"));
+                vp.setUser(resultSet.getString("user"));
+                vp.setLike(resultSet.getInt("like"));
+                vp.setDislike(resultSet.getInt("dislike"));
+                vp.setPoints();
+                votePosts.add(vp);
+            }
+        } catch (MySQLIntegrityConstraintViolationException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        } catch (MySQLSyntaxErrorException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String json = (new ResultJson<ArrayList<VotePost>>(
+                ResponseStatus.ResponceCode.OK.ordinal(), votePosts)).getStringResult();
+
+        return json;
+    }
+
+    @Override
     public String unFollow(String followerFollowee) {
         connection =  ConnectionToMySQL.getConnection();
+
+        followerFollowee = MyJsonUtils.replaceOneQuoteTwoQuotes(followerFollowee);
 
         String follower, followee;
 
@@ -161,6 +346,9 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     @Override
     public String details(String email) {
         connection =  ConnectionToMySQL.getConnection();
+
+        email = MyJsonUtils.replaceOneQuoteTwoQuotes(email);
+
         String sqlSelectFollowers = "SELECT * FROM " + Table.User.TABLE_USER + " " +
                 "INNER JOIN " + Table.Followers.TABLE_FOLLOWERS + " ON " +
                 Table.User.COLUMN_EMAIL + "=" + Table.Followers.COLUMN_FOLLOWEE + " AND " +
@@ -179,23 +367,23 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         String sqlSelectUser= "SELECT * FROM " + Table.User.TABLE_USER + " " +
                 " WHERE " + Table.User.COLUMN_EMAIL + "=?" ;
 
-        UserDetails detailUser = new UserDetails();
-        detailUser.setEmail(email);
+        userDetails = new UserDetails();
+
+        userDetails.setEmail(email);
 
         try {
-
             preparedStatement = connection.prepareStatement(sqlSelectUser);
             preparedStatement.setString(1, email);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                detailUser.setId(resultSet.getLong("idUser"));
-                detailUser.setUsername(resultSet.getString("username"));
-                detailUser.setAbout(resultSet.getString("about"));
-                detailUser.setName(resultSet.getString("name"));
-                detailUser.setisAnonymous(resultSet.getBoolean("isAnonymous"));
+                userDetails.setId(resultSet.getLong("idUser"));
+                userDetails.setUsername(resultSet.getString("username"));
+                userDetails.setAbout(resultSet.getString("about"));
+                userDetails.setName(resultSet.getString("name"));
+                userDetails.setisAnonymous(resultSet.getBoolean("isAnonymous"));
             }
 
-            if (detailUser.getId() == null)
+            if (userDetails.getId() == null)
                 return ResponseStatus.getMessage(
                         ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
                         ResponseStatus.FORMAT_JSON);
@@ -204,31 +392,21 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
             preparedStatement.setString(1, email);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                detailUser.getFollowing().add(resultSet.getString("followee"));
+                userDetails.getFollowing().add(resultSet.getString("followee"));
             }
 
             preparedStatement = connection.prepareStatement(sqlSelectFollowers);
-            preparedStatement.setString(1, detailUser.getEmail());
+            preparedStatement.setString(1, userDetails.getEmail());
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-//                detailUser.setId(resultSet.getLong("idUser"));
-//                detailUser.setUsername(resultSet.getString("username"));
-//                detailUser.setAbout(resultSet.getString("about"));
-//                detailUser.setName(resultSet.getString("name"));
-//                detailUser.setisAnonymous(resultSet.getBoolean("isAnonymous"));
-                detailUser.getFollowers().add(resultSet.getString("follower"));
+                userDetails.getFollowers().add(resultSet.getString("follower"));
             }
 
-//            if (detailUser.getId() == null)
-//                return ResponseStatus.getMessage(
-//                        ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
-//                        ResponseStatus.FORMAT_JSON);
-
             preparedStatement = connection.prepareStatement(sqlSelectSubscriptions);
-            preparedStatement.setString(1, detailUser.getEmail());
+            preparedStatement.setString(1, userDetails.getEmail());
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next())
-                detailUser.getSubscriptions().add(resultSet.getInt("thread"));
+                userDetails.getSubscriptions().add(resultSet.getInt("thread"));
         }
         catch (NullPointerException e) {
             return ResponseStatus.getMessage(
@@ -240,9 +418,9 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
+        if(this.usersDetail != null) usersDetail.add(userDetails);
         String json = (new ResultJson<UserDetails>(
-                ResponseStatus.ResponceCode.OK.ordinal(), detailUser)).getStringResult();
+                ResponseStatus.ResponceCode.OK.ordinal(), userDetails)).getStringResult();
 
         return json;
     }
@@ -250,6 +428,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     @Override
     public String updateProfile(String json) {
         connection =  ConnectionToMySQL.getConnection();
+        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
 
         String sql = "UPDATE " + Table.User.TABLE_USER +
                 " SET " + Table.User.COLUMN_ABOUT +
@@ -286,6 +465,11 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         }
 
         return details(user);
+    }
+
+    public UserDetails getUserDetatil(String email) {
+        details(email);
+        return this.userDetails;
     }
 
     @Override

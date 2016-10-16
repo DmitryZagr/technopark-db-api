@@ -1,5 +1,10 @@
 package ru.mail.park.model.thread;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import ru.mail.park.util.MyJsonUtils;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Calendar;
 
@@ -9,6 +14,7 @@ import java.util.Calendar;
 public class Thread implements Serializable{
 
     private static final long serialVersionUID = -5527566248002296042L;
+    private ObjectMapper mapper = new ObjectMapper();
 
     //    Requried
     private long id;
@@ -26,16 +32,17 @@ public class Thread implements Serializable{
     public Thread() {
     }
 
-    public Thread(String forum, String title, boolean isClosed,
-                  String user, String date,
-                  String message, String slug) {
-        this.forum = forum;
-        this.title = title;
-        this.isClosed = isClosed;
-        this.user = user;
-        this.date = date;
-        this.message = message;
-        this.slug = slug;
+    public Thread(String json) throws IOException {
+        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
+        ObjectNode root = (ObjectNode) mapper.readTree(json);
+        setForum(root.get("forum").asText());
+        setTitle(root.get("title").asText());
+        setClosed(root.get("isClosed").asBoolean());
+        setUser(root.get("user").asText());
+        setDate(root.get("date").asText());
+        setMessage(root.get("message").asText());
+        setSlug(root.get("slug").asText());
+        if(root.has("isDeleted")) setDeleted(root.get("isDeleted").asBoolean());
     }
 
 //    public String getForum() {

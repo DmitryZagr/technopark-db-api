@@ -2,6 +2,7 @@ package ru.mail.park.service.interfaces;
 
 import org.springframework.stereotype.Component;
 import ru.mail.park.model.user.User;
+import ru.mail.park.model.user.UserDetails;
 
 /**
  * Created by admin on 08.10.16.
@@ -11,8 +12,9 @@ public interface IUserService {
     String create(User ucr); //+
     String details(String email);//+
     String follow(String followerFollowee); //+
-    String listFollowers(String user, Integer limit, String order, Integer id);
-    String listFollowing(String user, Integer limit, String order, Integer id);
+    String listFollowers(String user, Integer limit, String order, Integer id);//+
+    String listFollowing(String user, Integer limit, String order, Integer id);//+
+    String listPosts(String user, String since, Integer limit, String order);//+
     String unFollow(String followerFollowee);//+
     String updateProfile(String json); //+
 }

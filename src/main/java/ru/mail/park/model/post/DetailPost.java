@@ -1,41 +1,58 @@
 package ru.mail.park.model.post;
 
-import java.io.Serializable;
-import java.util.Calendar;
-
 /**
- * Created by admin on 08.10.16.
+ * Created by admin on 16.10.16.
  */
-public class Post implements Serializable{
+public class DetailPost<U, T, F > {
+
+    private U user;
+    private T thread;
+    private F forum;
 
     private static final long serialVersionUID = -5527566248002296042L;
 
-//    Requried
+    //    Requried
     Long   idPost = 0l;
     String date;
-    long   thread ;
     String message;
-    String user;
-    String forum;
 
-//    Optional
+    //    Optional
     long parent;
     boolean isApproved    = false;
     boolean isHighlighted = false;
     boolean isEdited      = false;
     boolean isSpam        = false;
     boolean isDeleted     = false;
+    private int like;
+    private int dislike;
+    private int points;
 
-    public Post() {
+    public int getLike() {
+        return like;
     }
 
-//    public Post(String date, int thread, String message, String user, String forum) {
-//        this.date = date;
-//        this.thread = thread;
-//        this.message = message;
-//        this.user = user;
-//        this.forum = forum;
-//    }
+    public void setLike(int like) {
+        this.like = like;
+    }
+
+    public int getDislike() {
+        return dislike;
+    }
+
+    public void setDislike(int dislike) {
+        this.dislike = dislike;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints() {
+        this.points = like - dislike;
+    }
+
+    public DetailPost() {
+    }
 
     public String getDate() {
 
@@ -50,7 +67,7 @@ public class Post implements Serializable{
         this.idPost = idPost;
     }
 
-    public void setThread(Integer thread) {
+    public void setThread(T thread) {
         this.thread = thread;
     }
 
@@ -58,7 +75,7 @@ public class Post implements Serializable{
         this.date = date;
     }
 
-    public long getThread() {
+    public T getThread() {
         return thread;
     }
 
@@ -70,19 +87,19 @@ public class Post implements Serializable{
         this.message = message;
     }
 
-    public String getUser() {
+    public U getUser() {
         return user;
     }
 
-    public void setUser(String user) {
+    public void setUser(U user) {
         this.user = user;
     }
 
-    public String getForum() {
+    public F getForum() {
         return forum;
     }
 
-    public void setForum(String forum) {
+    public void setForum(F forum) {
         this.forum = forum;
     }
 
@@ -134,21 +151,4 @@ public class Post implements Serializable{
         isDeleted = deleted;
     }
 
-    @Override
-    public String toString() {
-        return "" +
-                "\"id\":" + idPost +
-                ", \"date\": \"" + date + '\"' +
-                ", \"thread\":" + thread +
-                ", \"message\": \"" + message + '\"' +
-                ", \"user\": \"" + user + '\"' +
-                ", \"forum\": \"" + forum + '\"' +
-                ", \"parent\":" + parent +
-                ", \"isApproved\":" + isApproved +
-                ", \"isHighlighted\":" + isHighlighted +
-                ", \"isEdited\":" + isEdited +
-                ", \"isSpam\":" + isSpam +
-                ", \"isDeleted\":" + isDeleted
-                ;
-    }
 }

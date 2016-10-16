@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 import ru.mail.park.api.status.ResponseStatus;
@@ -89,6 +90,26 @@ public class UserController {
             @RequestParam(name = "order", required = false) String order,
             @RequestParam(name = "since_id", required = false) Integer since_id) {
         return ResponseEntity.ok(userService.listFollowers(user, limit, order, since_id));
+    }
+
+    @RequestMapping(path = "/db/api/user/listFollowing/", method = RequestMethod.GET,
+            produces = "application/json")
+    public ResponseEntity listFollowing (
+            @RequestParam(name = "user",  required = true) String user,
+            @RequestParam(name = "limit", required = false) Integer limit,
+            @RequestParam(name = "order", required = false) String order,
+            @RequestParam(name = "since_id", required = false) Integer since_id) {
+        return ResponseEntity.ok(userService.listFollowing(user, limit, order, since_id));
+    }
+
+    @RequestMapping(path = "/db/api/user/listPosts/", method = RequestMethod.GET,
+            produces = "application/json")
+    public ResponseEntity listPosts (
+            @RequestParam(name = "user",  required = true) String user,
+            @RequestParam(name = "limit", required = false) Integer limit,
+            @RequestParam(name = "order", required = false) String order,
+            @RequestParam(name = "since", required = false) String since) {
+        return ResponseEntity.ok(userService.listPosts(user, since, limit, order));
     }
 
     @ExceptionHandler({

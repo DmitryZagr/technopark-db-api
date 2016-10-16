@@ -11,8 +11,9 @@ import ru.mail.park.model.post.VotePost;
 @Component
 public interface IPostService {
     String create(Post post);
+    String details(Integer post, String related);
+    String list(String forum, Long thread, String since, Long limit, String order);
     String removeOrRestore(IdPost post, boolean isDel);
     String vote(String votePost);
     String update(String update);
-    String list(String forum, Long thread, String since, Long limit, String order);
 }

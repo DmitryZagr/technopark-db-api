@@ -9,6 +9,7 @@ import ru.mail.park.model.forum.Forum;
  */
 @Component
 public interface IForumService {
-    String create(Forum forum);
+    String create(Forum forum);//+
+    String listUsers(String forum, Integer limit, String order, Integer since_id);//+
 //    String remove();
 }

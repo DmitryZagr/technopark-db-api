@@ -1,17 +1,16 @@
 package ru.mail.park.model.thread;
 
-import java.io.Serializable;
-
 /**
- * Created by admin on 14.10.16.
+ * Created by admin on 16.10.16.
  */
-public class ThreadVote implements Serializable {
+public class ThreadDetails<U, F> {
+
     //    Requried
     private long id;
-    private String forum;
+    private F forum;
     private String title;
     private boolean isClosed;
-    private String user;
+    private U user;
     private String date;
     private String message;
     private String slug;
@@ -23,25 +22,7 @@ public class ThreadVote implements Serializable {
     //    Optional
     private boolean isDeleted = false;
 
-    public ThreadVote() {}
-
-    public ThreadVote(long id, String forum, String title,
-                      boolean isClosed, String user, String date,
-                      String message, String slug, long likes,
-                      long dislikes, boolean isDeleted, long posts) {
-        this.id = id;
-        this.forum = forum;
-        this.title = title;
-        this.isClosed = isClosed;
-        this.user = user;
-        this.date = date;
-        this.message = message;
-        this.slug = slug;
-        this.likes = likes;
-        this.dislikes = dislikes;
-        this.isDeleted = isDeleted;
-        this.posts = posts;
-    }
+    public ThreadDetails() {}
 
     public long getPosts() {
         return posts;
@@ -67,11 +48,11 @@ public class ThreadVote implements Serializable {
         this.id = id;
     }
 
-    public String getForum() {
+    public F getForum() {
         return forum;
     }
 
-    public void setForum(String forum) {
+    public void setForum(F forum) {
         this.forum = forum;
     }
 
@@ -91,11 +72,11 @@ public class ThreadVote implements Serializable {
         isClosed = closed;
     }
 
-    public String getUser() {
+    public U getUser() {
         return user;
     }
 
-    public void setUser(String user) {
+    public void setUser(U user) {
         this.user = user;
     }
 

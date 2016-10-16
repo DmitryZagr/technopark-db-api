@@ -31,8 +31,8 @@ public class ThreadController {
 
     @RequestMapping(path = "/db/api/thread/create/", method = RequestMethod.POST,
             produces = "application/json")
-    public ResponseEntity createThread(@RequestBody Thread thread) {
-        return ResponseEntity.ok(threadService.create(thread));
+    public ResponseEntity createThread(HttpEntity<String> httpEntity) throws IOException {
+        return ResponseEntity.ok(threadService.create((new Thread(httpEntity.getBody()))));
     }
 
     @RequestMapping(path = "/db/api/thread/update/", method = RequestMethod.POST,
@@ -44,38 +44,40 @@ public class ThreadController {
 
     @RequestMapping(path = "/db/api/thread/subscribe/", method = RequestMethod.POST,
             produces = "application/json")
-    public ResponseEntity SubscribeThread(@RequestBody ThreadSubscribe thread) {
-        return ResponseEntity.ok(threadService.subscribeUnSub(thread, true));
+    public ResponseEntity SubscribeThread(HttpEntity<String> httpEntity) throws IOException {
+        return ResponseEntity.ok(threadService.subscribeUnSub(
+                (new ThreadSubscribe(httpEntity.getBody())), true));
     }
 
     @RequestMapping(path = "/db/api/thread/unsubscribe/", method = RequestMethod.POST,
             produces = "application/json")
-    public ResponseEntity unSubscribeThread(@RequestBody ThreadSubscribe thread) {
-        return ResponseEntity.ok(threadService.subscribeUnSub(thread, false));
+    public ResponseEntity unSubscribeThread(HttpEntity<String> httpEntity) throws IOException {
+        return ResponseEntity.ok(threadService.subscribeUnSub(
+                (new ThreadSubscribe(httpEntity.getBody())), false));
     }
 
     @RequestMapping(path = "/db/api/thread/open/", method = RequestMethod.POST,
             produces = "application/json")
-    public ResponseEntity openThread(@RequestBody ThreadID thread) {
-        return ResponseEntity.ok(threadService.open(thread));
+    public ResponseEntity openThread(HttpEntity<String> httpEntity) throws IOException {
+        return ResponseEntity.ok(threadService.open((new ThreadID(httpEntity.getBody()))));
     }
 
     @RequestMapping(path = "/db/api/thread/close/", method = RequestMethod.POST,
             produces = "application/json")
-    public ResponseEntity closeThread(@RequestBody ThreadID thread) {
-        return ResponseEntity.ok(threadService.close(thread));
+    public ResponseEntity closeThread(HttpEntity<String> httpEntity) throws IOException {
+        return ResponseEntity.ok(threadService.close((new ThreadID(httpEntity.getBody()))));
     }
 
     @RequestMapping(path = "/db/api/thread/remove/", method = RequestMethod.POST,
             produces = "application/json")
-    public ResponseEntity removeThread(@RequestBody ThreadID thread) {
-        return ResponseEntity.ok(threadService.remove(thread));
+    public ResponseEntity removeThread(HttpEntity<String> httpEntity) throws IOException {
+        return ResponseEntity.ok(threadService.remove((new ThreadID(httpEntity.getBody()))));
     }
 
     @RequestMapping(path = "/db/api/thread/restore/", method = RequestMethod.POST,
             produces = "application/json")
-    public ResponseEntity restoreThread(@RequestBody ThreadID thread) {
-        return ResponseEntity.ok(threadService.restore(thread));
+    public ResponseEntity restoreThread(HttpEntity<String> httpEntity) throws IOException {
+        return ResponseEntity.ok(threadService.restore((new ThreadID(httpEntity.getBody()))));
     }
 
     @RequestMapping(path = "/db/api/thread/vote/", method = RequestMethod.POST,
@@ -86,14 +88,19 @@ public class ThreadController {
 
     @RequestMapping(path = "/db/api/thread/list/", method = RequestMethod.GET,
             produces = "application/json")
-    public ResponseEntity listPost(@RequestParam(name = "user",  required = false) String user,
+    public ResponseEntity listThread(@RequestParam(name = "user",  required = false) String user,
                                    @RequestParam(name = "forum", required = false) String forum,
                                    @RequestParam(name = "since", required = false) String since,
                                    @RequestParam(name = "limit", required = false) Integer limit,
                                    @RequestParam(name = "order", required = false) String order) {
-
-
         return ResponseEntity.ok(threadService.list( user, forum, since, limit, order));
+    }
+
+    @RequestMapping(path = "/db/api/thread/details/", method = RequestMethod.GET,
+            produces = "application/json")
+    public ResponseEntity detailsThread(@RequestParam(name = "thread",  required = true) Integer thread,
+                                   @RequestParam(name = "related", required = false) String related) {
+        return ResponseEntity.ok(threadService.details(thread, related));
     }
 
 
@@ -101,6 +108,24 @@ public class ThreadController {
     @ExceptionHandler({HttpMessageNotReadableException.class})
     @ResponseBody
     public String resolveException() {
+        return ru.mail.park.api.status.ResponseStatus.getMessage(
+                ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+        );
+    }
+
+    @ExceptionHandler({NullPointerException.class})
+    @ResponseBody
+    public String resolveNUllException() {
+        return ru.mail.park.api.status.ResponseStatus.getMessage(
+                ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+        );
+    }
+
+    @ExceptionHandler({IOException.class})
+    @ResponseBody
+    public String resolveIOException() {
         return ru.mail.park.api.status.ResponseStatus.getMessage(
                 ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
                 ru.mail.park.api.status.ResponseStatus.FORMAT_JSON

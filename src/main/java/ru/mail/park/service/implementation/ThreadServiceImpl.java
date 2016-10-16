@@ -8,15 +8,16 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationExceptio
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import javafx.scene.control.Tab;
 import org.springframework.stereotype.Component;
+import org.springframework.util.*;
+import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Table;
+import ru.mail.park.model.thread.*;
 import ru.mail.park.model.thread.Thread;
-import ru.mail.park.model.thread.ThreadID;
-import ru.mail.park.model.thread.ThreadSubscribe;
-import ru.mail.park.model.thread.ThreadVote;
 import ru.mail.park.service.interfaces.IThreadService;
 import ru.mail.park.util.ConnectionToMySQL;
+import ru.mail.park.util.MyJsonUtils;
 import sun.jvm.hotspot.opto.RootNode;
 
 import java.io.IOException;
@@ -37,6 +38,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
     private ResultSet resultSet;
     private PreparedStatement preparedStatement;
     private ObjectMapper mapper = new ObjectMapper();
+    private ThreadDetails<Object, Object> threadDetails;
 
 
     @Override
@@ -83,6 +85,60 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
         String json = (new ResultJson<Thread>(
                 ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
+
+        return json;
+    }
+
+    @Override
+    public String details(Integer thread, String related) {
+        connection =  ConnectionToMySQL.getConnection();
+
+        String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_ID_POST + ") AS posts FROM " +
+                Table.Thread.TABLE_THREAD + "INNER JOIN " +
+                Table.ThreadVote.TABLE_THREAD_VOTE + " ON " +
+                Table.Thread.COLUMN_ID_THREAD + "=" + Table.ThreadVote.COLUMN_ID_THREAD + " AND " +
+                Table.Thread.COLUMN_ID_THREAD   + "=?" +
+                " INNER JOIN " + Table.Post.TABLE_POST +
+                " ON " + Table.Post.COLUMN_THREAD + "=" + Table.Thread.COLUMN_ID_THREAD +
+                " AND " + Table.Post.COLUMN_IS_DELETED + "!= FALSE " ;
+
+        threadDetails = new ThreadDetails<>();
+
+        try {
+            preparedStatement = connection.prepareStatement(sqlSel);
+            preparedStatement.setLong(1, thread.intValue());
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                threadDetails.setDate(resultSet.getString("date"));
+                threadDetails.setForum(resultSet.getString("forum"));
+                threadDetails.setId(resultSet.getLong("idThread"));
+                threadDetails.setClosed(resultSet.getBoolean("isClosed"));
+                threadDetails.setDeleted(resultSet.getBoolean("isDeleted"));
+                threadDetails.setMessage(resultSet.getString("message"));
+                threadDetails.setPosts(resultSet.getLong("posts"));
+                threadDetails.setSlug(resultSet.getString("slug"));
+                threadDetails.setTitle(resultSet.getString("title"));
+                threadDetails.setUser(resultSet.getString("user"));
+                threadDetails.setLikes(resultSet.getLong("likes"));
+                threadDetails.setDislikes(resultSet.getLong("dislikes"));
+                threadDetails.setPoints();
+
+                if(!StringUtils.isEmpty(related) && related.contains("user")) {
+                    UserServiceImpl usi = new UserServiceImpl();
+                    threadDetails.setUser(usi.getUserDetatil((String)threadDetails.getUser()));
+                }
+
+                if(!StringUtils.isEmpty(related) && related.contains("forum")) {
+                    ForumServiceImpl fsi = new ForumServiceImpl();
+                    threadDetails.setForum(fsi.getForum((String)threadDetails.getForum()));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String json = (new ResultJson<>(
+                ResponseStatus.ResponceCode.OK.ordinal(), threadDetails)).getStringResult();
 
         return json;
     }
@@ -249,14 +305,31 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
     public String vote(String voteThread) {
         connection =  ConnectionToMySQL.getConnection();
 
-        String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_THREAD + ") AS posts FROM " +
+
+
+//       SELECT *, COUNT(idPost) as posts
+//        FROM `forum`.`Thread`
+//        INNER JOIN`forum`.`ThreadVote` ON
+//        forum.Thread.idThread=forum.ThreadVote.idThread AND
+//        forum.Thread.idThread = 45
+//        INNER JOIN forum.Post ON
+//        forum.Post.thread = forum.Thread.idThread
+//        GROUP BY Thread.idThread ";
+
+
+        String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_ID_POST + ") AS posts FROM " +
                 Table.Thread.TABLE_THREAD + "INNER JOIN " +
                 Table.ThreadVote.TABLE_THREAD_VOTE + " ON " +
-                Table.ThreadVote.COLUMN_ID_THREAD   + "=? INNER JOIN " + Table.Post.TABLE_POST +
-                " ON " + Table.Post.COLUMN_THREAD + "=? AND " + Table.Post.COLUMN_IS_DELETED + "!= FALSE " ;
+                Table.Thread.COLUMN_ID_THREAD + "=" + Table.ThreadVote.COLUMN_ID_THREAD + " AND " +
+                Table.Thread.COLUMN_ID_THREAD   + "=?" +
+                " INNER JOIN " + Table.Post.TABLE_POST +
+                " ON " + Table.Post.COLUMN_THREAD + "=" + Table.Thread.COLUMN_ID_THREAD +
+                " AND " + Table.Post.COLUMN_IS_DELETED + "!= FALSE " ;
 
         int _vote = 0;
         int idThread = 0;
+
+        voteThread = MyJsonUtils.replaceOneQuoteTwoQuotes(voteThread);
 
         try {
             ObjectNode root = (ObjectNode) mapper.readTree(voteThread);
@@ -285,7 +358,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
         try {
             preparedStatement = connection.prepareStatement(sqlSel);
             preparedStatement.setLong(1, idThread);
-            preparedStatement.setLong(2, idThread);
+//            preparedStatement.setLong(2, idThread);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 threadVote.setDate(resultSet.getString("date"));
@@ -393,6 +466,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
     @Override
     public String update(String updJson) {
         connection =  ConnectionToMySQL.getConnection();
+        updJson = MyJsonUtils.replaceOneQuoteTwoQuotes(updJson);
         String sql = "UPDATE " + Table.Thread.TABLE_THREAD + " SET " +
                 Table.Thread.COLUMN_MESSAGE + "=?, " + Table.Thread.COLUMN_SLUG + " =? " +
                 "WHERE " + Table.Thread.COLUMN_ID_THREAD + "=?; ";
@@ -459,6 +533,12 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 ResponseStatus.ResponceCode.OK.ordinal(), threadVote)).getStringResult();
 
         return json;
+    }
+
+
+    public ThreadDetails getThreadDetatils(Integer thread, String related) {
+        details(thread, related);
+        return this.threadDetails;
     }
 
 
