@@ -17,17 +17,17 @@ public class Thread implements Serializable{
     private ObjectMapper mapper = new ObjectMapper();
 
     //    Requried
-    private long id;
+    private int id;
     private String forum;
     private String title;
-    private boolean isClosed;
+    private Boolean isClosed;
     private String user;
     private String date;
     private String message;
     private String slug;
 
-//    Optional
-    private boolean isDeleted = false;
+    //    Optional
+    private Boolean isDeleted = null;
 
     public Thread() {
     }
@@ -58,11 +58,11 @@ public class Thread implements Serializable{
         return forum;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -74,11 +74,11 @@ public class Thread implements Serializable{
         this.title = title;
     }
 
-    public boolean isClosed() {
+    public Boolean getisClosed() {
         return isClosed;
     }
 
-    public void setClosed(boolean closed) {
+    public void setClosed(Boolean closed) {
         isClosed = closed;
     }
 
@@ -114,12 +114,13 @@ public class Thread implements Serializable{
         this.slug = slug;
     }
 
-    public boolean isDeleted() {
+    public Boolean getDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
+
 }
 

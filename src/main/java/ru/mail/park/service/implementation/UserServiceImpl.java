@@ -263,7 +263,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                 VotePost vp  = new VotePost();
                 vp.setDate(resultSet.getString("date"));
                 vp.setForum(resultSet.getString("forum"));
-                vp.setIdPost(resultSet.getLong("idPost"));
+                vp.setpost(resultSet.getInt("idPost"));
                 vp.setApproved(resultSet.getBoolean("isApproved"));
                 vp.setDeleted(resultSet.getBoolean("isDeleted"));
                 vp.setEdited(resultSet.getBoolean("isEdited"));
@@ -377,9 +377,17 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 userDetails.setId(resultSet.getLong("idUser"));
-                userDetails.setUsername(resultSet.getString("username"));
-                userDetails.setAbout(resultSet.getString("about"));
-                userDetails.setName(resultSet.getString("name"));
+
+//                if(resultSet.getString("username").equals("null"))  userDetails.setUsername(null);
+//                else
+                    userDetails.setUsername(resultSet.getString("username"));
+
+                if(resultSet.getString("about").equals("null")) userDetails.setAbout(null);
+                else userDetails.setAbout(resultSet.getString("about"));
+
+                if(resultSet.getString("name").equals("null")) userDetails.setName(null);
+                else userDetails.setName(resultSet.getString("name"));
+
                 userDetails.setisAnonymous(resultSet.getBoolean("isAnonymous"));
             }
 

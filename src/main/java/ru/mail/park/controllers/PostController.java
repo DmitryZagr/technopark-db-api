@@ -35,7 +35,7 @@ public class PostController {
             produces = "application/json")
     public ResponseEntity createPost(HttpEntity<String> httpEntity) throws IOException {
         String json = httpEntity.getBody();
-        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
+//        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
         ObjectNode root = null;
         Post post = new Post();
         root = (ObjectNode) mapper.readTree(json);
@@ -44,7 +44,7 @@ public class PostController {
         post.setMessage(root.get("message").asText());
         post.setUser(root.get("user").asText());
         post.setForum(root.get("forum").asText());
-        if(root.has("parent")) post.setParent(root.get("parent").asInt());
+        if(root.has("parent")) post.setParent((Integer) root.get("parent").numberValue());
         if(root.has("isApproved")) post.setApproved(root.get("isApproved").asBoolean());
         if(root.has("isHighlighted"))post.setHighlighted(root.get("isHighlighted").asBoolean());
         if(root.has("isEdited"))post.setEdited(root.get("isEdited").asBoolean());

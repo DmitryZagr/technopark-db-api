@@ -2,14 +2,19 @@ package ru.mail.park.service.implementation;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.forum.ForumCreateRequest;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.forum.Forum;
 import ru.mail.park.model.Table;
+import ru.mail.park.model.forum.ForumDetails;
+import ru.mail.park.model.post.DetailPost;
+import ru.mail.park.model.thread.ThreadDetails;
 import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IForumService;
 import ru.mail.park.util.ConnectionToMySQL;
+import sun.tools.jconsole.inspector.TableSorter;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -54,7 +59,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
             while(resultSet.next())
-                forum.setId(resultSet.getLong(1));
+                forum.setId(resultSet.getInt(1));
 
         }
 //        catch (MySQLIntegrityConstraintViolationException e) {
@@ -72,6 +77,139 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
 
         String json = (new ResultJson<Forum>(
                 ResponseStatus.ResponceCode.OK.ordinal(), forum)).getStringResult();
+
+        return json;
+    }
+
+    @Override
+    public String details(String forum, String related) {
+        connection =  ConnectionToMySQL.getConnection();
+        String sql= "SELECT * FROM " + Table.Forum.TABLE_FORUM +
+                " WHERE " + Table.Forum.COLUMN_SHORT_NAME + "=?";
+
+        ForumDetails<Object> forumDetails = new ForumDetails<>();
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, forum);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                forumDetails.setId(resultSet.getInt("idForum"));
+                forumDetails.setName(resultSet.getString("name"));
+                forumDetails.setShort_name(resultSet.getString("short_name"));
+                forumDetails.setUser(resultSet.getString("user"));
+                if(!StringUtils.isEmpty(related) && related.contains("user")) {
+                    UserServiceImpl usi = new UserServiceImpl();
+                    forumDetails.setUser(usi.getUserDetatil((String) forumDetails.getUser()));
+                }
+            }
+
+        } catch (MySQLSyntaxErrorException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String json = (new ResultJson<ForumDetails<Object>>(
+                ResponseStatus.ResponceCode.OK.ordinal(), forumDetails)).getStringResult();
+
+        return json;
+    }
+
+    @Override
+    public String listPosts(String forum, String since, Integer limit,
+                            String order, String related) {
+        connection =  ConnectionToMySQL.getConnection();
+
+//        SELECT * FROM forum.Post inner join forum.Forum on
+//        forum.Post.forum = forum.Forum.short_name
+//
+//        inner join
+//        forum.VotePost on
+//        forum.Post.idPost = forum.VotePost.idPost
+//
+//        inner join forum.Thread on
+//        forum.Post.thread = forum.Thread.idThread
+//
+//        inner join forum.ThreadVote  on
+//        forum.ThreadVote.idThread =forum.Thread.idThread ;
+
+        String sql = "SELECT * FROM " + Table.Post.TABLE_POST +
+                " INNER JOIN " + Table.Forum.TABLE_FORUM + " ON " +
+                Table.Post.COLUMN_FORUM + "=" + Table.Forum.COLUMN_SHORT_NAME +
+                " AND " + Table.Forum.COLUMN_SHORT_NAME +"=? ";
+        if(since != null)
+            sql = sql + " AND " + Table.Post.COLUMN_DATE + ">=" + "\'" + since + "\'";
+
+//        if(!StringUtils.isEmpty(related) && related.contains("thread")) {
+//            sql = sql + " INNER JOIN " + Table.VotePost.TABLE_VOTE_POST +
+//                    " ON " + Table.Post.COLUMN_ID_POST = ;
+//        }
+
+        if(order == null)
+            order = " DESC ";
+        sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + " " + order;
+
+        ArrayList<DetailPost<Object, Object, Object >> posts = new ArrayList<>();
+        DetailPost<Object, Object, Object > post;
+        Forum forumObj;
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, forum);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                post = new DetailPost<>();
+                post.setDate(resultSet.getString("date"));
+                if(related != null && related.contains("forum")) {
+                    forumObj = new Forum();
+                    forumObj.setId(resultSet.getInt("idForum"));
+                    forumObj.setName(resultSet.getString("name"));
+                    forumObj.setShort_name(resultSet.getString("short_name"));
+                    forumObj.setUser(resultSet.getString("Forum.user"));
+                    post.setForum(forumObj);
+                } else post.setForum(resultSet.getString("forum"));
+                post.setpost(resultSet.getInt("idPost"));
+                post.setApproved(resultSet.getBoolean("isApproved"));
+                post.setDeleted(resultSet.getBoolean("isDeleted"));
+                post.setEdited(resultSet.getBoolean("isEdited"));
+                post.setHighlighted(resultSet.getBoolean("isHighlighted"));
+                post.setSpam(resultSet.getBoolean("isSpam"));
+                post.setMessage(resultSet.getString("message"));
+                post.setParent(resultSet.getInt("parent"));
+                post.setThread(resultSet.getInt("thread"));
+                post.setUser(resultSet.getString("user"));
+                posts.add(post);
+            }
+
+
+            UserServiceImpl usi = new UserServiceImpl();
+            ThreadServiceImpl tsi = new ThreadServiceImpl();
+
+            for(int i = 0; i < posts.size(); i++){
+                if(related != null ) {
+                    if(related.contains("user"))
+                        posts.get(i).setUser(usi.getUserDetatil((String) posts.get(i).getUser()));
+                    if(related.contains("thread"))
+                        posts.get(i).setThread(tsi.getThreadDetatils((Integer) posts.get(i).getThread(), null));
+                }
+
+            }
+
+        } catch (MySQLSyntaxErrorException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String json = (new ResultJson<ArrayList<DetailPost<Object, Object, Object >>> (
+                ResponseStatus.ResponceCode.OK.ordinal(), posts)).getStringResult();
 
         return json;
     }
@@ -116,6 +254,58 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
         String userDetailseList =  usi.getUserDetailsListJSON(emails);
 
         return userDetailseList;
+    }
+
+    @Override
+    public String listThreads(String forum, String since,
+                              Integer limit, String order, String related) {
+        connection =  ConnectionToMySQL.getConnection();
+        String sql = "SELECT * FROM " + Table.Forum.TABLE_FORUM +
+                " INNER JOIN " + Table.Thread.TABLE_THREAD + " ON " +
+                Table.Forum.COLUMN_SHORT_NAME + "=? AND " +
+                Table.Thread.COLUMN_FORUM + "=" + Table.Forum.COLUMN_SHORT_NAME;
+
+        if(since != null)
+            sql = sql + " AND " + Table.Thread.COLUMN_DATE +">=" + "\'" + since + "\'";
+
+        String sqlSort = " GROUP BY " + Table.Thread.COLUMN_DATE ;
+        if(since == null ) sqlSort = sqlSort + " DESC";
+        else sqlSort = sqlSort + " " + order;
+
+        if(limit != null)
+            sql = sql + " LIMIT " + limit.intValue();
+        sql = sql + sqlSort;
+
+        ArrayList<ThreadDetails<Object, Object>> threadDetailses = new ArrayList<>();
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, forum);
+            resultSet = preparedStatement.executeQuery();
+            ArrayList<Integer> threadId = new ArrayList<>();
+            while (resultSet.next()) {
+                threadId.add(resultSet.getInt("idThread"));
+            }
+
+            ThreadServiceImpl tsi = new ThreadServiceImpl();
+
+            for(int i = 0; i < threadId.size(); i++) {
+                threadDetailses.add(tsi.getThreadDetatils(threadId.get(i), related));
+            }
+
+        } catch (MySQLSyntaxErrorException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String json = (new ResultJson<ArrayList<ThreadDetails<Object, Object>>>(
+                ResponseStatus.ResponceCode.OK.ordinal(), threadDetailses)).getStringResult();
+
+        return json;
     }
 
     public Forum getForum(String short_name) throws SQLException {

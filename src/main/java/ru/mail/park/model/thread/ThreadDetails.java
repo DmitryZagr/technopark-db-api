@@ -6,33 +6,33 @@ package ru.mail.park.model.thread;
 public class ThreadDetails<U, F> {
 
     //    Requried
-    private long id;
+    private int id;
     private F forum;
     private String title;
-    private boolean isClosed;
+    private Boolean isClosed;
     private U user;
-    private String date;
+    private String date = null;
     private String message;
     private String slug;
-    private long likes;
-    private long dislikes;
-    private long posts;
-    private long points;
+    private int likes;
+    private int dislikes;
+    private int posts;
+    private int points;
 
     //    Optional
-    private boolean isDeleted = false;
+    private Boolean isDeleted = null;
 
     public ThreadDetails() {}
 
-    public long getPosts() {
+    public int getPosts() {
         return posts;
     }
 
-    public void setPosts(long posts) {
+    public void setPosts(int posts) {
         this.posts = posts;
     }
 
-    public long getPoints() {
+    public int getPoints() {
         return points;
     }
 
@@ -40,11 +40,11 @@ public class ThreadDetails<U, F> {
         this.points = likes - dislikes;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -64,11 +64,11 @@ public class ThreadDetails<U, F> {
         this.title = title;
     }
 
-    public boolean isClosed() {
+    public Boolean getisClosed() {
         return isClosed;
     }
 
-    public void setClosed(boolean closed) {
+    public void setClosed(Boolean closed) {
         isClosed = closed;
     }
 
@@ -104,27 +104,27 @@ public class ThreadDetails<U, F> {
         this.slug = slug;
     }
 
-    public long getLikes() {
+    public int getLikes() {
         return likes;
     }
 
-    public void setLikes(long likes) {
+    public void setLikes(int likes) {
         this.likes = likes;
     }
 
-    public long getDislikes() {
+    public int getDislikes() {
         return dislikes;
     }
 
-    public void setDislikes(long dislikes) {
+    public void setDislikes(int dislikes) {
         this.dislikes = dislikes;
     }
 
-    public boolean isDeleted() {
+    public Boolean getisDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
 }

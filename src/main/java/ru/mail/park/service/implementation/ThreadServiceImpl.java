@@ -61,15 +61,15 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, thread.getForum());
             preparedStatement.setString(2, thread.getTitle());
-            preparedStatement.setBoolean(3, thread.isClosed());
+            preparedStatement.setBoolean(3, thread.getisClosed());
             preparedStatement.setString(4, thread.getUser());
             preparedStatement.setString(5, thread.getDate());
             preparedStatement.setString(6, thread.getMessage());
             preparedStatement.setString(7, thread.getSlug());
-            preparedStatement.setBoolean(8, thread.isDeleted());
+            preparedStatement.setBoolean(8, thread.getDeleted());
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
-            while(resultSet.next())  thread.setId(resultSet.getLong(1));
+            while(resultSet.next())  thread.setId(resultSet.getInt(1));
             preparedStatement = connection.prepareStatement(sqlVoteTabel);
             preparedStatement.setLong(1, thread.getId());
             preparedStatement.execute();
@@ -109,18 +109,18 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             preparedStatement.setLong(1, thread.intValue());
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                threadDetails.setDate(resultSet.getString("date"));
+                threadDetails.setDate(resultSet.getString("date").replace(".0", ""));
                 threadDetails.setForum(resultSet.getString("forum"));
-                threadDetails.setId(resultSet.getLong("idThread"));
+                threadDetails.setId(resultSet.getInt("idThread"));
                 threadDetails.setClosed(resultSet.getBoolean("isClosed"));
                 threadDetails.setDeleted(resultSet.getBoolean("isDeleted"));
                 threadDetails.setMessage(resultSet.getString("message"));
-                threadDetails.setPosts(resultSet.getLong("posts"));
+                threadDetails.setPosts(resultSet.getInt("posts"));
                 threadDetails.setSlug(resultSet.getString("slug"));
                 threadDetails.setTitle(resultSet.getString("title"));
                 threadDetails.setUser(resultSet.getString("user"));
-                threadDetails.setLikes(resultSet.getLong("likes"));
-                threadDetails.setDislikes(resultSet.getLong("dislikes"));
+                threadDetails.setLikes(resultSet.getInt("likes"));
+                threadDetails.setDislikes(resultSet.getInt("dislikes"));
                 threadDetails.setPoints();
 
                 if(!StringUtils.isEmpty(related) && related.contains("user")) {
@@ -363,16 +363,16 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             while (resultSet.next()) {
                 threadVote.setDate(resultSet.getString("date"));
                 threadVote.setForum(resultSet.getString("forum"));
-                threadVote.setId(resultSet.getLong("idThread"));
+                threadVote.setId(resultSet.getInt("idThread"));
                 threadVote.setClosed(resultSet.getBoolean("isClosed"));
-                threadVote.setDeleted(resultSet.getBoolean("isDeleted"));
+                threadVote.setisDeleted(resultSet.getBoolean("isDeleted"));
                 threadVote.setMessage(resultSet.getString("message"));
-                threadVote.setPosts(resultSet.getLong("posts"));
+                threadVote.setPosts(resultSet.getInt("posts"));
                 threadVote.setSlug(resultSet.getString("slug"));
                 threadVote.setTitle(resultSet.getString("title"));
                 threadVote.setUser(resultSet.getString("user"));
-                threadVote.setLikes(resultSet.getLong("likes"));
-                threadVote.setDislikes(resultSet.getLong("dislikes"));
+                threadVote.setLikes(resultSet.getInt("likes"));
+                threadVote.setDislikes(resultSet.getInt("dislikes"));
                 if(_vote == 1) threadVote.setLikes(threadVote.getLikes() + 1);
                 else threadVote.setDislikes(threadVote.getDislikes() + 1);
                 threadVote.setPoints();
@@ -432,16 +432,16 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 ThreadVote tv  = new ThreadVote();
                 tv.setDate(resultSet.getString("date"));
                 tv.setForum(resultSet.getString("forum"));
-                tv.setId(resultSet.getLong("idThread"));
+                tv.setId(resultSet.getInt("idThread"));
                 tv.setClosed(resultSet.getBoolean("isClosed"));
-                tv.setDeleted(resultSet.getBoolean("isDeleted"));
+                tv.setisDeleted(resultSet.getBoolean("isDeleted"));
                 tv.setMessage(resultSet.getString("message"));
-                tv.setPosts(resultSet.getLong("posts"));
+                tv.setPosts(resultSet.getInt("posts"));
                 tv.setSlug(resultSet.getString("slug"));
                 tv.setTitle(resultSet.getString("title"));
                 tv.setUser(resultSet.getString("user"));
-                tv.setLikes(resultSet.getLong("likes"));
-                tv.setDislikes(resultSet.getLong("dislikes"));
+                tv.setLikes(resultSet.getInt("likes"));
+                tv.setDislikes(resultSet.getInt("dislikes"));
                 tv.setPoints();
                 threadVotes.add(tv);
             }
@@ -513,16 +513,16 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             while (resultSet.next()) {
                 threadVote.setDate(resultSet.getString("date"));
                 threadVote.setForum(resultSet.getString("forum"));
-                threadVote.setId(resultSet.getLong("idThread"));
+                threadVote.setId(resultSet.getInt("idThread"));
                 threadVote.setClosed(resultSet.getBoolean("isClosed"));
-                threadVote.setDeleted(resultSet.getBoolean("isDeleted"));
+                threadVote.setisDeleted(resultSet.getBoolean("isDeleted"));
                 threadVote.setMessage(resultSet.getString("message"));
-                threadVote.setPosts(resultSet.getLong("posts"));
+                threadVote.setPosts(resultSet.getInt("posts"));
                 threadVote.setSlug(resultSet.getString("slug"));
                 threadVote.setTitle(resultSet.getString("title"));
                 threadVote.setUser(resultSet.getString("user"));
-                threadVote.setLikes(resultSet.getLong("likes"));
-                threadVote.setDislikes(resultSet.getLong("dislikes"));
+                threadVote.setLikes(resultSet.getInt("likes"));
+                threadVote.setDislikes(resultSet.getInt("dislikes"));
                 threadVote.setPoints();
             }
         } catch (SQLException e) {

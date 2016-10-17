@@ -63,6 +63,33 @@ public class ForumController {
         return ResponseEntity.ok(forumService.listUsers(forum, limit, order, since_id));
     }
 
+    @RequestMapping(path = "/db/api/forum/listThreads/", method = RequestMethod.GET,
+            produces = "application/json")
+    public ResponseEntity listThreads(@RequestParam(name = "forum", required = true) String forum,
+                                      @RequestParam(name = "since", required = false) String since,
+                                      @RequestParam(name = "limit", required = false) Integer limit,
+                                      @RequestParam(name = "order", required = false) String order,
+                                      @RequestParam(name = "related", required = false) String related) {
+        return ResponseEntity.ok(forumService.listThreads(forum, since, limit, order, related));
+    }
+
+    @RequestMapping(path = "/db/api/forum/details/", method = RequestMethod.GET,
+            produces = "application/json")
+    public ResponseEntity details (@RequestParam(name = "forum", required = true) String forum,
+                                   @RequestParam(name = "related", required = false) String related) {
+        return ResponseEntity.ok(forumService.details(forum, related));
+    }
+
+    @RequestMapping(path = "/db/api/forum/listPosts/", method = RequestMethod.GET,
+            produces = "application/json")
+    public ResponseEntity listPosts(@RequestParam(name = "forum", required = true) String forum,
+                                      @RequestParam(name = "since", required = false) String since,
+                                      @RequestParam(name = "limit", required = false) Integer limit,
+                                      @RequestParam(name = "order", required = false) String order,
+                                      @RequestParam(name = "related", required = false) String related) {
+        return ResponseEntity.ok(forumService.listPosts(forum, since, limit, order, related));
+    }
+
     @ExceptionHandler({HttpMessageNotReadableException.class})
     @ResponseBody
     public String resolveException() {

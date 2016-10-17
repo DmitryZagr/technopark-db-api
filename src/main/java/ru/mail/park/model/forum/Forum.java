@@ -11,7 +11,7 @@ public class Forum implements Serializable{
 
     private static final long serialVersionUID = -5527566248002296042L;
 
-    private long id;
+    private int id;
     private String name;
     private String short_name;
     private String user;
@@ -29,11 +29,11 @@ public class Forum implements Serializable{
 //        return new Forum();
 //    }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

@@ -14,7 +14,7 @@ public class ThreadSubscribe implements Serializable {
     private static final long serialVersionUID = -5527566248002296042L;
     private ObjectMapper mapper = new ObjectMapper();
 
-    private long thread;
+    private int thread;
     private String user;
 
     public ThreadSubscribe(String json ) throws IOException {
@@ -25,11 +25,11 @@ public class ThreadSubscribe implements Serializable {
     }
 
 
-    public long getThread() {
+    public int getThread() {
         return thread;
     }
 
-    public void setThread(long thread) {
+    public void setThread(int thread) {
         this.thread = thread;
     }
 

@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public class ThreadVote implements Serializable {
     //    Requried
-    private long id;
+    private int id;
     private String forum;
     private String title;
     private boolean isClosed;
@@ -15,43 +15,43 @@ public class ThreadVote implements Serializable {
     private String date;
     private String message;
     private String slug;
-    private long likes;
-    private long dislikes;
-    private long posts;
-    private long points;
+    private int likes;
+    private int dislikes;
+    private int posts;
+    private int points;
 
     //    Optional
-    private boolean isDeleted = false;
+    private Boolean isDeleted = null;
 
     public ThreadVote() {}
 
-    public ThreadVote(long id, String forum, String title,
-                      boolean isClosed, String user, String date,
-                      String message, String slug, long likes,
-                      long dislikes, boolean isDeleted, long posts) {
-        this.id = id;
-        this.forum = forum;
-        this.title = title;
-        this.isClosed = isClosed;
-        this.user = user;
-        this.date = date;
-        this.message = message;
-        this.slug = slug;
-        this.likes = likes;
-        this.dislikes = dislikes;
-        this.isDeleted = isDeleted;
-        this.posts = posts;
-    }
+//    public ThreadVote(long id, String forum, String title,
+//                      boolean isClosed, String user, String date,
+//                      String message, String slug, long likes,
+//                      long dislikes, boolean isDeleted, long posts) {
+//        this.id = id;
+//        this.forum = forum;
+//        this.title = title;
+//        this.isClosed = isClosed;
+//        this.user = user;
+//        this.date = date;
+//        this.message = message;
+//        this.slug = slug;
+//        this.likes = likes;
+//        this.dislikes = dislikes;
+//        this.isDeleted = isDeleted;
+//        this.posts = posts;
+//    }
 
-    public long getPosts() {
+    public int getPosts() {
         return posts;
     }
 
-    public void setPosts(long posts) {
+    public void setPosts(int posts) {
         this.posts = posts;
     }
 
-    public long getPoints() {
+    public int getPoints() {
         return points;
     }
 
@@ -59,11 +59,11 @@ public class ThreadVote implements Serializable {
         this.points = likes - dislikes;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -83,7 +83,7 @@ public class ThreadVote implements Serializable {
         this.title = title;
     }
 
-    public boolean isClosed() {
+    public boolean getisClosed() {
         return isClosed;
     }
 
@@ -123,27 +123,27 @@ public class ThreadVote implements Serializable {
         this.slug = slug;
     }
 
-    public long getLikes() {
+    public int getLikes() {
         return likes;
     }
 
-    public void setLikes(long likes) {
+    public void setLikes(int likes) {
         this.likes = likes;
     }
 
-    public long getDislikes() {
+    public int getDislikes() {
         return dislikes;
     }
 
-    public void setDislikes(long dislikes) {
+    public void setDislikes(int dislikes) {
         this.dislikes = dislikes;
     }
 
-    public boolean isDeleted() {
+    public Boolean getDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setisDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
 }

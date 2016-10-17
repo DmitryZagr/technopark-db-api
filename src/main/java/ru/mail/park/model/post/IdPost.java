@@ -14,7 +14,7 @@ public class IdPost implements Serializable{
     private static final long serialVersionUID = -5527566248002296042L;
     private ObjectMapper mapper = new ObjectMapper();
 
-    long post;
+    int post;
 
     public IdPost(String json) throws IOException {
         json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
@@ -22,11 +22,11 @@ public class IdPost implements Serializable{
         setPost(root.get("thread").asInt());
     }
 
-    public long getPost() {
+    public int getPost() {
         return post;
     }
 
-    public void setPost(long post) {
+    public void setPost(int post) {
         this.post = post;
     }
 }

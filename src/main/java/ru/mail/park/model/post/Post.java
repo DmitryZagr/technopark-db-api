@@ -11,20 +11,20 @@ public class Post implements Serializable{
     private static final long serialVersionUID = -5527566248002296042L;
 
 //    Requried
-    Long   idPost = 0l;
+    int   post ;
     String date;
-    long   thread ;
+    int   thread ;
     String message;
     String user;
     String forum;
 
 //    Optional
-    long parent;
-    boolean isApproved    = false;
-    boolean isHighlighted = false;
-    boolean isEdited      = false;
-    boolean isSpam        = false;
-    boolean isDeleted     = false;
+    Integer parent;
+    Boolean isApproved    = null;
+    Boolean isHighlighted = null;
+    Boolean isEdited      = null;
+    Boolean isSpam        = null;
+    Boolean isDeleted     = null;
 
     public Post() {
     }
@@ -37,29 +37,28 @@ public class Post implements Serializable{
 //        this.forum = forum;
 //    }
 
+    public int getpost() {
+        return post;
+    }
+
+    public void setpost(int idPost) {
+        this.post = idPost;
+    }
+
     public String getDate() {
-
         return date;
-    }
-
-    public Long getIdPost() {
-        return idPost;
-    }
-
-    public void setIdPost(long idPost) {
-        this.idPost = idPost;
-    }
-
-    public void setThread(Integer thread) {
-        this.thread = thread;
     }
 
     public void setDate(String date) {
         this.date = date;
     }
 
-    public long getThread() {
+    public int getThread() {
         return thread;
+    }
+
+    public void setThread(int thread) {
+        this.thread = thread;
     }
 
     public String getMessage() {
@@ -86,7 +85,7 @@ public class Post implements Serializable{
         this.forum = forum;
     }
 
-    public long getParent() {
+    public Integer getParent() {
         return parent;
     }
 
@@ -94,50 +93,50 @@ public class Post implements Serializable{
         this.parent = parent;
     }
 
-    public boolean isApproved() {
+    public Boolean getisApproved() {
         return isApproved;
     }
 
-    public void setApproved(boolean approved) {
+    public void setApproved(Boolean approved) {
         isApproved = approved;
     }
 
-    public boolean isHighlighted() {
+    public Boolean getisHighlighted() {
         return isHighlighted;
     }
 
-    public void setHighlighted(boolean highlighted) {
+    public void setHighlighted(Boolean highlighted) {
         isHighlighted = highlighted;
     }
 
-    public boolean isEdited() {
+    public Boolean getisEdited() {
         return isEdited;
     }
 
-    public void setEdited(boolean edited) {
+    public void setEdited(Boolean edited) {
         isEdited = edited;
     }
 
-    public boolean isSpam() {
+    public Boolean getisSpam() {
         return isSpam;
     }
 
-    public void setSpam(boolean spam) {
+    public void setSpam(Boolean spam) {
         isSpam = spam;
     }
 
-    public boolean isDeleted() {
+    public Boolean getisDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
 
     @Override
     public String toString() {
         return "" +
-                "\"id\":" + idPost +
+                "\"id\":" + post +
                 ", \"date\": \"" + date + '\"' +
                 ", \"thread\":" + thread +
                 ", \"message\": \"" + message + '\"' +

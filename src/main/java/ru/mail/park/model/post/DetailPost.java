@@ -12,17 +12,17 @@ public class DetailPost<U, T, F > {
     private static final long serialVersionUID = -5527566248002296042L;
 
     //    Requried
-    Long   idPost = 0l;
+    int   post;
     String date;
     String message;
 
     //    Optional
-    long parent;
-    boolean isApproved    = false;
-    boolean isHighlighted = false;
-    boolean isEdited      = false;
-    boolean isSpam        = false;
-    boolean isDeleted     = false;
+    Integer parent;
+    Boolean isApproved    = false;
+    Boolean isHighlighted = false;
+    Boolean isEdited      = false;
+    Boolean isSpam        = false;
+    Boolean isDeleted     = false;
     private int like;
     private int dislike;
     private int points;
@@ -59,12 +59,12 @@ public class DetailPost<U, T, F > {
         return date;
     }
 
-    public Long getIdPost() {
-        return idPost;
+    public int getpost() {
+        return post;
     }
 
-    public void setIdPost(long idPost) {
-        this.idPost = idPost;
+    public void setpost(int idPost) {
+        this.post = idPost;
     }
 
     public void setThread(T thread) {
@@ -103,7 +103,7 @@ public class DetailPost<U, T, F > {
         this.forum = forum;
     }
 
-    public long getParent() {
+    public Integer getParent() {
         return parent;
     }
 
@@ -111,43 +111,43 @@ public class DetailPost<U, T, F > {
         this.parent = parent;
     }
 
-    public boolean isApproved() {
+    public Boolean getisApproved() {
         return isApproved;
     }
 
-    public void setApproved(boolean approved) {
+    public void setApproved(Boolean approved) {
         isApproved = approved;
     }
 
-    public boolean isHighlighted() {
+    public Boolean getisHighlighted() {
         return isHighlighted;
     }
 
-    public void setHighlighted(boolean highlighted) {
+    public void setHighlighted(Boolean highlighted) {
         isHighlighted = highlighted;
     }
 
-    public boolean isEdited() {
+    public boolean getisEdited() {
         return isEdited;
     }
 
-    public void setEdited(boolean edited) {
+    public void setEdited(Boolean edited) {
         isEdited = edited;
     }
 
-    public boolean isSpam() {
+    public Boolean getisSpam() {
         return isSpam;
     }
 
-    public void setSpam(boolean spam) {
+    public void setSpam(Boolean spam) {
         isSpam = spam;
     }
 
-    public boolean isDeleted() {
+    public boolean getisDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
 

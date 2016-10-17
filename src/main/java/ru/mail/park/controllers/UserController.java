@@ -35,16 +35,17 @@ public class UserController {
     @RequestMapping(path = "/db/api/user/create/", method = RequestMethod.POST,
             produces = "application/json")
     public ResponseEntity createUser(HttpEntity<String> httpEntity) {
-        String json = httpEntity.getBody();
-        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
-        ObjectNode root = null;
-        User user = new User();
-        try {
-            root = (ObjectNode) mapper.readTree(json);
-            user.setUsername(root.get("username").asText());
-            user.setAbout(root.get("about").asText());
-            user.setName(root.get("name").asText());
-            user.setEmail(root.get("email").asText());
+            String json = httpEntity.getBody();
+            json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
+            ObjectNode root = null;
+            User user = new User();
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                root = (ObjectNode) mapper.readTree(json);
+                user.setUsername(root.get("username").asText());
+                user.setAbout(root.get("about").asText());
+                user.setName(root.get("name").asText());
+                user.setEmail(root.get("email").asText());
             if(json.contains("isAnonymous"))
                 user.setisAnonymous(root.get("isAnonymous").asBoolean());
         } catch (NullPointerException e) {

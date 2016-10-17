@@ -24,10 +24,7 @@ import ru.mail.park.util.ConnectionToMySQL;
 import ru.mail.park.util.MyJsonUtils;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 
 /**
@@ -63,24 +60,26 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             preparedStatement.setString(3, post.getMessage());
             preparedStatement.setString(4, post.getUser());
             preparedStatement.setString(5, post.getForum());
-            preparedStatement.setLong(6, post.getParent());
-            preparedStatement.setBoolean(7, post.isApproved());
-            preparedStatement.setBoolean(8, post.isHighlighted());
-            preparedStatement.setBoolean(9, post.isEdited());
-            preparedStatement.setBoolean(10, post.isSpam());
-            preparedStatement.setBoolean(11, post.isDeleted());
+            if(post.getParent() == null) preparedStatement.setNull(6, Types.INTEGER);
+            else preparedStatement.setInt(6, post.getParent());
+            preparedStatement.setBoolean(7, post.getisApproved());
+            preparedStatement.setBoolean(8, post.getisHighlighted());
+            preparedStatement.setBoolean(9, post.getisEdited());
+            preparedStatement.setBoolean(10, post.getisSpam());
+            preparedStatement.setBoolean(11, post.getisDeleted());
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
-            while(resultSet.next())
-                post.setIdPost(resultSet.getLong(1));
+            if(resultSet.next()) post.setpost(resultSet.getInt(1));
+
             preparedStatement = connection.prepareStatement(insertInVotePost,
                     Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setLong(1, post.getIdPost());
+            preparedStatement.setLong(1, post.getpost());
             preparedStatement.execute();
         } catch (MySQLIntegrityConstraintViolationException e) {
-            return ResponseStatus.getMessage(
-                        ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
-                        ResponseStatus.FORMAT_JSON);
+//            return ResponseStatus.getMessage(
+//                        ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
+//                        ResponseStatus.FORMAT_JSON);
+            e.printStackTrace();
         } catch (MySQLSyntaxErrorException e) {
             return ResponseStatus.getMessage(
                         ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
@@ -160,7 +159,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             while (resultSet.next()) {
                 votePost.setDate(resultSet.getString("date"));
                 votePost.setForum(resultSet.getString("forum"));
-                votePost.setIdPost(resultSet.getLong("idPost"));
+                votePost.setpost(resultSet.getInt("idPost"));
                 votePost.setApproved(resultSet.getBoolean("isApproved"));
                 votePost.setDeleted(resultSet.getBoolean("isDeleted"));
                 votePost.setEdited(resultSet.getBoolean("isEdited"));
@@ -179,7 +178,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             preparedStatement = connection.prepareStatement(sqlUpd);
             if(_vote == 1) preparedStatement.setLong(1, votePost.getLike());
             else preparedStatement.setLong(1, votePost.getDislike());
-            preparedStatement.setLong(2, votePost.getIdPost());
+            preparedStatement.setLong(2, votePost.getpost());
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -225,7 +224,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             while (resultSet.next()) {
                 votePost.setDate(resultSet.getString("date"));
                 votePost.setForum(resultSet.getString("forum"));
-                votePost.setIdPost(resultSet.getLong("idPost"));
+                votePost.setpost(resultSet.getInt("idPost"));
                 votePost.setApproved(resultSet.getBoolean("isApproved"));
                 votePost.setDeleted(resultSet.getBoolean("isDeleted"));
                 votePost.setEdited(resultSet.getBoolean("isEdited"));
@@ -241,7 +240,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             }
             preparedStatement = connection.prepareStatement(sqlUpd);
             preparedStatement.setString(1, message);
-            preparedStatement.setLong(2, votePost.getIdPost());
+            preparedStatement.setLong(2, votePost.getpost());
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -285,7 +284,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 VotePost vp  = new VotePost();
                 vp.setDate(resultSet.getString("date"));
                 vp.setForum(resultSet.getString("forum"));
-                vp.setIdPost(resultSet.getLong("idPost"));
+                vp.setpost(resultSet.getInt("idPost"));
                 vp.setApproved(resultSet.getBoolean("isApproved"));
                 vp.setDeleted(resultSet.getBoolean("isDeleted"));
                 vp.setEdited(resultSet.getBoolean("isEdited"));
@@ -348,7 +347,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             while(resultSet.next()) {
                 postDetail.setDate(resultSet.getString("date"));
                 postDetail.setForum(resultSet.getString("forum"));
-                postDetail.setIdPost(resultSet.getLong("idPost"));
+                postDetail.setpost(resultSet.getInt("idPost"));
                 postDetail.setApproved(resultSet.getBoolean("isApproved"));
                 postDetail.setDeleted(resultSet.getBoolean("isDeleted"));
                 postDetail.setEdited(resultSet.getBoolean("isEdited"));

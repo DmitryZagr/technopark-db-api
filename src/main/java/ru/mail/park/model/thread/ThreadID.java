@@ -14,7 +14,7 @@ public class ThreadID implements Serializable{
     private static final long serialVersionUID = -5527566248002296042L;
     private ObjectMapper mapper = new ObjectMapper();
 
-    private long thread;
+    private int thread;
 
     public ThreadID(String json) throws IOException {
         json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
@@ -22,11 +22,11 @@ public class ThreadID implements Serializable{
         setThread(root.get("thread").asInt());
     }
 
-    public long getThread() {
+    public int getThread() {
         return thread;
     }
 
-    public void setThread(long thread) {
+    public void setThread(int thread) {
         this.thread = thread;
     }
 
