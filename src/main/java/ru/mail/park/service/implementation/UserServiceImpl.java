@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
-import com.sun.org.apache.bcel.internal.generic.RETURN;
 import org.springframework.stereotype.Component;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
@@ -44,9 +43,9 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     public String create(User user) {
         connection =  ConnectionToMySQL.getConnection();
 
-        if(user.isEmpty())
-            return ResponseStatus.getMessage(
-                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
+//        if(user.isEmpty())
+//            return ResponseStatus.getMessage(
+//                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
 
         String sqlInsert = "INSERT INTO " + Table.User.TABLE_USER + " ( " +
                 Table.User.COLUMN_USERNAME + ',' +
@@ -247,7 +246,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         sqlSel = sqlSel + dateContidion;
 
         orderCondition = (order != null) ? " ORDER BY " + Table.Post.COLUMN_DATE +
-                " " + order + " ": " DESC ";
+                " " + order + " ": " ORDER BY " + Table.Post.COLUMN_DATE + " DESC ";
         sqlSel = sqlSel + orderCondition;
 
         limitCondition = (limit != null) ? " LIMIT "+ limit.longValue()  : " ";
@@ -261,20 +260,20 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()) {
                 VotePost vp  = new VotePost();
-                vp.setDate(resultSet.getString("date"));
+                vp.setDate(resultSet.getString("date").replace(".0", ""));
                 vp.setForum(resultSet.getString("forum"));
-                vp.setpost(resultSet.getInt("idPost"));
+                vp.setid(resultSet.getInt("idPost"));
                 vp.setApproved(resultSet.getBoolean("isApproved"));
                 vp.setDeleted(resultSet.getBoolean("isDeleted"));
                 vp.setEdited(resultSet.getBoolean("isEdited"));
                 vp.setHighlighted(resultSet.getBoolean("isHighlighted"));
                 vp.setSpam(resultSet.getBoolean("isSpam"));
                 vp.setMessage(resultSet.getString("message"));
-                vp.setParent(resultSet.getInt("parent"));
-                vp.setThread(resultSet.getInt("thread"));
+                vp.setParent((Integer) resultSet.getObject("parent"));
+                vp.setThread((Integer) resultSet.getObject("thread"));
                 vp.setUser(resultSet.getString("user"));
-                vp.setLike(resultSet.getInt("like"));
-                vp.setDislike(resultSet.getInt("dislike"));
+                vp.setLikes(resultSet.getInt("like"));
+                vp.setDislikes(resultSet.getInt("dislike"));
                 vp.setPoints();
                 votePosts.add(vp);
             }
@@ -347,7 +346,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     public String details(String email) {
         connection =  ConnectionToMySQL.getConnection();
 
-        email = MyJsonUtils.replaceOneQuoteTwoQuotes(email);
+//        email = MyJsonUtils.replaceOneQuoteTwoQuotes(email);
 
         String sqlSelectFollowers = "SELECT * FROM " + Table.User.TABLE_USER + " " +
                 "INNER JOIN " + Table.Followers.TABLE_FOLLOWERS + " ON " +
@@ -382,11 +381,13 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 //                else
                     userDetails.setUsername(resultSet.getString("username"));
 
-                if(resultSet.getString("about").equals("null")) userDetails.setAbout(null);
-                else userDetails.setAbout(resultSet.getString("about"));
+//                if(resultSet.getString("about").equals("null")) userDetails.setAbout(null);
+//                else
+                    userDetails.setAbout(resultSet.getString("about"));
 
-                if(resultSet.getString("name").equals("null")) userDetails.setName(null);
-                else userDetails.setName(resultSet.getString("name"));
+//                if(resultSet.getString("name").equals("null")) userDetails.setName(null);
+//                else
+                    userDetails.setName(resultSet.getString("name"));
 
                 userDetails.setisAnonymous(resultSet.getBoolean("isAnonymous"));
             }

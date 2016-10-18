@@ -28,7 +28,7 @@ DISCR = {
 			'parent': '```int``` id of parent post. Default: None',
 			'forum': '```str``` forum short_name',
 			'message': '```str``` post body',
-			'vote': "```int``` like/dislike. Possible values: [1, -1]",
+			'vote': "```int``` likes/dislikes. Possible values: [1, -1]",
 			'date': "```str``` date of creation. Format: 'YYYY-MM-DD hh-mm-ss'",
 			'since': "```str``` include posts created since date. Format: 'YYYY-MM-DD hh-mm-ss'",
 			'related': "```array``` include related entities. Possible values: ```['user', 'thread', 'forum']```. Default: []",
@@ -46,7 +46,7 @@ DISCR = {
 			'remove': 'Mark post as removed',
 			'restore': 'Cancel removal',
 			'update': 'Edit post',
-			'vote': 'like/dislike post',
+			'vote': 'likes/dislikes post',
 		}
 	},
 	'user': {
@@ -90,7 +90,7 @@ DISCR = {
 			'related': "```array``` include related entities. Possible values: ```['user', 'forum']```. Default: []",
 			'since': "```str``` include threads created since date. Format: 'YYYY-MM-DD hh-mm-ss'",
 			'order': "```str``` sort order (by date). Possible values: ```['desc', 'asc']```. Default: 'desc'",
-			'vote': "```int``` like/dislike. Possible values: [1, -1]",
+			'vote': "```int``` likes/dislikes. Possible values: [1, -1]",
 		},
 		'methods': {
 			'list': 'List threads',
@@ -104,7 +104,7 @@ DISCR = {
 			'update': 'Edit thread',
 			'subscribe': 'Subscribe user to this thread',
 			'unsubscribe': 'Unsubscribe user from this thread',
-			'vote': 'like/dislike thread',
+			'vote': 'likes/dislikes thread',
 		}
 	},
 }

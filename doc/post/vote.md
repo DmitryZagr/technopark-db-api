@@ -1,5 +1,5 @@
 #Post.vote
-like/dislike post
+likes/dislikes post
 
 ## Supported request methods 
 * POST
@@ -13,7 +13,7 @@ like/dislike post
 ###Requried
 * vote
 
-   ```int``` like/dislike. Possible values: [1, -1]
+   ```int``` likes/dislikes. Possible values: [1, -1]
 * post
 
    ```int``` post id

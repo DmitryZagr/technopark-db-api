@@ -33,23 +33,7 @@ public class ForumController {
 
     @RequestMapping(path = "/db/api/forum/create/", method = RequestMethod.POST,
                                          produces = "application/json")
-    public ResponseEntity create(HttpEntity<String> httpEntity) {
-        String json = httpEntity.getBody();
-        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
-        ObjectNode root = null;
-        Forum forum = new Forum();
-        try {
-            root = (ObjectNode) mapper.readTree(json);
-            forum.setName(root.get("name").asText());
-            forum.setShort_name(root.get("short_name").asText());
-            forum.setUser(root.get("user").asText());
-        } catch (NullPointerException e) {
-            return ResponseEntity.ok(ru.mail.park.api.status.ResponseStatus.getMessage(
-                    ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-                    ru.mail.park.api.status.ResponseStatus.FORMAT_JSON));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public ResponseEntity create(@RequestBody Forum forum) {
         return ResponseEntity.ok(forumService.create(forum));
     }
 

@@ -15,7 +15,7 @@ public interface IThreadService {
     String create(Thread thread); //+
     String details(Integer thread, String related);//+
     String list(String user, String forum, String since, Integer limit, String order);//+
-
+    String listPosts(Integer thread, String since, Integer limit, String sort, String order);
     String open(ThreadID thread); //+
     String remove(ThreadID thread);//+
     String restore(ThreadID thread);//+

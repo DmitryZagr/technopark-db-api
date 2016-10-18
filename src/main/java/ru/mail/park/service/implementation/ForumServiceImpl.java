@@ -1,6 +1,7 @@
 package ru.mail.park.service.implementation;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
@@ -149,9 +150,16 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
 //                    " ON " + Table.Post.COLUMN_ID_POST = ;
 //        }
 
+        sql = sql + " INNER  JOIN " + Table.VotePost.TABLE_VOTE_POST + " ON " +
+                Table.VotePost.COLUMN_ID_POST + "=" + Table.Post.COLUMN_ID_POST;
+
         if(order == null)
-            order = " DESC ";
-        sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + " " + order;
+            sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + " DESC ";
+        else sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + order;
+
+        if(limit != null)
+            sql = sql + " LIMIT " + limit.intValue();
+
 
         ArrayList<DetailPost<Object, Object, Object >> posts = new ArrayList<>();
         DetailPost<Object, Object, Object > post;
@@ -163,7 +171,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 post = new DetailPost<>();
-                post.setDate(resultSet.getString("date"));
+                post.setDate(resultSet.getString("date").replace(".0", ""));
                 if(related != null && related.contains("forum")) {
                     forumObj = new Forum();
                     forumObj.setId(resultSet.getInt("idForum"));
@@ -172,16 +180,19 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                     forumObj.setUser(resultSet.getString("Forum.user"));
                     post.setForum(forumObj);
                 } else post.setForum(resultSet.getString("forum"));
-                post.setpost(resultSet.getInt("idPost"));
-                post.setApproved(resultSet.getBoolean("isApproved"));
-                post.setDeleted(resultSet.getBoolean("isDeleted"));
-                post.setEdited(resultSet.getBoolean("isEdited"));
-                post.setHighlighted(resultSet.getBoolean("isHighlighted"));
-                post.setSpam(resultSet.getBoolean("isSpam"));
+                post.setid(resultSet.getInt("idPost"));
+                post.setApproved((Boolean) resultSet.getObject("isApproved"));
+                post.setDeleted((Boolean) resultSet.getObject("isDeleted"));
+                post.setEdited((Boolean) resultSet.getObject("isEdited"));
+                post.setHighlighted((Boolean) resultSet.getObject("isHighlighted"));
+                post.setSpam((Boolean) resultSet.getObject("isSpam"));
                 post.setMessage(resultSet.getString("message"));
-                post.setParent(resultSet.getInt("parent"));
+                post.setParent((Integer) resultSet.getObject("parent"));
                 post.setThread(resultSet.getInt("thread"));
                 post.setUser(resultSet.getString("user"));
+                post.setLikes(resultSet.getInt(("like")));
+                post.setDislikes(resultSet.getInt("dislike"));
+                post.setPoints();
                 posts.add(post);
             }
 
@@ -272,9 +283,10 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
         if(since == null ) sqlSort = sqlSort + " DESC";
         else sqlSort = sqlSort + " " + order;
 
+        sql = sql + sqlSort;
+
         if(limit != null)
             sql = sql + " LIMIT " + limit.intValue();
-        sql = sql + sqlSort;
 
         ArrayList<ThreadDetails<Object, Object>> threadDetailses = new ArrayList<>();
 

@@ -12,35 +12,35 @@ public class DetailPost<U, T, F > {
     private static final long serialVersionUID = -5527566248002296042L;
 
     //    Requried
-    int   post;
+    Integer   id;
     String date;
     String message;
 
     //    Optional
-    Integer parent;
-    Boolean isApproved    = false;
-    Boolean isHighlighted = false;
-    Boolean isEdited      = false;
-    Boolean isSpam        = false;
-    Boolean isDeleted     = false;
-    private int like;
-    private int dislike;
+    Integer parent = null;
+    Boolean isApproved    = null;
+    Boolean isHighlighted = null;
+    Boolean isEdited      = null;
+    Boolean isSpam        = null;
+    Boolean isDeleted     = null;
+    private int likes;
+    private int dislikes;
     private int points;
 
-    public int getLike() {
-        return like;
+    public int getLikes() {
+        return likes;
     }
 
-    public void setLike(int like) {
-        this.like = like;
+    public void setLikes(int likes) {
+        this.likes = likes;
     }
 
-    public int getDislike() {
-        return dislike;
+    public int getDislikes() {
+        return dislikes;
     }
 
-    public void setDislike(int dislike) {
-        this.dislike = dislike;
+    public void setDislikes(int dislikes) {
+        this.dislikes = dislikes;
     }
 
     public int getPoints() {
@@ -48,7 +48,7 @@ public class DetailPost<U, T, F > {
     }
 
     public void setPoints() {
-        this.points = like - dislike;
+        this.points = likes - dislikes;
     }
 
     public DetailPost() {
@@ -59,12 +59,12 @@ public class DetailPost<U, T, F > {
         return date;
     }
 
-    public int getpost() {
-        return post;
+    public Integer getid() {
+        return id;
     }
 
-    public void setpost(int idPost) {
-        this.post = idPost;
+    public void setid(Integer id) {
+        this.id = id;
     }
 
     public void setThread(T thread) {
@@ -127,7 +127,7 @@ public class DetailPost<U, T, F > {
         isHighlighted = highlighted;
     }
 
-    public boolean getisEdited() {
+    public Boolean getisEdited() {
         return isEdited;
     }
 
@@ -143,7 +143,7 @@ public class DetailPost<U, T, F > {
         isSpam = spam;
     }
 
-    public boolean getisDeleted() {
+    public Boolean getisDeleted() {
         return isDeleted;
     }
 

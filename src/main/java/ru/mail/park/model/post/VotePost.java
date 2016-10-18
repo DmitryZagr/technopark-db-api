@@ -5,24 +5,24 @@ package ru.mail.park.model.post;
  */
 public class VotePost extends Post {
 
-    private int like;
-    private int dislike;
+    private int likes;
+    private int dislikes;
     private int points;
 
-    public int getLike() {
-        return like;
+    public int getLikes() {
+        return likes;
     }
 
-    public void setLike(int like) {
-        this.like = like;
+    public void setLikes(int likes) {
+        this.likes = likes;
     }
 
-    public int getDislike() {
-        return dislike;
+    public int getDislikes() {
+        return dislikes;
     }
 
-    public void setDislike(int dislike) {
-        this.dislike = dislike;
+    public void setDislikes(int dislikes) {
+        this.dislikes = dislikes;
     }
 
     public int getPoints() {
@@ -30,6 +30,6 @@ public class VotePost extends Post {
     }
 
     public void setPoints() {
-        this.points = like - dislike;
+        this.points = likes - dislikes;
     }
 }

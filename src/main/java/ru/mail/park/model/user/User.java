@@ -88,11 +88,11 @@ public class User implements Serializable{
         isAnonymous = anonymous;
     }
 
-    @JsonIgnore
-    public boolean isEmpty() {
-        if(StringUtils.isEmpty(email) || StringUtils.isEmpty(username) ||
-                StringUtils.isEmpty(about) || StringUtils.isEmpty(name))
-            return true;
-        return false;
-    }
+//    @JsonIgnore
+//    public boolean isEmpty() {
+//        if(StringUtils.isEmpty(email) || StringUtils.isEmpty(username) ||
+//                StringUtils.isEmpty(about) || StringUtils.isEmpty(name))
+//            return true;
+//        return false;
+//    }
 }

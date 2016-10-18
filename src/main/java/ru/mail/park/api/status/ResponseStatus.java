@@ -12,10 +12,6 @@ public class ResponseStatus {
 
     public static final String FORMAT_JSON = "JSON";
 
-//    public static String OK() {
-//        return "OK";
-//    }
-
     public static String getMessage(int code, String format) {
         switch (code) {
             case 0:

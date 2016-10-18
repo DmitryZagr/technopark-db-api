@@ -13,6 +13,8 @@ import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Table;
+import ru.mail.park.model.post.DetailPost;
+import ru.mail.park.model.post.VotePost;
 import ru.mail.park.model.thread.*;
 import ru.mail.park.model.thread.Thread;
 import ru.mail.park.service.interfaces.IThreadService;
@@ -66,7 +68,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             preparedStatement.setString(5, thread.getDate());
             preparedStatement.setString(6, thread.getMessage());
             preparedStatement.setString(7, thread.getSlug());
-            preparedStatement.setBoolean(8, thread.getDeleted());
+            preparedStatement.setBoolean(8, thread.getisDeleted());
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
             while(resultSet.next())  thread.setId(resultSet.getInt(1));
@@ -91,6 +93,12 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     @Override
     public String details(Integer thread, String related) {
+
+        if(!(related.contains("user") || related.contains("form")))
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+
         connection =  ConnectionToMySQL.getConnection();
 
         String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_ID_POST + ") AS posts FROM " +
@@ -100,7 +108,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 Table.Thread.COLUMN_ID_THREAD   + "=?" +
                 " INNER JOIN " + Table.Post.TABLE_POST +
                 " ON " + Table.Post.COLUMN_THREAD + "=" + Table.Thread.COLUMN_ID_THREAD +
-                " AND " + Table.Post.COLUMN_IS_DELETED + "!= FALSE " ;
+                " AND " + Table.Post.COLUMN_IS_DELETED + "= FALSE " ;
 
         threadDetails = new ThreadDetails<>();
 
@@ -112,8 +120,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 threadDetails.setDate(resultSet.getString("date").replace(".0", ""));
                 threadDetails.setForum(resultSet.getString("forum"));
                 threadDetails.setId(resultSet.getInt("idThread"));
-                threadDetails.setClosed(resultSet.getBoolean("isClosed"));
-                threadDetails.setDeleted(resultSet.getBoolean("isDeleted"));
+                threadDetails.setClosed((Boolean) resultSet.getObject("isClosed"));
+                threadDetails.setisDeleted((Boolean) resultSet.getObject("isDeleted"));
                 threadDetails.setMessage(resultSet.getString("message"));
                 threadDetails.setPosts(resultSet.getInt("posts"));
                 threadDetails.setSlug(resultSet.getString("slug"));
@@ -364,8 +372,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 threadVote.setDate(resultSet.getString("date"));
                 threadVote.setForum(resultSet.getString("forum"));
                 threadVote.setId(resultSet.getInt("idThread"));
-                threadVote.setClosed(resultSet.getBoolean("isClosed"));
-                threadVote.setisDeleted(resultSet.getBoolean("isDeleted"));
+                threadVote.setClosed((Boolean) resultSet.getObject("isClosed"));
+                threadVote.setisDeleted((Boolean) resultSet.getObject("isDeleted"));
                 threadVote.setMessage(resultSet.getString("message"));
                 threadVote.setPosts(resultSet.getInt("posts"));
                 threadVote.setSlug(resultSet.getString("slug"));
@@ -430,11 +438,11 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()) {
                 ThreadVote tv  = new ThreadVote();
-                tv.setDate(resultSet.getString("date"));
+                tv.setDate(resultSet.getString("date").replace(".0",""));
                 tv.setForum(resultSet.getString("forum"));
                 tv.setId(resultSet.getInt("idThread"));
-                tv.setClosed(resultSet.getBoolean("isClosed"));
-                tv.setisDeleted(resultSet.getBoolean("isDeleted"));
+                tv.setClosed((Boolean) resultSet.getObject("isClosed"));
+                tv.setisDeleted((Boolean) resultSet.getObject("isDeleted"));
                 tv.setMessage(resultSet.getString("message"));
                 tv.setPosts(resultSet.getInt("posts"));
                 tv.setSlug(resultSet.getString("slug"));
@@ -514,8 +522,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 threadVote.setDate(resultSet.getString("date"));
                 threadVote.setForum(resultSet.getString("forum"));
                 threadVote.setId(resultSet.getInt("idThread"));
-                threadVote.setClosed(resultSet.getBoolean("isClosed"));
-                threadVote.setisDeleted(resultSet.getBoolean("isDeleted"));
+                threadVote.setClosed((Boolean) resultSet.getObject("isClosed"));
+                threadVote.setisDeleted((Boolean) resultSet.getObject("isDeleted"));
                 threadVote.setMessage(resultSet.getString("message"));
                 threadVote.setPosts(resultSet.getInt("posts"));
                 threadVote.setSlug(resultSet.getString("slug"));
@@ -531,6 +539,74 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
         String json = (new ResultJson<ThreadVote>(
                 ResponseStatus.ResponceCode.OK.ordinal(), threadVote)).getStringResult();
+
+        return json;
+    }
+
+    @Override
+    public String listPosts(Integer thread, String since,
+                            Integer limit, String sort, String order) {
+        connection =  ConnectionToMySQL.getConnection();
+
+        String sql = "Select * FROM " + Table.Post.TABLE_POST + " INNER JOIN " +
+                Table.VotePost.TABLE_VOTE_POST + " ON " + Table.Post.COLUMN_ID_POST +
+                "=" + Table.VotePost.COLUMN_ID_POST + " AND " +
+                Table.Post.COLUMN_THREAD + "=?";
+
+        String sqlSince = " " +  Table.Post.COLUMN_DATE + ">=" + "'" +since + "'" + " ";
+
+        String sqlLimit = " LIMIT " + limit.intValue() + " ";
+
+        String sqlOrder = (order == null) ? " DESC " : order;
+
+        if(sqlSince != null)
+            sql = sql + " AND " + sqlSince;
+
+
+        if(sort != null) {
+            if(sort.contains("flat"))
+                sql = sql +  " GROUP BY " +
+                        Table.Post.COLUMN_DATE + " " + sqlOrder;
+        }
+
+        if(sort == null)
+            sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + " " + sqlOrder;
+
+        if(limit != null)
+            sql = sql + sqlLimit;
+
+
+       ArrayList<VotePost> detailPosts = new ArrayList<>();
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, thread);
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()) {
+                VotePost votePost = new VotePost();
+                votePost.setDate(resultSet.getString("date").replace(".0", ""));
+                votePost.setForum(resultSet.getString("forum"));
+                votePost.setid(resultSet.getInt("idPost"));
+                votePost.setApproved((Boolean) resultSet.getObject("isApproved"));
+                votePost.setDeleted((Boolean)resultSet.getObject("isDeleted"));
+                votePost.setEdited((Boolean)resultSet.getObject("isEdited"));
+                votePost.setHighlighted((Boolean)resultSet.getObject("isHighlighted"));
+                votePost.setSpam((Boolean)resultSet.getObject("isSpam"));
+                votePost.setMessage(resultSet.getString("message"));
+                votePost.setParent((Integer) resultSet.getObject("parent"));
+                votePost.setThread(resultSet.getInt("thread"));
+                votePost.setUser(resultSet.getString("user"));
+                votePost.setLikes(resultSet.getInt("like"));
+                votePost.setDislikes((resultSet.getInt("dislike")));
+                votePost.setPoints();
+                detailPosts.add(votePost);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String json = (new ResultJson<ArrayList<VotePost>>(
+                ResponseStatus.ResponceCode.OK.ordinal(), detailPosts)).getStringResult();
 
         return json;
     }

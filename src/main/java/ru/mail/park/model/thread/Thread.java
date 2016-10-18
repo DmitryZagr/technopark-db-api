@@ -42,7 +42,7 @@ public class Thread implements Serializable{
         setDate(root.get("date").asText());
         setMessage(root.get("message").asText());
         setSlug(root.get("slug").asText());
-        if(root.has("isDeleted")) setDeleted(root.get("isDeleted").asBoolean());
+        if(root.has("isDeleted")) setisDeleted(root.get("isDeleted").asBoolean());
     }
 
 //    public String getForum() {
@@ -114,11 +114,11 @@ public class Thread implements Serializable{
         this.slug = slug;
     }
 
-    public Boolean getDeleted() {
+    public Boolean getisDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(Boolean deleted) {
+    public void setisDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
 

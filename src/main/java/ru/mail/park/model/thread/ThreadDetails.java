@@ -124,7 +124,7 @@ public class ThreadDetails<U, F> {
         return isDeleted;
     }
 
-    public void setDeleted(Boolean deleted) {
+    public void setisDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
 }

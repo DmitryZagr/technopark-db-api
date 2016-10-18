@@ -1,5 +1,5 @@
 #Thread.vote
-like/dislike thread
+likes/dislikes thread
 
 ## Supported request methods 
 * POST
@@ -13,7 +13,7 @@ like/dislike thread
 ###Requried
 * vote
 
-   ```int``` like/dislike. Possible values: [1, -1]
+   ```int``` likes/dislikes. Possible values: [1, -1]
 * thread
 
    ```int``` thread id of this post

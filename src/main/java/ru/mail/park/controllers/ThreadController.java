@@ -88,12 +88,22 @@ public class ThreadController {
 
     @RequestMapping(path = "/db/api/thread/list/", method = RequestMethod.GET,
             produces = "application/json")
-    public ResponseEntity listThread(@RequestParam(name = "user",  required = false) String user,
+    public ResponseEntity listThread(@RequestParam(name = "user",required = false) String user,
                                    @RequestParam(name = "forum", required = false) String forum,
                                    @RequestParam(name = "since", required = false) String since,
                                    @RequestParam(name = "limit", required = false) Integer limit,
                                    @RequestParam(name = "order", required = false) String order) {
         return ResponseEntity.ok(threadService.list( user, forum, since, limit, order));
+    }
+
+    @RequestMapping(path = "/db/api/thread/listPosts/", method = RequestMethod.GET,
+            produces = "application/json")
+    public ResponseEntity listPosts(@RequestParam(name = "thread",required = true) Integer thread,
+                                    @RequestParam(name = "since", required = false) String since,
+                                    @RequestParam(name = "limit", required = false) Integer limit,
+                                    @RequestParam(name = "sort",  required = false) String sort,
+                                    @RequestParam(name = "order", required = false) String order) {
+        return ResponseEntity.ok(threadService.listPosts(thread, since, limit, sort, order));
     }
 
     @RequestMapping(path = "/db/api/thread/details/", method = RequestMethod.GET,

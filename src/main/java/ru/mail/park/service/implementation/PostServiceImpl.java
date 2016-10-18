@@ -9,15 +9,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
-import ru.mail.park.model.forum.Forum;
 import ru.mail.park.model.post.DetailPost;
 import ru.mail.park.model.post.IdPost;
 import ru.mail.park.model.post.Post;
 import ru.mail.park.model.Table;
 import ru.mail.park.model.post.VotePost;
-import ru.mail.park.model.thread.Thread;
 import ru.mail.park.model.thread.ThreadVote;
-import ru.mail.park.model.user.User;
 import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IPostService;
 import ru.mail.park.util.ConnectionToMySQL;
@@ -69,11 +66,11 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             preparedStatement.setBoolean(11, post.getisDeleted());
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
-            if(resultSet.next()) post.setpost(resultSet.getInt(1));
+            if(resultSet.next()) post.setid(resultSet.getInt(1));
 
             preparedStatement = connection.prepareStatement(insertInVotePost,
                     Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setLong(1, post.getpost());
+            preparedStatement.setLong(1, post.getid());
             preparedStatement.execute();
         } catch (MySQLIntegrityConstraintViolationException e) {
 //            return ResponseStatus.getMessage(
@@ -103,7 +100,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
         try {
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setBoolean(1, isDeleted);
-            preparedStatement.setLong(2, idPost.getPost());
+            preparedStatement.setLong(2, idPost.getid());
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -123,7 +120,8 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
         String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
                 Table.VotePost.TABLE_VOTE_POST + " ON " +
-                Table.VotePost.COLUMN_ID_POST + "=?;";
+                Table.VotePost.COLUMN_ID_POST + "=? AND " + Table.Post.COLUMN_ID_POST + "=" +
+                Table.VotePost.COLUMN_ID_POST + ";";
 
         int _vote = 0;
         int idPost = 0;
@@ -150,35 +148,35 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
         String sqlUpd = "UPDATE " + Table.VotePost.TABLE_VOTE_POST + " SET " +
                 sqlCol + "=? WHERE " +
-                Table.VotePost.COLUMN_ID_POST + "=?;";
+                Table.VotePost.COLUMN_ID_POST + "=? ;";
         VotePost votePost = new VotePost();
         try {
             preparedStatement = connection.prepareStatement(sqlSel);
             preparedStatement.setLong(1, idPost);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                votePost.setDate(resultSet.getString("date"));
+                votePost.setDate(resultSet.getString("date").replace(".0", ""));
                 votePost.setForum(resultSet.getString("forum"));
-                votePost.setpost(resultSet.getInt("idPost"));
+                votePost.setid(resultSet.getInt("idPost"));
                 votePost.setApproved(resultSet.getBoolean("isApproved"));
                 votePost.setDeleted(resultSet.getBoolean("isDeleted"));
                 votePost.setEdited(resultSet.getBoolean("isEdited"));
                 votePost.setHighlighted(resultSet.getBoolean("isHighlighted"));
                 votePost.setSpam(resultSet.getBoolean("isSpam"));
                 votePost.setMessage(resultSet.getString("message"));
-                votePost.setParent(resultSet.getInt("parent"));
+                votePost.setParent((Integer) resultSet.getObject("parent"));
                 votePost.setThread(resultSet.getInt("thread"));
                 votePost.setUser(resultSet.getString("user"));
-                votePost.setLike(resultSet.getInt("like"));
-                votePost.setDislike((resultSet.getInt("dislike")));
-                if(_vote == 1) votePost.setLike(votePost.getLike() + 1);
-                else votePost.setDislike(votePost.getDislike() + 1);
+                votePost.setLikes(resultSet.getInt("like"));
+                votePost.setDislikes((resultSet.getInt("dislike")));
+                if(_vote == 1) votePost.setLikes(votePost.getLikes() + 1);
+                else votePost.setDislikes(votePost.getDislikes() + 1);
                 votePost.setPoints();
             }
             preparedStatement = connection.prepareStatement(sqlUpd);
-            if(_vote == 1) preparedStatement.setLong(1, votePost.getLike());
-            else preparedStatement.setLong(1, votePost.getDislike());
-            preparedStatement.setLong(2, votePost.getpost());
+            if(_vote == 1) preparedStatement.setLong(1, votePost.getLikes());
+            else preparedStatement.setLong(1, votePost.getDislikes());
+            preparedStatement.setLong(2, votePost.getid());
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -198,7 +196,8 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
         String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
                 Table.VotePost.TABLE_VOTE_POST + " ON " +
-                Table.VotePost.COLUMN_ID_POST + "=?;";
+                Table.VotePost.COLUMN_ID_POST + "=? AND " +
+                Table.VotePost.COLUMN_ID_POST + "=" + Table.Post.COLUMN_ID_POST;
 
         String message = null;
         int idPost = 0;
@@ -215,32 +214,32 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
         String sqlUpd = "UPDATE " + Table.Post.TABLE_POST + " SET " +
                 Table.Post.COLUMN_MESSAGE + "=? WHERE " +
-                Table.Post.COLUMN_ID_POST + "=?;";
+                Table.Post.COLUMN_ID_POST + "=?";
         VotePost votePost = new VotePost();
         try {
             preparedStatement = connection.prepareStatement(sqlSel);
             preparedStatement.setLong(1, idPost);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                votePost.setDate(resultSet.getString("date"));
+                votePost.setDate(resultSet.getString("date").replace(".0", ""));
                 votePost.setForum(resultSet.getString("forum"));
-                votePost.setpost(resultSet.getInt("idPost"));
+                votePost.setid(resultSet.getInt("idPost"));
                 votePost.setApproved(resultSet.getBoolean("isApproved"));
                 votePost.setDeleted(resultSet.getBoolean("isDeleted"));
                 votePost.setEdited(resultSet.getBoolean("isEdited"));
                 votePost.setHighlighted(resultSet.getBoolean("isHighlighted"));
                 votePost.setSpam(resultSet.getBoolean("isSpam"));
                 votePost.setMessage(message);
-                votePost.setParent(resultSet.getInt("parent"));
+                votePost.setParent((Integer) resultSet.getObject("parent"));
                 votePost.setThread(resultSet.getInt("thread"));
                 votePost.setUser(resultSet.getString("user"));
-                votePost.setLike(votePost.getLike());
-                votePost.setDislike(votePost.getDislike());
+                votePost.setLikes(votePost.getLikes());
+                votePost.setDislikes(votePost.getDislikes());
                 votePost.setPoints();
             }
             preparedStatement = connection.prepareStatement(sqlUpd);
             preparedStatement.setString(1, message);
-            preparedStatement.setLong(2, votePost.getpost());
+            preparedStatement.setLong(2, votePost.getid());
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -282,20 +281,20 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()) {
                 VotePost vp  = new VotePost();
-                vp.setDate(resultSet.getString("date"));
+                vp.setDate(resultSet.getString("date").replace(".0", ""));
                 vp.setForum(resultSet.getString("forum"));
-                vp.setpost(resultSet.getInt("idPost"));
+                vp.setid(resultSet.getInt("idPost"));
                 vp.setApproved(resultSet.getBoolean("isApproved"));
                 vp.setDeleted(resultSet.getBoolean("isDeleted"));
                 vp.setEdited(resultSet.getBoolean("isEdited"));
                 vp.setHighlighted(resultSet.getBoolean("isHighlighted"));
                 vp.setSpam(resultSet.getBoolean("isSpam"));
                 vp.setMessage(resultSet.getString("message"));
-                vp.setParent(resultSet.getInt("parent"));
+                vp.setParent((Integer) resultSet.getObject("parent"));
                 vp.setThread(resultSet.getInt("thread"));
                 vp.setUser(resultSet.getString("user"));
-                vp.setLike(resultSet.getInt("like"));
-                vp.setDislike(resultSet.getInt("dislike"));
+                vp.setLikes(resultSet.getInt("like"));
+                vp.setDislikes(resultSet.getInt("dislike"));
                 vp.setPoints();
                 votePosts.add(vp);
             }
@@ -326,15 +325,6 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 Table.Post.COLUMN_ID_POST + "="+ Table.VotePost.COLUMN_ID_POST + " AND " +
                 Table.VotePost.COLUMN_ID_POST + "=?;";
 
-//        String typeUser = (related.contains("user")) ?
-//                "ru.mail.park.model.user.UserDetails" : "java.lang.String";
-//
-//        String typeThread = (related.contains("thread")) ?
-//                "ru.mail.park.model.thread.ThreadVote" : "java.lang.Integer;";
-//        String typeForum = (related.contains("forum")) ?
-//                "ru.mail.park.model.forum.Forum" : "java.lang.String";
-
-
         DetailPost<Object, Object, Object> postDetail = new DetailPost<>();
         UserDetails userDetails = new UserDetails();
         ThreadVote threadVote = new ThreadVote();
@@ -345,21 +335,27 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             preparedStatement.setLong(1, post.intValue());
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()) {
-                postDetail.setDate(resultSet.getString("date"));
+                postDetail.setDate(resultSet.getString("date").replace(".0", ""));
                 postDetail.setForum(resultSet.getString("forum"));
-                postDetail.setpost(resultSet.getInt("idPost"));
+                postDetail.setid((Integer) resultSet.getObject("idPost"));
                 postDetail.setApproved(resultSet.getBoolean("isApproved"));
                 postDetail.setDeleted(resultSet.getBoolean("isDeleted"));
                 postDetail.setEdited(resultSet.getBoolean("isEdited"));
                 postDetail.setHighlighted(resultSet.getBoolean("isHighlighted"));
                 postDetail.setSpam(resultSet.getBoolean("isSpam"));
                 postDetail.setMessage(resultSet.getString("message"));
-                postDetail.setParent(resultSet.getInt("parent"));
+                postDetail.setParent((Integer) resultSet.getObject("parent"));
                 postDetail.setThread(resultSet.getInt("thread"));
                 postDetail.setUser(resultSet.getString("user"));
-                postDetail.setLike(resultSet.getInt("like"));
-                postDetail.setDislike(resultSet.getInt("dislike"));
+                postDetail.setLikes(resultSet.getInt("like"));
+                postDetail.setDislikes(resultSet.getInt("dislike"));
                 postDetail.setPoints();
+
+                if(postDetail.getid() == null)
+                    return ResponseStatus.getMessage(
+                            ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
+                            ResponseStatus.FORMAT_JSON);
+
 
                 if(!StringUtils.isEmpty(related) && related.contains("forum")) {
                     ForumServiceImpl fsi = new ForumServiceImpl();

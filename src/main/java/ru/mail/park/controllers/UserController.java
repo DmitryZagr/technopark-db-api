@@ -34,27 +34,7 @@ public class UserController {
 
     @RequestMapping(path = "/db/api/user/create/", method = RequestMethod.POST,
             produces = "application/json")
-    public ResponseEntity createUser(HttpEntity<String> httpEntity) {
-            String json = httpEntity.getBody();
-            json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
-            ObjectNode root = null;
-            User user = new User();
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                root = (ObjectNode) mapper.readTree(json);
-                user.setUsername(root.get("username").asText());
-                user.setAbout(root.get("about").asText());
-                user.setName(root.get("name").asText());
-                user.setEmail(root.get("email").asText());
-            if(json.contains("isAnonymous"))
-                user.setisAnonymous(root.get("isAnonymous").asBoolean());
-        } catch (NullPointerException e) {
-            return ResponseEntity.ok(ResponseStatus.getMessage(
-                    ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-                    ResponseStatus.FORMAT_JSON));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public ResponseEntity createUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.create(user));
     }
 
@@ -113,14 +93,15 @@ public class UserController {
         return ResponseEntity.ok(userService.listPosts(user, since, limit, order));
     }
 
-    @ExceptionHandler({
-            HttpMessageNotReadableException.class,
-            MissingServletRequestParameterException.class})
-    @ResponseBody
-    public String resolveException() {
-        return ResponseStatus.getMessage(
-                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-                ResponseStatus.FORMAT_JSON
-        );
-    }
+//    @ExceptionHandler({
+//            HttpMessageNotReadableException.class,
+//            MissingServletRequestParameterException.class})
+//    @ResponseBody
+//    public String resolveException() {
+//        return ResponseStatus.getMessage(
+//                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+//                ResponseStatus.FORMAT_JSON
+//        );
+//    }
 }
+

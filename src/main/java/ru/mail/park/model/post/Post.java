@@ -11,7 +11,7 @@ public class Post implements Serializable{
     private static final long serialVersionUID = -5527566248002296042L;
 
 //    Requried
-    int   post ;
+    Integer   id ;
     String date;
     int   thread ;
     String message;
@@ -19,7 +19,7 @@ public class Post implements Serializable{
     String forum;
 
 //    Optional
-    Integer parent;
+    Integer parent = null;
     Boolean isApproved    = null;
     Boolean isHighlighted = null;
     Boolean isEdited      = null;
@@ -37,12 +37,12 @@ public class Post implements Serializable{
 //        this.forum = forum;
 //    }
 
-    public int getpost() {
-        return post;
+    public Integer getid() {
+        return id;
     }
 
-    public void setpost(int idPost) {
-        this.post = idPost;
+    public void setid(Integer idPost) {
+        this.id = idPost;
     }
 
     public String getDate() {
@@ -136,7 +136,7 @@ public class Post implements Serializable{
     @Override
     public String toString() {
         return "" +
-                "\"id\":" + post +
+                "\"id\":" + id +
                 ", \"date\": \"" + date + '\"' +
                 ", \"thread\":" + thread +
                 ", \"message\": \"" + message + '\"' +

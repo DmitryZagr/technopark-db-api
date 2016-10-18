@@ -139,7 +139,7 @@ public class ThreadVote implements Serializable {
         this.dislikes = dislikes;
     }
 
-    public Boolean getDeleted() {
+    public Boolean getisDeleted() {
         return isDeleted;
     }
 

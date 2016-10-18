@@ -14,19 +14,19 @@ public class IdPost implements Serializable{
     private static final long serialVersionUID = -5527566248002296042L;
     private ObjectMapper mapper = new ObjectMapper();
 
-    int post;
+    Integer id;
 
     public IdPost(String json) throws IOException {
         json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
         ObjectNode root = (ObjectNode) mapper.readTree(json);
-        setPost(root.get("thread").asInt());
+        setid(root.get("post").asInt());
     }
 
-    public int getPost() {
-        return post;
+    public Integer getid() {
+        return id;
     }
 
-    public void setPost(int post) {
-        this.post = post;
+    public void setid(Integer post) {
+        this.id = post;
     }
 }
