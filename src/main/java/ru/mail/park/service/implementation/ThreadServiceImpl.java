@@ -555,6 +555,11 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                             Integer limit, String sort, String order) {
         connection =  ConnectionToMySQL.getConnection();
 
+//        String sql = "Select * FROM " + Table.Post.TABLE_POST + " INNER JOIN " +
+//                Table.VotePost.TABLE_VOTE_POST + " ON " + Table.Post.COLUMN_ID_POST +
+//                "=" + Table.VotePost.COLUMN_ID_POST + " AND " +
+//                Table.Post.COLUMN_THREAD + "=?";
+
         String sql = "Select * FROM " + Table.Post.TABLE_POST + " INNER JOIN " +
                 Table.VotePost.TABLE_VOTE_POST + " ON " + Table.Post.COLUMN_ID_POST +
                 "=" + Table.VotePost.COLUMN_ID_POST + " AND " +
@@ -565,18 +570,25 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
         if(since != null )
             sqlSince = " " +  Table.Post.COLUMN_DATE + ">=" + "'" +since + "'" + " ";
 
-//        String sqlLimit = " LIMIT " + limit.intValue() + " ";
-
         String sqlOrder = (order == null) ? " DESC " : order;
 
         if(sqlSince != null)
             sql = sql + " AND " + sqlSince;
 
-
         if(sort != null) {
             if(sort.contains("flat"))
                 sql = sql +  " GROUP BY " +
                         Table.Post.COLUMN_DATE + " " + sqlOrder;
+
+            if(sort.contains("parent_tree")) {
+                return (new ResultJson<ArrayList<DetailPost<Object, Object,Object>>>(
+                        ResponseStatus.ResponceCode.OK.ordinal(), getParentTree(thread, since,
+                        limit, sort, order))).getStringResult();
+            }
+
+            if(sort.contains("tree")) {
+
+            }
         }
 
         if(sort == null)
@@ -620,6 +632,74 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
         return json;
     }
+
+    private ArrayList<DetailPost<Object,Object,Object>> getParentTree(Integer thread, String since,
+                               Integer limit, String sort, String order) {
+
+        String sqlSelect = "SELECT * " +
+                " FROM " + Table.Post.TABLE_POST +
+                " WHERE " + Table.Post.COLUMN_THREAD + "=? " +
+                " AND " + Table.Post.COLUMN_PARENT + " IS NULL ";
+        if(since != null)
+            sqlSelect = sqlSelect + " AND " + Table.Post.COLUMN_DATE +
+                    ">=" + "'" + since + "' ";
+        if(order == null)
+            sqlSelect = sqlSelect + " GROUP BY " + Table.Post.COLUMN_PARENT + ", " +
+                Table.Post.COLUMN_ID_POST + " DESC ";
+        else
+            sqlSelect = sqlSelect + " GROUP BY " + Table.Post.COLUMN_PARENT + ", " +
+                    Table.Post.COLUMN_ID_POST + " " + order;
+
+        if(limit != null)
+            sqlSelect = sqlSelect + " LIMIT " + limit.intValue();
+
+        ArrayList<DetailPost<Object,Object,Object>> posts = new ArrayList<>();
+
+        ArrayList<Integer> rootId = new ArrayList<>();
+
+        try {
+            preparedStatement = connection.prepareStatement(sqlSelect);
+            preparedStatement.setInt(1, thread);
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()) {
+                rootId.add(resultSet.getInt("idPost"));
+            }
+
+            PostServiceImpl psi = new PostServiceImpl();
+
+            for(int i = 0; i < rootId.size(); i++ ) {
+                psi.details(rootId.get(i), null);
+                posts.add(psi.getVotePost());
+
+
+
+                String childs = " Select * from forum.Post " +
+                        " WHERE   parent is not null and path like concat('" +
+                        rootId.get(i).intValue() + "', '.%') ";
+
+                preparedStatement = connection.prepareStatement(childs);
+                resultSet = preparedStatement.executeQuery();
+
+                ArrayList<Integer> child = new ArrayList<>();
+
+                while(resultSet.next()) {
+                    child.add(resultSet.getInt("idPost"));
+                }
+
+                for(int j = 0; j < child.size(); j++ ) {
+                    psi.details(child.get(j), null);
+                    posts.add(psi.getVotePost());
+                }
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return posts;
+    }
+
 
 
     public ThreadDetails getThreadDetatils(Integer thread, String related) {

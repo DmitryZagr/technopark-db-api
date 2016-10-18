@@ -34,6 +34,11 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
     private PreparedStatement preparedStatement;
     private ResultSet resultSet;
     private ObjectMapper mapper = new ObjectMapper();
+    private DetailPost<Object,Object,Object> votePost ;
+
+    public DetailPost<Object, Object, Object> getVotePost() {
+        return votePost;
+    }
 
     @Override
     public String create(Post post) {
@@ -48,8 +53,12 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 Table.Post.COLUMN_FORUM    + ',' + Table.Post.COLUMN_PARENT + "," +
                 Table.Post.COLUMN_IS_APPROVED  + ',' + Table.Post.COLUMN_IS_HIGHLIGHED + ',' +
                 Table.Post.COLUMN_IS_EDITED   + ',' + Table.Post.COLUMN_IS_SPAM+ ',' +
-                Table.Post.COLUMN_IS_DELETED  + ')' +
+                Table.Post.COLUMN_IS_DELETED  +  ')' +
                 "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+        String sqlUpdPath = "UPDATE  " + Table.Post.TABLE_POST + " SET " +
+                Table.Post.COLUMN_PATH + " =? " +  " WHERE " + Table.Post.COLUMN_ID_POST +
+                "=?";
 
         String insertInVotePost =  "INSERT INTO " + Table.VotePost.TABLE_VOTE_POST +
                 " ( " + Table.VotePost.COLUMN_ID_POST + ')' + "VALUES (?);";
@@ -82,6 +91,13 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
             if(resultSet.next()) post.setid(resultSet.getInt(1));
+
+            String path = getPath(post.getParent(), post.getid());
+
+            preparedStatement = connection.prepareStatement(sqlUpdPath);
+            preparedStatement.setString(1, path);
+            preparedStatement.setInt(2, post.getid().intValue());
+            preparedStatement.executeUpdate();
 
             preparedStatement = connection.prepareStatement(insertInVotePost,
                     Statement.RETURN_GENERATED_KEYS);
@@ -356,6 +372,8 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
         ThreadVote threadVote = new ThreadVote();
 //        VotePost votePost = new VotePost();
 
+        this.votePost = null;
+
         try {
             preparedStatement = connection.prepareStatement(sqlSel);
             preparedStatement.setLong(1, post.intValue());
@@ -392,7 +410,6 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                     usi.getUserDetatil((String)postDetail.getUser());
                     postDetail.setUser(usi.getUserDetatil((String)postDetail.getUser()));
                 }
-
             }
         } catch (MySQLIntegrityConstraintViolationException e) {
             return ResponseStatus.getMessage(
@@ -411,10 +428,39 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                     ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
                     ResponseStatus.FORMAT_JSON);
 
+        this.votePost = postDetail;
+
         String json = (new ResultJson<DetailPost<Object, Object, Object>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), postDetail)).getStringResult();
         return json;
     }
+
+    private String getPath(Integer parent, Integer idPost) {
+        connection =  ConnectionToMySQL.getConnection();
+
+        if(parent == null)
+            return Integer.toString(idPost.intValue());
+
+        String matPath = "";
+
+        String sql = " Select * FROM " + Table.Post.TABLE_POST +
+                " WHERE " + Table.Post.COLUMN_ID_POST + "=?";
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, parent.intValue());
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                matPath = resultSet.getString("path");
+            }
+            matPath = matPath + "." + idPost.intValue();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return matPath;
+    }
+
 
 
     @Override

@@ -27,6 +27,7 @@ public class Table {
         public static final String COLUMN_IS_EDITED = "`forum`.`Post`.`isEdited`";
         public static final String COLUMN_IS_SPAM = "`forum`.`Post`.`isSpam`";
         public static final String COLUMN_IS_DELETED = "`forum`.`Post`.`isDeleted`";
+        public static final String COLUMN_PATH      = "`forum`.`Post`.`path`";
     }
 
     public static final class VotePost {
