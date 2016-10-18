@@ -675,7 +675,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
                 String childs = " Select * from forum.Post " +
                         " WHERE   parent is not null and path like concat('" +
-                        rootId.get(i).intValue() + "', '.%') ";
+                        rootId.get(i).intValue() + "', '.%') " +
+                        " GROUP BY " + Table.Post.COLUMN_PATH;
 
                 preparedStatement = connection.prepareStatement(childs);
                 resultSet = preparedStatement.executeQuery();
