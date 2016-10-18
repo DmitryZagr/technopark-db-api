@@ -6,7 +6,7 @@ package ru.mail.park.model.thread;
 public class ThreadDetails<U, F> {
 
     //    Requried
-    private int id;
+    private Integer id;
     private F forum;
     private String title;
     private Boolean isClosed;
@@ -40,11 +40,11 @@ public class ThreadDetails<U, F> {
         this.points = likes - dislikes;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

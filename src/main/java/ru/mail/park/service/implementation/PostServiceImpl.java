@@ -39,6 +39,9 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
     public String create(Post post) {
         connection =  ConnectionToMySQL.getConnection();
 
+        String sqlApproveThread = "SELECT * FROM " + Table.Thread.TABLE_THREAD +
+                " WHERE " + Table.Thread.COLUMN_ID_THREAD + "=" + post.getThread();
+
         String sqlInsert = "INSERT INTO " + Table.Post.TABLE_POST + " ( " +
                 Table.Post.COLUMN_DATE + ',' + Table.Post.COLUMN_THREAD + ',' +
                 Table.Post.COLUMN_MESSAGE   + ',' + Table.Post.COLUMN_USER + ',' +
@@ -51,6 +54,18 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
         String insertInVotePost =  "INSERT INTO " + Table.VotePost.TABLE_VOTE_POST +
                 " ( " + Table.VotePost.COLUMN_ID_POST + ')' + "VALUES (?);";
         try {
+            preparedStatement = connection.prepareStatement(sqlApproveThread);
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()) {
+                if (resultSet.getBoolean("isDeleted"))
+                    return ResponseStatus.getMessage(
+                            ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                            ResponseStatus.FORMAT_JSON);
+            } else
+                return ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+                        ResponseStatus.FORMAT_JSON);
+
             preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, post.getDate());
             preparedStatement.setLong(2, post.getThread());
@@ -213,8 +228,14 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
         }
 
         String sqlUpd = "UPDATE " + Table.Post.TABLE_POST + " SET " +
-                Table.Post.COLUMN_MESSAGE + "=? WHERE " +
+                Table.Post.COLUMN_MESSAGE + "=? " ;
+
+
+        String sqlUpdateback = " WHERE " +
                 Table.Post.COLUMN_ID_POST + "=?";
+
+        String sqlEdited = " , " + Table.Post.COLUMN_IS_EDITED + "=1 ";
+
         VotePost votePost = new VotePost();
         try {
             preparedStatement = connection.prepareStatement(sqlSel);
@@ -237,6 +258,11 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 votePost.setDislikes(votePost.getDislikes());
                 votePost.setPoints();
             }
+
+            if(!votePost.getMessage().equals(message))
+                sqlUpd = sqlUpd + sqlEdited + sqlUpdateback;
+            else sqlUpd = sqlUpd + sqlUpdateback;
+
             preparedStatement = connection.prepareStatement(sqlUpd);
             preparedStatement.setString(1, message);
             preparedStatement.setLong(2, votePost.getid());
@@ -351,12 +377,6 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 postDetail.setDislikes(resultSet.getInt("dislike"));
                 postDetail.setPoints();
 
-                if(postDetail.getid() == null)
-                    return ResponseStatus.getMessage(
-                            ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
-                            ResponseStatus.FORMAT_JSON);
-
-
                 if(!StringUtils.isEmpty(related) && related.contains("forum")) {
                     ForumServiceImpl fsi = new ForumServiceImpl();
                     postDetail.setForum( fsi.getForum((String)postDetail.getForum()));
@@ -386,16 +406,10 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             e.printStackTrace();
         }
 
-//        if(related.contains("forum"))
-
-
-//        DetailPost detailPost;
-//        if(related == null) {
-//            detailPost = new DetailPost<String, Integer, String>();
-//        }
-
-
-
+        if(postDetail.getid() == null)
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
 
         String json = (new ResultJson<DetailPost<Object, Object, Object>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), postDetail)).getStringResult();

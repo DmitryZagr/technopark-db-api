@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public class ThreadVote implements Serializable {
     //    Requried
-    private int id;
+    private Integer id;
     private String forum;
     private String title;
     private boolean isClosed;
@@ -59,11 +59,11 @@ public class ThreadVote implements Serializable {
         this.points = likes - dislikes;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

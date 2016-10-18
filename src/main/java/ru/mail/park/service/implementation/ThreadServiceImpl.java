@@ -94,9 +94,10 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
     @Override
     public String details(Integer thread, String related) {
 
-        if(!(related.contains("user") || related.contains("form")))
+        if(related != null && !((related.equals("user") || related.equals("forum") ||
+                related.equals("user,forum") || related.equals("forum,user"))))
             return ResponseStatus.getMessage(
-                    ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
                     ResponseStatus.FORMAT_JSON);
 
         connection =  ConnectionToMySQL.getConnection();
@@ -117,6 +118,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             preparedStatement.setLong(1, thread.intValue());
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
+                if(((String)resultSet.getObject("forum")) == null)
+                    throw new NullPointerException();
                 threadDetails.setDate(resultSet.getString("date").replace(".0", ""));
                 threadDetails.setForum(resultSet.getString("forum"));
                 threadDetails.setId(resultSet.getInt("idThread"));
@@ -141,6 +144,10 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                     threadDetails.setForum(fsi.getForum((String)threadDetails.getForum()));
                 }
             }
+        } catch (NullPointerException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -553,9 +560,12 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 "=" + Table.VotePost.COLUMN_ID_POST + " AND " +
                 Table.Post.COLUMN_THREAD + "=?";
 
-        String sqlSince = " " +  Table.Post.COLUMN_DATE + ">=" + "'" +since + "'" + " ";
+        String sqlSince = null;
 
-        String sqlLimit = " LIMIT " + limit.intValue() + " ";
+        if(since != null )
+            sqlSince = " " +  Table.Post.COLUMN_DATE + ">=" + "'" +since + "'" + " ";
+
+//        String sqlLimit = " LIMIT " + limit.intValue() + " ";
 
         String sqlOrder = (order == null) ? " DESC " : order;
 
@@ -573,7 +583,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + " " + sqlOrder;
 
         if(limit != null)
-            sql = sql + sqlLimit;
+            sql = sql + " LIMIT " + limit.intValue() + " ";
 
 
        ArrayList<VotePost> detailPosts = new ArrayList<>();
