@@ -1,14 +1,14 @@
 package ru.mail.park.service.implementation;
 
-import com.fasterxml.jackson.databind.JsonNode;
+//import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mysql.jdbc.*;
+//import com.mysql.jdbc.*;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
-import javafx.scene.control.Tab;
+//import javafx.scene.control.Tab;
 import org.springframework.stereotype.Component;
-import org.springframework.util.*;
+//import org.springframework.util.*;
 import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
@@ -20,7 +20,7 @@ import ru.mail.park.model.thread.Thread;
 import ru.mail.park.service.interfaces.IThreadService;
 import ru.mail.park.util.ConnectionToMySQL;
 import ru.mail.park.util.MyJsonUtils;
-import sun.jvm.hotspot.opto.RootNode;
+//import sun.jvm.hotspot.opto.RootNode;
 
 import java.io.IOException;
 import java.sql.*;
@@ -587,7 +587,9 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             }
 
             if(sort.contains("tree")) {
-
+                return (new ResultJson<ArrayList<DetailPost<Object, Object,Object>>>(
+                        ResponseStatus.ResponceCode.OK.ordinal(), getTree(thread, since,
+                        limit, sort, order))).getStringResult();
             }
         }
 
@@ -631,6 +633,61 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 ResponseStatus.ResponceCode.OK.ordinal(), detailPosts)).getStringResult();
 
         return json;
+    }
+
+
+    private ArrayList<DetailPost<Object,Object,Object>> getTree(Integer thread, String since,
+                                                                Integer limit, String sort, String order) {
+
+//        Select * from forum.Post
+//        WHERE thread=3
+//        group by path
+
+        String sqlSelect = "SELECT * " +
+                " FROM " + Table.Post.TABLE_POST +
+                " WHERE " + Table.Post.COLUMN_THREAD + "=? ";
+        if(since != null)
+            sqlSelect = sqlSelect + " AND " + Table.Post.COLUMN_DATE +
+                    ">=" + "'" + since + "' ";
+        if(order == null)
+            sqlSelect = sqlSelect + " GROUP BY " + Table.Post.COLUMN_ROOT + " DESC , " +
+                    Table.Post.COLUMN_PATH + " ASC ";
+        else {
+            if (order.equals("desc"))
+                sqlSelect = sqlSelect + " GROUP BY " + Table.Post.COLUMN_ROOT + " DESC , " +
+                        Table.Post.COLUMN_PATH + " ASC ";
+            if(order.equals(("asc")))
+                sqlSelect = sqlSelect + " GROUP BY " + Table.Post.COLUMN_ROOT + " " +
+                        " ASC, " + Table.Post.COLUMN_PATH + " ASC ";
+        }
+
+        if(limit != null)
+            sqlSelect = sqlSelect + " LIMIT " + limit.intValue();
+
+        ArrayList<DetailPost<Object,Object,Object>> posts = new ArrayList<>();
+
+        ArrayList<Integer> postsID = new ArrayList<>();
+
+        try {
+            preparedStatement = connection.prepareStatement(sqlSelect);
+            preparedStatement.setInt(1, thread);
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()) {
+                postsID.add(resultSet.getInt("idPost"));
+            }
+
+            PostServiceImpl psi = new PostServiceImpl();
+
+            for(int i = 0; i < postsID.size(); i++ ) {
+                psi.details(postsID.get(i), null);
+                posts.add(psi.getVotePost());
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return posts;
     }
 
     private ArrayList<DetailPost<Object,Object,Object>> getParentTree(Integer thread, String since,

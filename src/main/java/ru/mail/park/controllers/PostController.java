@@ -1,7 +1,7 @@
 package ru.mail.park.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+//import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -9,14 +9,14 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 import ru.mail.park.model.post.Post;
 import ru.mail.park.model.post.IdPost;
-import ru.mail.park.model.post.VotePost;
+//import ru.mail.park.model.post.VotePost;
 import ru.mail.park.service.implementation.PostServiceImpl;
 import ru.mail.park.service.interfaces.IPostService;
-import ru.mail.park.util.MyJsonUtils;
+//import ru.mail.park.util.MyJsonUtils;
 
 import java.io.IOException;
 
-import static com.sun.xml.internal.ws.api.model.wsdl.WSDLBoundOperation.ANONYMOUS.required;
+//import static com.sun.xml.internal.ws.api.model.wsdl.WSDLBoundOperation.ANONYMOUS.required;
 
 /**
  * Created by admin on 09.10.16.

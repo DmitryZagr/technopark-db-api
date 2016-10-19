@@ -1,7 +1,7 @@
 package ru.mail.park.service.implementation;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
-import com.sun.org.apache.xpath.internal.operations.Bool;
+//import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
@@ -12,10 +12,10 @@ import ru.mail.park.model.Table;
 import ru.mail.park.model.forum.ForumDetails;
 import ru.mail.park.model.post.DetailPost;
 import ru.mail.park.model.thread.ThreadDetails;
-import ru.mail.park.model.user.UserDetails;
+//import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IForumService;
 import ru.mail.park.util.ConnectionToMySQL;
-import sun.tools.jconsole.inspector.TableSorter;
+//import sun.tools.jconsole.inspector.TableSorter;
 
 import java.sql.*;
 import java.util.ArrayList;

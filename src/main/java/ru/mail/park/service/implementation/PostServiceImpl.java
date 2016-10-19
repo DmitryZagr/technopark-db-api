@@ -57,7 +57,8 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         String sqlUpdPath = "UPDATE  " + Table.Post.TABLE_POST + " SET " +
-                Table.Post.COLUMN_PATH + " =? " +  " WHERE " + Table.Post.COLUMN_ID_POST +
+                Table.Post.COLUMN_PATH + " =?, " + Table.Post.COLUMN_ROOT + " =? " +
+                " WHERE " + Table.Post.COLUMN_ID_POST +
                 "=?";
 
         String insertInVotePost =  "INSERT INTO " + Table.VotePost.TABLE_VOTE_POST +
@@ -94,9 +95,17 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
             String path = getPath(post.getParent(), post.getid());
 
+            String root = "";
+            if(path != null && path.contains(".")) {
+                root = path.substring(0, path.indexOf("."));
+            }
+
             preparedStatement = connection.prepareStatement(sqlUpdPath);
             preparedStatement.setString(1, path);
-            preparedStatement.setInt(2, post.getid().intValue());
+            if(post.getParent() == null)
+            preparedStatement.setString(2, Integer.toString(post.getid().intValue()));
+            else preparedStatement.setString(2, root);
+            preparedStatement.setInt(3, post.getid().intValue());
             preparedStatement.executeUpdate();
 
             preparedStatement = connection.prepareStatement(insertInVotePost,
