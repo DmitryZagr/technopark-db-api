@@ -2,7 +2,6 @@ package ru.mail.park.model.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import ru.mail.park.util.MyJsonUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -17,7 +16,6 @@ public class IdPost implements Serializable{
     Integer id;
 
     public IdPost(String json) throws IOException {
-        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
         ObjectNode root = (ObjectNode) mapper.readTree(json);
         setid(root.get("post").asInt());
     }

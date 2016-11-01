@@ -19,7 +19,6 @@ import ru.mail.park.model.thread.*;
 import ru.mail.park.model.thread.Thread;
 import ru.mail.park.service.interfaces.IThreadService;
 import ru.mail.park.util.ConnectionToMySQL;
-import ru.mail.park.util.MyJsonUtils;
 //import sun.jvm.hotspot.opto.RootNode;
 
 import java.io.IOException;
@@ -344,8 +343,6 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
         int _vote = 0;
         int idThread = 0;
 
-        voteThread = MyJsonUtils.replaceOneQuoteTwoQuotes(voteThread);
-
         try {
             ObjectNode root = (ObjectNode) mapper.readTree(voteThread);
             _vote = root.get("vote").asInt();
@@ -481,7 +478,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
     @Override
     public String update(String updJson) {
         connection =  ConnectionToMySQL.getConnection();
-        updJson = MyJsonUtils.replaceOneQuoteTwoQuotes(updJson);
+
         String sql = "UPDATE " + Table.Thread.TABLE_THREAD + " SET " +
                 Table.Thread.COLUMN_MESSAGE + "=?, " + Table.Thread.COLUMN_SLUG + " =? " +
                 "WHERE " + Table.Thread.COLUMN_ID_THREAD + "=?; ";

@@ -18,7 +18,6 @@ import ru.mail.park.model.thread.ThreadVote;
 import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IPostService;
 import ru.mail.park.util.ConnectionToMySQL;
-import ru.mail.park.util.MyJsonUtils;
 
 import java.io.IOException;
 import java.sql.*;
@@ -156,8 +155,6 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
     public String vote(String vote) {
         connection =  ConnectionToMySQL.getConnection();
 
-        vote = MyJsonUtils.replaceOneQuoteTwoQuotes(vote);
-
         String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
                 Table.VotePost.TABLE_VOTE_POST + " ON " +
                 Table.VotePost.COLUMN_ID_POST + "=? AND " + Table.Post.COLUMN_ID_POST + "=" +
@@ -231,8 +228,6 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
     @Override
     public String update(String update) {
         connection =  ConnectionToMySQL.getConnection();
-
-        update = MyJsonUtils.replaceOneQuoteTwoQuotes(update);
 
         String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
                 Table.VotePost.TABLE_VOTE_POST + " ON " +

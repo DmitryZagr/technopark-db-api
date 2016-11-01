@@ -2,11 +2,9 @@ package ru.mail.park.model.thread;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import ru.mail.park.util.MyJsonUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Calendar;
 
 /**
  * Created by admin on 08.10.16.
@@ -33,7 +31,6 @@ public class Thread implements Serializable{
     }
 
     public Thread(String json) throws IOException {
-        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
         ObjectNode root = (ObjectNode) mapper.readTree(json);
         setForum(root.get("forum").asText());
         setTitle(root.get("title").asText());
@@ -45,10 +42,6 @@ public class Thread implements Serializable{
         if(root.has("isDeleted")) setisDeleted(root.get("isDeleted").asBoolean());
     }
 
-//    public String getForum() {
-//
-//        return forum;
-//    }
 
     public void setForum(String forum) {
         this.forum = forum;

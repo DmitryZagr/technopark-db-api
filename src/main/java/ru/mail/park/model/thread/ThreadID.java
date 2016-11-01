@@ -2,7 +2,6 @@ package ru.mail.park.model.thread;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import ru.mail.park.util.MyJsonUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -17,7 +16,6 @@ public class ThreadID implements Serializable{
     private Integer thread;
 
     public ThreadID(String json) throws IOException {
-        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
         ObjectNode root = (ObjectNode) mapper.readTree(json);
         setThread(root.get("thread").asInt());
     }

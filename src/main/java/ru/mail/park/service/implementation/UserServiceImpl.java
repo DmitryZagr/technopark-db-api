@@ -13,7 +13,6 @@ import ru.mail.park.model.user.User;
 import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IUserService;
 import ru.mail.park.util.ConnectionToMySQL;
-import ru.mail.park.util.MyJsonUtils;
 
 import java.io.IOException;
 import java.sql.*;
@@ -84,8 +83,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     public String follow(String followerFollowee) {
         connection =  ConnectionToMySQL.getConnection();
         String follower, followee;
-
-        followerFollowee = MyJsonUtils.replaceOneQuoteTwoQuotes(followerFollowee);
 
         try {
             ObjectNode root = (ObjectNode) mapper.readTree(followerFollowee);
@@ -299,8 +296,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     public String unFollow(String followerFollowee) {
         connection =  ConnectionToMySQL.getConnection();
 
-        followerFollowee = MyJsonUtils.replaceOneQuoteTwoQuotes(followerFollowee);
-
         String follower, followee;
 
         try {
@@ -437,7 +432,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     @Override
     public String updateProfile(String json) {
         connection =  ConnectionToMySQL.getConnection();
-        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
 
         String sql = "UPDATE " + Table.User.TABLE_USER +
                 " SET " + Table.User.COLUMN_ABOUT +
