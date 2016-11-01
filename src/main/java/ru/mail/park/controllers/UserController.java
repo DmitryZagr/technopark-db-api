@@ -93,15 +93,5 @@ public class UserController {
         return ResponseEntity.ok(userService.listPosts(user, since, limit, order));
     }
 
-//    @ExceptionHandler({
-//            HttpMessageNotReadableException.class,
-//            MissingServletRequestParameterException.class})
-//    @ResponseBody
-//    public String resolveException() {
-//        return ResponseStatus.getMessage(
-//                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-//                ResponseStatus.FORMAT_JSON
-//        );
-//    }
 }
 

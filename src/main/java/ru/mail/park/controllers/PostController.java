@@ -34,23 +34,6 @@ public class PostController {
     @RequestMapping(path = "/db/api/post/create/", method = RequestMethod.POST,
             produces = "application/json")
     public ResponseEntity createPost(@RequestBody Post post) throws IOException {
-//        String json = httpEntity.getBody();
-////        json = MyJsonUtils.replaceOneQuoteTwoQuotes(json);
-//        ObjectNode root = null;
-//        Post post = new Post();
-//        root = (ObjectNode) mapper.readTree(json);
-//        post.setDate(root.get("date").asText());
-//        post.setThread(root.get("thread").asInt());
-//        post.setMessage(root.get("message").asText());
-//        post.setUser(root.get("user").asText());
-//        post.setForum(root.get("forum").asText());
-//        if(root.has("parent")) post.setParent((Integer) root.get("parent").numberValue());
-//        if(root.has("isApproved")) post.setApproved(root.get("isApproved").asBoolean());
-//        if(root.has("isHighlighted"))post.setHighlighted(root.get("isHighlighted").asBoolean());
-//        if(root.has("isEdited"))post.setEdited(root.get("isEdited").asBoolean());
-//        if(root.has("isSpam"))post.setSpam(root.get("isSpam").asBoolean());
-//        if(root.has("isDeleted"))post.setDeleted(root.get("isDeleted").asBoolean());
-
         return ResponseEntity.ok(postService.create(post));
     }
 
