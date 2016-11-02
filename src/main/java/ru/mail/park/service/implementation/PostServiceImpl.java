@@ -47,6 +47,8 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
     private ThreadServiceImpl threadService;
     @Autowired
     private ForumServiceImpl forumService;
+    @Autowired
+    private UserServiceImpl userService;
 
     public DetailPost<Object, Object, Object> getVotePost() {
         return votePost;
@@ -450,9 +452,9 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                         }
 
                         if (!StringUtils.isEmpty(related) && related.contains("user")) {
-                            UserServiceImpl usi = new UserServiceImpl();
-                            usi.getUserDetatil((String) postDetail.getUser());
-                            postDetail.setUser(usi.getUserDetatil((String) postDetail.getUser()));
+//                            UserServiceImpl usi = new UserServiceImpl();
+                            userService.getUserDetatil((String) postDetail.getUser());
+                            postDetail.setUser(userService.getUserDetatil((String) postDetail.getUser()));
                         }
                     }
                 }

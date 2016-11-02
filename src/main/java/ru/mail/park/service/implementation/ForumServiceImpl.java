@@ -42,6 +42,9 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
     @Autowired
     private ThreadServiceImpl threadService;
 
+    @Autowired
+    private UserServiceImpl userService;
+
     @Override
     public String create(Forum forum) {
 
@@ -120,8 +123,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                     forumDetails.setShort_name(resultSet.getString("short_name"));
                     forumDetails.setUser(resultSet.getString("user"));
                     if (!StringUtils.isEmpty(related) && related.contains("user")) {
-                        UserServiceImpl usi = new UserServiceImpl();
-                        forumDetails.setUser(usi.getUserDetatil((String) forumDetails.getUser()));
+//                        UserServiceImpl usi = new UserServiceImpl();
+                        forumDetails.setUser(userService.getUserDetatil((String) forumDetails.getUser()));
                     }
                 }
             }
@@ -219,13 +222,13 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                 }
             }
 
-            UserServiceImpl usi = new UserServiceImpl();
+//            UserServiceImpl usi = new UserServiceImpl();
 //            ThreadServiceImpl tsi = new ThreadServiceImpl();
 
             for(int i = 0; i < posts.size(); i++){
                 if(related != null ) {
                     if(related.contains("user"))
-                        posts.get(i).setUser(usi.getUserDetatil((String) posts.get(i).getUser()));
+                        posts.get(i).setUser(userService.getUserDetatil((String) posts.get(i).getUser()));
                     if(related.contains("thread"))
                         posts.get(i).setThread(threadService.getThreadDetatils((Integer) posts.get(i).getThread(), null));
                 }
@@ -269,7 +272,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
 
         ArrayList<String> emails = new ArrayList<>();
 
-        UserServiceImpl usi = new UserServiceImpl();
+//        UserServiceImpl usi = new UserServiceImpl();
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, forum);
@@ -285,7 +288,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
             e.printStackTrace();
         }
 
-        String userDetailseList =  usi.getUserDetailsListJSON(emails);
+        String userDetailseList =  userService.getUserDetailsListJSON(emails);
 
         return userDetailseList;
     }

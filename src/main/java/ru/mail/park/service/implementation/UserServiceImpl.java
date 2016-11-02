@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Table;
@@ -14,6 +17,7 @@ import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IUserService;
 import ru.mail.park.util.ConnectionToMySQL;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -22,6 +26,7 @@ import java.util.ArrayList;
  * Created by admin on 08.10.16.
  */
 @Component
+@Transactional
 public class UserServiceImpl implements IUserService, AutoCloseable {
 
     private ObjectMapper mapper = new ObjectMapper();
@@ -33,14 +38,18 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 //        return usersDetail;
 //    }
 
-    private Connection connection;
-    private Statement statement;
-    private ResultSet resultSet;
-    private PreparedStatement preparedStatement;
+//    private Connection connection;
+//    private Statement statement;
+//    private ResultSet resultSet;
+//    private PreparedStatement preparedStatement;
+
+    @Autowired
+    private DataSource dataSource;
 
     @Override
     public String create(User user) {
-        connection =  ConnectionToMySQL.getConnection();
+//        connection =  ConnectionToMySQL.getConnection();
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 //        if(user.isEmpty())
 //            return ResponseStatus.getMessage(
@@ -52,17 +61,18 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                 Table.User.COLUMN_NAME + ',' + Table.User.COLUMN_EMAIL + " ) " +
                 "VALUES ( ?, ?, ?, ?, ?); ";
 
-        try {
-            preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+        try(PreparedStatement preparedStatement =
+                    connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, user.getUsername());
             preparedStatement.setString(2, user.getAbout());
             preparedStatement.setBoolean(3, user.getisAnonymous());
             preparedStatement.setString(4, user.getName());
             preparedStatement.setString(5, user.getEmail());
             preparedStatement.executeUpdate();
-            resultSet = preparedStatement.getGeneratedKeys();
-            while(resultSet.next())
-                user.setId(resultSet.getLong(1));
+            try(ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
+                while (resultSet.next())
+                    user.setId(resultSet.getLong(1));
+            }
         } catch (MySQLIntegrityConstraintViolationException e) {
             return ResponseStatus.getMessage(
                     ResponseStatus.ResponceCode.USER_EXIST.ordinal(), ResponseStatus.FORMAT_JSON);
@@ -81,7 +91,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String follow(String followerFollowee) {
-        connection =  ConnectionToMySQL.getConnection();
+//        connection =  ConnectionToMySQL.getConnection();
         String follower, followee;
 
         try {
@@ -105,8 +115,10 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                 " (" + Table.Followers.COLUMN_FOLLOWER + ", " + Table.Followers.COLUMN_FOLLOWEE +
                 ") VALUES (?, ?);" ;
 
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
             preparedStatement.setString(1, follower);
             preparedStatement.setString(2, followee);
             preparedStatement.execute();
@@ -124,7 +136,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String listFollowers(String user, Integer limit, String order, Integer sinceId) {
-        connection =  ConnectionToMySQL.getConnection();
+//        connection =  ConnectionToMySQL.getConnection();
 
         String sqlSelectFollowers = "SELECT * "   +
                 "  FROM " + Table.Followers.TABLE_FOLLOWERS +
@@ -143,14 +155,18 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         sqlSelectFollowers = sqlSelectFollowers +  " LIMIT " + limit.intValue();
 
         ArrayList<String> followers = new ArrayList<>();
+
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+
         usersDetail = null;
-        try {
-            preparedStatement = connection.prepareStatement(sqlSelectFollowers);
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectFollowers)) {
             preparedStatement.setString(1, user);
-            resultSet = preparedStatement.executeQuery();
-            usersDetail = new ArrayList<>();
-            while (resultSet.next()) {
-                followers.add(resultSet.getString("follower"));
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                usersDetail = new ArrayList<>();
+                while (resultSet.next()) {
+                    followers.add(resultSet.getString("follower"));
+                }
             }
         } catch (MySQLSyntaxErrorException e) {
             usersDetail = null;
@@ -173,7 +189,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String listFollowing(String user, Integer limit, String order, Integer sinceId) {
-        connection =  ConnectionToMySQL.getConnection();
+//        connection =  ConnectionToMySQL.getConnection();
 
         String sqlSelectFollowing = "SELECT * "   +
                 "  FROM " + Table.Followers.TABLE_FOLLOWERS +
@@ -191,15 +207,18 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         if(limit != null)
             sqlSelectFollowing = sqlSelectFollowing +  " LIMIT " + limit.intValue();
 
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+
         ArrayList<String> followers = new ArrayList<>();
         usersDetail = null;
-        try {
-            preparedStatement = connection.prepareStatement(sqlSelectFollowing);
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectFollowing)) {
             preparedStatement.setString(1, user);
-            resultSet = preparedStatement.executeQuery();
-            usersDetail = new ArrayList<>();
-            while (resultSet.next()) {
-                followers.add(resultSet.getString("followee"));
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                usersDetail = new ArrayList<>();
+                while (resultSet.next()) {
+                    followers.add(resultSet.getString("followee"));
+                }
             }
         } catch (MySQLSyntaxErrorException e) {
             usersDetail = null;
@@ -232,7 +251,9 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String listPosts(String user, String since, Integer limit, String order) {
-        connection =  ConnectionToMySQL.getConnection();
+//        connection =  ConnectionToMySQL.getConnection();
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
         String  dateContidion, orderCondition, limitCondition;
 
         String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
@@ -251,28 +272,28 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
         ArrayList<VotePost> votePosts = new ArrayList<>();
 
-        try {
-            preparedStatement = connection.prepareStatement(sqlSel);
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel);) {
             preparedStatement.setString(1, user);
-            resultSet = preparedStatement.executeQuery();
-            while(resultSet.next()) {
-                VotePost vp  = new VotePost();
-                vp.setDate(resultSet.getString("date").replace(".0", ""));
-                vp.setForum(resultSet.getString("forum"));
-                vp.setid(resultSet.getInt("idPost"));
-                vp.setApproved(resultSet.getBoolean("isApproved"));
-                vp.setDeleted(resultSet.getBoolean("isDeleted"));
-                vp.setEdited(resultSet.getBoolean("isEdited"));
-                vp.setHighlighted(resultSet.getBoolean("isHighlighted"));
-                vp.setSpam(resultSet.getBoolean("isSpam"));
-                vp.setMessage(resultSet.getString("message"));
-                vp.setParent((Integer) resultSet.getObject("parent"));
-                vp.setThread((Integer) resultSet.getObject("thread"));
-                vp.setUser(resultSet.getString("user"));
-                vp.setLikes(resultSet.getInt("like"));
-                vp.setDislikes(resultSet.getInt("dislike"));
-                vp.setPoints();
-                votePosts.add(vp);
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    VotePost vp = new VotePost();
+                    vp.setDate(resultSet.getString("date").replace(".0", ""));
+                    vp.setForum(resultSet.getString("forum"));
+                    vp.setid(resultSet.getInt("idPost"));
+                    vp.setApproved(resultSet.getBoolean("isApproved"));
+                    vp.setDeleted(resultSet.getBoolean("isDeleted"));
+                    vp.setEdited(resultSet.getBoolean("isEdited"));
+                    vp.setHighlighted(resultSet.getBoolean("isHighlighted"));
+                    vp.setSpam(resultSet.getBoolean("isSpam"));
+                    vp.setMessage(resultSet.getString("message"));
+                    vp.setParent((Integer) resultSet.getObject("parent"));
+                    vp.setThread((Integer) resultSet.getObject("thread"));
+                    vp.setUser(resultSet.getString("user"));
+                    vp.setLikes(resultSet.getInt("like"));
+                    vp.setDislikes(resultSet.getInt("dislike"));
+                    vp.setPoints();
+                    votePosts.add(vp);
+                }
             }
         } catch (MySQLIntegrityConstraintViolationException e) {
             return ResponseStatus.getMessage(
@@ -294,7 +315,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String unFollow(String followerFollowee) {
-        connection =  ConnectionToMySQL.getConnection();
+//        connection =  ConnectionToMySQL.getConnection();
 
         String follower, followee;
 
@@ -318,8 +339,9 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         String sqlUnFollow = "DELETE FROM " + Table.Followers.TABLE_FOLLOWERS + " WHERE " +
                 Table.Followers.COLUMN_FOLLOWER + "=? AND " + Table.Followers.COLUMN_FOLLOWEE + "=?;";
 
-        try {
-            preparedStatement = connection.prepareStatement(sqlUnFollow);
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sqlUnFollow)) {
             preparedStatement.setString(1, follower);
             preparedStatement.setString(2, followee);
             if(preparedStatement.executeUpdate() == 0)
@@ -339,7 +361,8 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String details(String email) {
-        connection =  ConnectionToMySQL.getConnection();
+//        connection =  ConnectionToMySQL.getConnection();
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 //        email = MyJsonUtils.replaceOneQuoteTwoQuotes(email);
 
@@ -366,25 +389,27 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         userDetails.setEmail(email);
 
         try {
-            preparedStatement = connection.prepareStatement(sqlSelectUser);
-            preparedStatement.setString(1, email);
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                userDetails.setId(resultSet.getLong("idUser"));
+            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectUser)){
+                preparedStatement.setString(1, email);
+                try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        userDetails.setId(resultSet.getLong("idUser"));
 
 //                if(resultSet.getString("username").equals("null"))  userDetails.setUsername(null);
 //                else
-                    userDetails.setUsername(resultSet.getString("username"));
+                        userDetails.setUsername(resultSet.getString("username"));
 
 //                if(resultSet.getString("about").equals("null")) userDetails.setAbout(null);
 //                else
-                    userDetails.setAbout(resultSet.getString("about"));
+                        userDetails.setAbout(resultSet.getString("about"));
 
 //                if(resultSet.getString("name").equals("null")) userDetails.setName(null);
 //                else
-                    userDetails.setName(resultSet.getString("name"));
+                        userDetails.setName(resultSet.getString("name"));
 
-                userDetails.setisAnonymous(resultSet.getBoolean("isAnonymous"));
+                        userDetails.setisAnonymous(resultSet.getBoolean("isAnonymous"));
+                    }
+                }
             }
 
             if (userDetails.getId() == null)
@@ -392,25 +417,31 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                         ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
                         ResponseStatus.FORMAT_JSON);
 
-            preparedStatement = connection.prepareStatement(sqlSelectFollowing);
-            preparedStatement.setString(1, email);
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                userDetails.getFollowing().add(resultSet.getString("followee"));
+            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectFollowing)) {
+                preparedStatement.setString(1, email);
+                try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        userDetails.getFollowing().add(resultSet.getString("followee"));
+                    }
+                }
             }
 
-            preparedStatement = connection.prepareStatement(sqlSelectFollowers);
-            preparedStatement.setString(1, userDetails.getEmail());
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                userDetails.getFollowers().add(resultSet.getString("follower"));
+            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectFollowers)) {
+                preparedStatement.setString(1, userDetails.getEmail());
+                try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        userDetails.getFollowers().add(resultSet.getString("follower"));
+                    }
+                }
             }
 
-            preparedStatement = connection.prepareStatement(sqlSelectSubscriptions);
-            preparedStatement.setString(1, userDetails.getEmail());
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next())
-                userDetails.getSubscriptions().add(resultSet.getInt("thread"));
+            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectSubscriptions)) {
+                preparedStatement.setString(1, userDetails.getEmail());
+                try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next())
+                        userDetails.getSubscriptions().add(resultSet.getInt("thread"));
+                }
+            }
         }
         catch (NullPointerException e) {
             return ResponseStatus.getMessage(
@@ -431,7 +462,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String updateProfile(String json) {
-        connection =  ConnectionToMySQL.getConnection();
+//        connection =  ConnectionToMySQL.getConnection();
 
         String sql = "UPDATE " + Table.User.TABLE_USER +
                 " SET " + Table.User.COLUMN_ABOUT +
@@ -454,8 +485,10 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                     ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
                     ResponseStatus.FORMAT_JSON);
         }
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+//            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, about);
             preparedStatement.setString(2, name);
             preparedStatement.setString(3, user);
@@ -477,8 +510,8 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        statement.close();
-        resultSet.close();
-        preparedStatement.close();
+//        statement.close();
+//        resultSet.close();
+//        preparedStatement.close();
     }
 }

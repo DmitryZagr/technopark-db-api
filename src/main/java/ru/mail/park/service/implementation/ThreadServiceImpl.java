@@ -52,6 +52,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
     private ForumServiceImpl forumService;
     @Autowired
     private PostServiceImpl postService;
+    @Autowired
+    private  UserServiceImpl userService;
 
 
     @Override
@@ -155,8 +157,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                     threadDetails.setPoints();
 
                     if (!StringUtils.isEmpty(related) && related.contains("user")) {
-                        UserServiceImpl usi = new UserServiceImpl();
-                        threadDetails.setUser(usi.getUserDetatil((String) threadDetails.getUser()));
+//                        UserServiceImpl usi = new UserServiceImpl();
+                        threadDetails.setUser(userService.getUserDetatil((String) threadDetails.getUser()));
                     }
 
                     if (!StringUtils.isEmpty(related) && related.contains("forum")) {
