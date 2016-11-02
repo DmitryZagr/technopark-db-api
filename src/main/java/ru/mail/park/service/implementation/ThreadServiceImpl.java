@@ -50,6 +50,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
     private DataSource dataSource;
     @Autowired
     private ForumServiceImpl forumService;
+    @Autowired
+    private PostServiceImpl postService;
 
 
     @Override
@@ -715,11 +717,11 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 }
             }
 
-            PostServiceImpl psi = new PostServiceImpl();
+//            PostServiceImpl psi = new PostServiceImpl();
 
             for(int i = 0; i < postsID.size(); i++ ) {
-                psi.details(postsID.get(i), null);
-                posts.add(psi.getVotePost());
+                postService.details(postsID.get(i), null);
+                posts.add(postService.getVotePost());
             }
 
         } catch (SQLException e) {
@@ -765,11 +767,11 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 }
             }
 
-            PostServiceImpl psi = new PostServiceImpl();
+//            PostServiceImpl psi = new PostServiceImpl();
 
             for(int i = 0; i < rootId.size(); i++ ) {
-                psi.details(rootId.get(i), null);
-                posts.add(psi.getVotePost());
+                postService.details(rootId.get(i), null);
+                posts.add(postService.getVotePost());
 
 
 
@@ -792,8 +794,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 }
 
                 for(int j = 0; j < child.size(); j++ ) {
-                    psi.details(child.get(j), null);
-                    posts.add(psi.getVotePost());
+                    postService.details(child.get(j), null);
+                    posts.add(postService.getVotePost());
                 }
 
             }
