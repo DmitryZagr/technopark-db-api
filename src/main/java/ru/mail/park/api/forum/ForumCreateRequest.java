@@ -1,5 +1,13 @@
 package ru.mail.park.api.forum;
 
+<<<<<<< HEAD
+=======
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+>>>>>>> 1133db2... Многопоточность
 import ru.mail.park.model.Table;
 import ru.mail.park.util.ConnectionToMySQL;
 
@@ -11,6 +19,11 @@ import java.sql.SQLException;
 /**
  * Created by admin on 08.10.16.
  */
+<<<<<<< HEAD
+=======
+@Service
+@Transactional
+>>>>>>> 1133db2... Многопоточность
 public class ForumCreateRequest implements AutoCloseable{
 
     private static Connection connection;
