@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.model.Table;
 import ru.mail.park.util.ConnectionToMySQL;
 
@@ -17,7 +18,7 @@ import java.sql.SQLException;
  * Created by admin on 08.10.16.
  */
 @Service
-@Component
+@Transactional
 public class ForumCreateRequest implements AutoCloseable{
 
 //    private static Connection connection;

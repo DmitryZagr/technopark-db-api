@@ -2,12 +2,16 @@ package ru.mail.park.service.implementation;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Table;
 import ru.mail.park.service.interfaces.ICommonService;
 import ru.mail.park.util.ConnectionToMySQL;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,11 +21,15 @@ import java.sql.Statement;
  * Created by admin on 09.10.16.
  */
 @Component
+@Transactional
 public class CommonServiceImpl implements ICommonService, AutoCloseable{
 
-    private Connection connection;
-    private Statement  statement;
-    private ResultSet  resultSet;
+//    private Connection connection;
+//    private Statement  statement;
+//    private ResultSet  resultSet;
+
+    @Autowired
+    private DataSource dataSource;
 
     @Override
     public int clear() {
@@ -35,18 +43,22 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
         String threadVote      = "DELETE FROM " + Table.ThreadVote.TABLE_THREAD_VOTE;
         String votePost        = "DELETE FROM " + Table.VotePost.TABLE_VOTE_POST;
         String safeMode        = "SET SQL_SAFE_UPDATES = 1;";
-        try {
-            connection = ConnectionToMySQL.getConnection();
-            connection.createStatement().execute(unsafeMod);
-            connection.createStatement().execute(tranckateUser);
-            connection.createStatement().execute(tranckateForum);
-            connection.createStatement().execute(tranckateThread);
-            connection.createStatement().execute(tranckatePost);
-            connection.createStatement().execute(threadSubscribe);
-            connection.createStatement().execute(threadVote);
-            connection.createStatement().execute(votePost);
-            connection.createStatement().execute(userFollower);
-            connection.createStatement().execute(safeMode);
+
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+        try(Statement statement = connection.createStatement()) {
+//            connection = ConnectionToMySQL.getConnection();
+
+            statement.execute(unsafeMod);
+            statement.execute(tranckateUser);
+            statement.execute(tranckateForum);
+            statement.execute(tranckateThread);
+            statement.execute(tranckatePost);
+            statement.execute(threadSubscribe);
+            statement.execute(threadVote);
+            statement.execute(votePost);
+            statement.execute(userFollower);
+            statement.execute(safeMode);
 
         } catch (MySQLIntegrityConstraintViolationException e) {
             e.printStackTrace();
@@ -74,20 +86,28 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
         int countForum, countPost, countThread, countUser;
         countForum = countPost = countThread = countUser = 0;
 
-        try {
-            connection = ConnectionToMySQL.getConnection();
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(countStrUser);
-            while (resultSet.next()) countUser   = resultSet.getInt(1);
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-            resultSet = statement.executeQuery(countStrThread);
-            while (resultSet.next()) countThread   = resultSet.getInt(1);
+        try(Statement statement = connection.createStatement()) {
+//            connection = ConnectionToMySQL.getConnection();
 
-            resultSet = statement.executeQuery(countStrForum);
-            while (resultSet.next()) countForum   = resultSet.getInt(1);
+            try(ResultSet resultSet = statement.executeQuery(countStrUser)) {
+                while (resultSet.next()) countUser = resultSet.getInt(1);
+            }
 
-            resultSet = statement.executeQuery(countStrPost);
-            while (resultSet.next()) countPost   = resultSet.getInt(1);
+            try(ResultSet resultSet = statement.executeQuery(countStrThread)) {
+                while (resultSet.next()) countThread = resultSet.getInt(1);
+            }
+
+            try(ResultSet resultSet = statement.executeQuery(countStrForum)) {
+                while (resultSet.next()) countForum = resultSet.getInt(1);
+            }
+
+            try(ResultSet resultSet = statement.executeQuery(countStrPost)) {
+                while (resultSet.next()) countPost = resultSet.getInt(1);
+            }
+
+            statement.close();
 
         } catch (MySQLSyntaxErrorException e) {
             return ResponseStatus.getMessage(
@@ -98,6 +118,7 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
                     ResponseStatus.ResponceCode.UNKNOWN_ERROR.ordinal(),
                     ResponseStatus.FORMAT_JSON);
         }
+
         return "{" +
                     "\"code\":" +  ResponseStatus.ResponceCode.OK.ordinal() + "," +
                     " \"response\": {" +
@@ -111,8 +132,8 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
 
     @Override
     public void close() throws Exception {
-        connection.close();
-        resultSet.close();
-        statement.close();
+//        connection.close();
+//        resultSet.close();
+//        statement.close();
     }
 }
