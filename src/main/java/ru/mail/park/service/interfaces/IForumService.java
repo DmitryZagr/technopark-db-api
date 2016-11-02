@@ -17,5 +17,4 @@ public interface IForumService {
                        Integer limit, String order, String related); //+
     String listUsers(String forum, Integer limit,
                      String order, Integer since_id);//+
-//    String remove();
 }

@@ -45,6 +45,9 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
     @Autowired
     private UserServiceImpl userService;
 
+    @Autowired
+    private ForumCreateRequest forumCreateRequest;
+
     @Override
     public String create(Forum forum) {
 
@@ -59,7 +62,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                 "VALUES (?, ?, ?);";
 
         try {
-            forum.setId(ForumCreateRequest.getExistingId(forum.getName(), forum.getShort_name()));
+            forum.setId(forumCreateRequest.getExistingId(forum.getName(), forum.getShort_name()));
             if(forum.getId() == -1)
                 return ResponseStatus.getMessage(
                     ResponseStatus.ResponceCode.UNKNOWN_ERROR.ordinal(),
