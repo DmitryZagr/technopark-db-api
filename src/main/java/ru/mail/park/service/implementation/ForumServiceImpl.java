@@ -2,6 +2,7 @@ package ru.mail.park.service.implementation;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 //import com.sun.org.apache.xpath.internal.operations.Bool;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
@@ -29,6 +30,9 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
     private PreparedStatement preparedStatement;
     private ResultSet resultSet;
     private Forum forum;
+
+    @Autowired
+    private ThreadServiceImpl threadService;
 
     @Override
     public String create(Forum forum) {
@@ -198,14 +202,14 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
 
 
             UserServiceImpl usi = new UserServiceImpl();
-            ThreadServiceImpl tsi = new ThreadServiceImpl();
+//            ThreadServiceImpl tsi = new ThreadServiceImpl();
 
             for(int i = 0; i < posts.size(); i++){
                 if(related != null ) {
                     if(related.contains("user"))
                         posts.get(i).setUser(usi.getUserDetatil((String) posts.get(i).getUser()));
                     if(related.contains("thread"))
-                        posts.get(i).setThread(tsi.getThreadDetatils((Integer) posts.get(i).getThread(), null));
+                        posts.get(i).setThread(threadService.getThreadDetatils((Integer) posts.get(i).getThread(), null));
                 }
 
             }
@@ -299,10 +303,10 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                 threadId.add(resultSet.getInt("idThread"));
             }
 
-            ThreadServiceImpl tsi = new ThreadServiceImpl();
+//            ThreadServiceImpl tsi = new ThreadServiceImpl();
 
             for(int i = 0; i < threadId.size(); i++) {
-                threadDetailses.add(tsi.getThreadDetatils(threadId.get(i), related));
+                threadDetailses.add(threadService.getThreadDetatils(threadId.get(i), related));
             }
 
         } catch (MySQLSyntaxErrorException e) {

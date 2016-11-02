@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mysql.jdbc.Statement;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
@@ -34,6 +35,9 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
     private ResultSet resultSet;
     private ObjectMapper mapper = new ObjectMapper();
     private DetailPost<Object,Object,Object> votePost ;
+
+    @Autowired
+    private ThreadServiceImpl threadService;
 
     public DetailPost<Object, Object, Object> getVotePost() {
         return votePost;
@@ -405,8 +409,8 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 }
 
                 if(!StringUtils.isEmpty(related) && related.contains("thread")) {
-                    ThreadServiceImpl tsi = new ThreadServiceImpl();
-                    postDetail.setThread(tsi.getThreadDetatils((Integer)postDetail.getThread(), null));
+//                    ThreadServiceImpl tsi = new ThreadServiceImpl();
+                    postDetail.setThread(threadService.getThreadDetatils((Integer)postDetail.getThread(), null));
                 }
 
                 if(!StringUtils.isEmpty(related) && related.contains("user")) {
