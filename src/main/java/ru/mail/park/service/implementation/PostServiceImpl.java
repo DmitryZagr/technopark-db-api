@@ -38,6 +38,8 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
     @Autowired
     private ThreadServiceImpl threadService;
+    @Autowired
+    private ForumServiceImpl forumService;
 
     public DetailPost<Object, Object, Object> getVotePost() {
         return votePost;
@@ -404,8 +406,8 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 postDetail.setPoints();
 
                 if(!StringUtils.isEmpty(related) && related.contains("forum")) {
-                    ForumServiceImpl fsi = new ForumServiceImpl();
-                    postDetail.setForum( fsi.getForum((String)postDetail.getForum()));
+//                    ForumServiceImpl fsi = new ForumServiceImpl();
+                    postDetail.setForum( forumService.getForum((String)postDetail.getForum()));
                 }
 
                 if(!StringUtils.isEmpty(related) && related.contains("thread")) {

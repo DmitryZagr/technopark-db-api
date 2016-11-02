@@ -48,6 +48,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     @Autowired
     private DataSource dataSource;
+    @Autowired
+    private ForumServiceImpl forumService;
 
 
     @Override
@@ -156,8 +158,8 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                     }
 
                     if (!StringUtils.isEmpty(related) && related.contains("forum")) {
-                        ForumServiceImpl fsi = new ForumServiceImpl();
-                        threadDetails.setForum(fsi.getForum((String) threadDetails.getForum()));
+//                        ForumServiceImpl fsi = new ForumServiceImpl();
+                        threadDetails.setForum(forumService.getForum((String) threadDetails.getForum()));
                     }
                 }
             }
