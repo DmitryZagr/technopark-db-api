@@ -9,6 +9,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 //import javafx.scene.control.Tab;
 import org.springframework.stereotype.Component;
 //import org.springframework.util.*;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
  * Created by admin on 08.10.16.
  */
 @Component
+@Transactional
 public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     private Connection connection;

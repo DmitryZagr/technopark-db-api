@@ -3,6 +3,7 @@ package ru.mail.park.service.implementation;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Table;
 import ru.mail.park.service.interfaces.ICommonService;
@@ -17,6 +18,7 @@ import java.sql.Statement;
  * Created by admin on 09.10.16.
  */
 @Component
+@Transactional
 public class CommonServiceImpl implements ICommonService, AutoCloseable{
 
     private Connection connection;
@@ -35,6 +37,7 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
         String threadVote      = "DELETE FROM " + Table.ThreadVote.TABLE_THREAD_VOTE;
         String votePost        = "DELETE FROM " + Table.VotePost.TABLE_VOTE_POST;
         String safeMode        = "SET SQL_SAFE_UPDATES = 1;";
+//        Connection connection;
         try {
             connection = ConnectionToMySQL.getConnection();
             connection.createStatement().execute(unsafeMod);

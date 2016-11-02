@@ -6,6 +6,7 @@ import com.mysql.jdbc.Statement;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import ru.mail.park.api.common.ResultJson;
 import ru.mail.park.api.status.ResponseStatus;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
  * Created by admin on 08.10.16.
  */
 @Component
+@Transactional
 public class PostServiceImpl implements IPostService, AutoCloseable{
 
     private Connection connection;
