@@ -43,8 +43,17 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 //    }
 
 //    private Connection connection;
+<<<<<<< HEAD
 //    private ResultSet resultSet;
 //    private PreparedStatement preparedStatement;
+=======
+//    private Statement statement;
+//    private ResultSet resultSet;
+//    private PreparedStatement preparedStatement;
+
+    @Autowired
+    private DataSource dataSource;
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
     @Override
     public String create(User user) {
@@ -63,7 +72,10 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
         try(PreparedStatement preparedStatement =
                     connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)) {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
             preparedStatement.setString(1, user.getUsername());
             preparedStatement.setString(2, user.getAbout());
             preparedStatement.setBoolean(3, user.getisAnonymous());
@@ -93,8 +105,11 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     @Override
     public String follow(String followerFollowee) {
 //        connection =  ConnectionToMySQL.getConnection();
+<<<<<<< HEAD
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
+=======
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
         String follower, followee;
 
         try {
@@ -118,7 +133,14 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                 " (" + Table.Followers.COLUMN_FOLLOWER + ", " + Table.Followers.COLUMN_FOLLOWEE +
                 ") VALUES (?, ?);" ;
 
+<<<<<<< HEAD
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+=======
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
             preparedStatement.setString(1, follower);
             preparedStatement.setString(2, followee);
             preparedStatement.execute();
@@ -137,7 +159,10 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     @Override
     public String listFollowers(String user, Integer limit, String order, Integer sinceId) {
 //        connection =  ConnectionToMySQL.getConnection();
+<<<<<<< HEAD
         final Connection connection = DataSourceUtils.getConnection(dataSource);
+=======
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
         String sqlSelectFollowers = "SELECT * "   +
                 "  FROM " + Table.Followers.TABLE_FOLLOWERS +
@@ -156,6 +181,10 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         sqlSelectFollowers = sqlSelectFollowers +  " LIMIT " + limit.intValue();
 
         ArrayList<String> followers = new ArrayList<>();
+
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+
         usersDetail = null;
         try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectFollowers)) {
             preparedStatement.setString(1, user);
@@ -187,8 +216,11 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     @Override
     public String listFollowing(String user, Integer limit, String order, Integer sinceId) {
 //        connection =  ConnectionToMySQL.getConnection();
+<<<<<<< HEAD
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
+=======
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
         String sqlSelectFollowing = "SELECT * "   +
                 "  FROM " + Table.Followers.TABLE_FOLLOWERS +
@@ -205,6 +237,9 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 //
         if(limit != null)
             sqlSelectFollowing = sqlSelectFollowing +  " LIMIT " + limit.intValue();
+
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
 
         ArrayList<String> followers = new ArrayList<>();
         usersDetail = null;
@@ -268,9 +303,15 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
         ArrayList<VotePost> votePosts = new ArrayList<>();
 
+<<<<<<< HEAD
         try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel)) {
             preparedStatement.setString(1, user);
             try(ResultSet resultSet = preparedStatement.executeQuery()){
+=======
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel);) {
+            preparedStatement.setString(1, user);
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
                 while (resultSet.next()) {
                     VotePost vp = new VotePost();
                     vp.setDate(resultSet.getString("date").replace(".0", ""));
@@ -312,8 +353,11 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     @Override
     public String unFollow(String followerFollowee) {
 //        connection =  ConnectionToMySQL.getConnection();
+<<<<<<< HEAD
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
+=======
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
         String follower, followee;
 
@@ -337,7 +381,13 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         String sqlUnFollow = "DELETE FROM " + Table.Followers.TABLE_FOLLOWERS + " WHERE " +
                 Table.Followers.COLUMN_FOLLOWER + "=? AND " + Table.Followers.COLUMN_FOLLOWEE + "=?;";
 
+<<<<<<< HEAD
         try(PreparedStatement preparedStatement = connection.prepareStatement(sqlUnFollow);) {
+=======
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sqlUnFollow)) {
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
             preparedStatement.setString(1, follower);
             preparedStatement.setString(2, followee);
             if(preparedStatement.executeUpdate() == 0)
@@ -359,7 +409,10 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     public String details(String email) {
 //        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
 //        email = MyJsonUtils.replaceOneQuoteTwoQuotes(email);
 
@@ -386,9 +439,15 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         userDetails.setEmail(email);
 
         try {
+<<<<<<< HEAD
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectUser)) {
                 preparedStatement.setString(1, email);
                 try(ResultSet resultSet = preparedStatement.executeQuery()){
+=======
+            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectUser)){
+                preparedStatement.setString(1, email);
+                try(ResultSet resultSet = preparedStatement.executeQuery()) {
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
                     while (resultSet.next()) {
                         userDetails.setId(resultSet.getLong("idUser"));
 
@@ -414,7 +473,11 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                         ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
                         ResponseStatus.FORMAT_JSON);
 
+<<<<<<< HEAD
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectFollowing)){
+=======
+            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectFollowing)) {
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
                 preparedStatement.setString(1, email);
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
@@ -425,14 +488,22 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectFollowers)) {
                 preparedStatement.setString(1, userDetails.getEmail());
+<<<<<<< HEAD
                 try(ResultSet resultSet = preparedStatement.executeQuery()){
+=======
+                try(ResultSet resultSet = preparedStatement.executeQuery()) {
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
                     while (resultSet.next()) {
                         userDetails.getFollowers().add(resultSet.getString("follower"));
                     }
                 }
             }
 
+<<<<<<< HEAD
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectSubscriptions)){
+=======
+            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectSubscriptions)) {
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
                 preparedStatement.setString(1, userDetails.getEmail());
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next())
@@ -460,8 +531,11 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
     @Override
     public String updateProfile(String json) {
 //        connection =  ConnectionToMySQL.getConnection();
+<<<<<<< HEAD
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
+=======
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
         String sql = "UPDATE " + Table.User.TABLE_USER +
                 " SET " + Table.User.COLUMN_ABOUT +
@@ -484,7 +558,14 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                     ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
                     ResponseStatus.FORMAT_JSON);
         }
+<<<<<<< HEAD
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+=======
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+//            preparedStatement = connection.prepareStatement(sql);
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
             preparedStatement.setString(1, about);
             preparedStatement.setString(2, name);
             preparedStatement.setString(3, user);

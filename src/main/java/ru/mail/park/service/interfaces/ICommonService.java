@@ -7,6 +7,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public interface ICommonService {
-    public int clear();
-    public String status();
+    int clear();
+    String status();
 }

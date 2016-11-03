@@ -44,6 +44,7 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
         String votePost        = "DELETE FROM " + Table.VotePost.TABLE_VOTE_POST;
         String safeMode        = "SET SQL_SAFE_UPDATES = 1;";
 <<<<<<< HEAD
+<<<<<<< HEAD
 //        Connection connection;
         try {
             connection = ConnectionToMySQL.getConnection();
@@ -58,6 +59,8 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
             connection.createStatement().execute(userFollower);
             connection.createStatement().execute(safeMode);
 =======
+=======
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
@@ -74,7 +77,10 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
             statement.execute(votePost);
             statement.execute(userFollower);
             statement.execute(safeMode);
+<<<<<<< HEAD
 >>>>>>> 1133db2... Многопоточность
+=======
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
         } catch (MySQLIntegrityConstraintViolationException e) {
             e.printStackTrace();
@@ -103,6 +109,7 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
         countForum = countPost = countThread = countUser = 0;
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
+<<<<<<< HEAD
 
         try(Statement statement = connection.createStatement()) {
 //            connection = ConnectionToMySQL.getConnection();
@@ -119,6 +126,24 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
                 while (resultSet.next()) countForum = resultSet.getInt(1);
             }
 
+=======
+
+        try(Statement statement = connection.createStatement()) {
+//            connection = ConnectionToMySQL.getConnection();
+
+            try(ResultSet resultSet = statement.executeQuery(countStrUser)) {
+                while (resultSet.next()) countUser = resultSet.getInt(1);
+            }
+
+            try(ResultSet resultSet = statement.executeQuery(countStrThread)) {
+                while (resultSet.next()) countThread = resultSet.getInt(1);
+            }
+
+            try(ResultSet resultSet = statement.executeQuery(countStrForum)) {
+                while (resultSet.next()) countForum = resultSet.getInt(1);
+            }
+
+>>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
             try(ResultSet resultSet = statement.executeQuery(countStrPost)) {
                 while (resultSet.next()) countPost = resultSet.getInt(1);
             }
