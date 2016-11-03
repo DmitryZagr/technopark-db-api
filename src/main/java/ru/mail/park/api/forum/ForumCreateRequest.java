@@ -1,19 +1,10 @@
 package ru.mail.park.api.forum;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-<<<<<<< HEAD
->>>>>>> 1133db2... Многопоточность
-=======
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 import ru.mail.park.model.Table;
 import ru.mail.park.util.ConnectionToMySQL;
 
@@ -26,16 +17,8 @@ import java.sql.SQLException;
 /**
  * Created by admin on 08.10.16.
  */
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 @Service
 @Transactional
->>>>>>> 1133db2... Многопоточность
-=======
-@Service
-@Transactional
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 public class ForumCreateRequest implements AutoCloseable{
 
 //    private static Connection connection;

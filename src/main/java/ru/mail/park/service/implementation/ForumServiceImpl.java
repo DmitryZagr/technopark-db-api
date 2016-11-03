@@ -30,25 +30,13 @@ import java.util.ArrayList;
 @Component
 @Transactional
 public class ForumServiceImpl implements IForumService, AutoCloseable{
-<<<<<<< HEAD
-=======
 //    private Connection connection;
 //    private PreparedStatement preparedStatement;
 //    private ResultSet resultSet;
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
     @Autowired
     private DataSource dataSource;
 
-<<<<<<< HEAD
-    final Connection connection = DataSourceUtils.getConnection(dataSource);
-
-
-    //    private Connection connection;
-//    private PreparedStatement preparedStatement;
-//    private ResultSet resultSet;
-=======
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
     private Forum forum;
 
     @Autowired
@@ -74,46 +62,29 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                 "VALUES (?, ?, ?);";
 
         try {
-<<<<<<< HEAD
-            forum.setId(ForumCreateRequest.getExistingId(forum.getName(), forum.getShort_name()));
-            if (forum.getId() == -1)
-=======
             forum.setId(forumCreateRequest.getExistingId(forum.getName(), forum.getShort_name()));
             if(forum.getId() == -1)
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
                 return ResponseStatus.getMessage(
-                        ResponseStatus.ResponceCode.UNKNOWN_ERROR.ordinal(),
-                        ResponseStatus.FORMAT_JSON);
+                    ResponseStatus.ResponceCode.UNKNOWN_ERROR.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
 
-            if (forum.getId() != 0) {
+            if(forum.getId() != 0) {
                 String json = (new ResultJson<Forum>(
                         ResponseStatus.ResponceCode.OK.ordinal(), forum)).getStringResult();
                 return json;
             }
 
-<<<<<<< HEAD
-            try (PreparedStatement preparedStatement =
-                    connection.prepareStatement(sqlInsert,Statement.RETURN_GENERATED_KEYS)) {
-=======
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)){
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
                 preparedStatement.setString(1, forum.getName());
                 preparedStatement.setString(2, forum.getShort_name());
                 preparedStatement.setString(3, forum.getUser());
                 preparedStatement.executeUpdate();
-<<<<<<< HEAD
-                try (ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
-=======
                 try(ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
                     while (resultSet.next())
                         forum.setId(resultSet.getInt(1));
                 }
             }
-<<<<<<< HEAD
-=======
 
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
         }
 //        catch (MySQLIntegrityConstraintViolationException e) {
 //            return ResponseStatus.getMessage(
@@ -145,12 +116,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
 
         ForumDetails<Object> forumDetails = new ForumDetails<>();
 
-<<<<<<< HEAD
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-=======
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
 //            preparedStatement = connection.prepareStatement(sql);
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
             preparedStatement.setString(1, forum);
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
@@ -159,13 +126,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                     forumDetails.setShort_name(resultSet.getString("short_name"));
                     forumDetails.setUser(resultSet.getString("user"));
                     if (!StringUtils.isEmpty(related) && related.contains("user")) {
-<<<<<<< HEAD
-                        UserServiceImpl usi = new UserServiceImpl();
-                        forumDetails.setUser(usi.getUserDetatil((String) forumDetails.getUser()));
-=======
 //                        UserServiceImpl usi = new UserServiceImpl();
                         forumDetails.setUser(userService.getUserDetatil((String) forumDetails.getUser()));
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
                     }
                 }
             }
@@ -189,13 +151,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
     public String listPosts(String forum, String since, Integer limit,
                             String order, String related) {
 //        connection =  ConnectionToMySQL.getConnection();
-<<<<<<< HEAD
-
-        final Connection connection = DataSourceUtils.getConnection(dataSource);
-=======
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
 //        SELECT * FROM forum.Post inner join forum.Forum on
 //        forum.Post.forum = forum.Forum.short_name
@@ -268,13 +225,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                 }
             }
 
-<<<<<<< HEAD
-            UserServiceImpl usi = new UserServiceImpl();
-            ThreadServiceImpl tsi = new ThreadServiceImpl();
-=======
 //            UserServiceImpl usi = new UserServiceImpl();
 //            ThreadServiceImpl tsi = new ThreadServiceImpl();
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
 
             for(int i = 0; i < posts.size(); i++){
                 if(related != null ) {
@@ -325,11 +277,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
 
 //        UserServiceImpl usi = new UserServiceImpl();
 
-<<<<<<< HEAD
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
-=======
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)){
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
             preparedStatement.setString(1, forum);
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) emails.add(resultSet.getString("email"));
@@ -412,16 +360,6 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
         String sql = "SELECT * FROM " + Table.Forum.TABLE_FORUM +
                 " WHERE " + Table.Forum.COLUMN_SHORT_NAME + "=?";
         forum = new Forum();
-<<<<<<< HEAD
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, short_name);
-            try(ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    forum.setId(resultSet.getInt("idForum"));
-                    forum.setName(resultSet.getString("name"));
-                    forum.setShort_name(resultSet.getString("short_name"));
-                    forum.setUser(resultSet.getString("user"));
-=======
             try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, short_name);
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -431,10 +369,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                         forum.setShort_name(resultSet.getString("short_name"));
                         forum.setUser(resultSet.getString("user"));
                     }
->>>>>>> 1133db2bcd48fff90857639599d7da2d87a478d0
                 }
             }
-        }
 
         return forum;
     }
