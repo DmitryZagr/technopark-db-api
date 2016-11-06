@@ -1,9 +1,5 @@
 package ru.mail.park.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.ModelAttribute;
-
 import java.io.Serializable;
 
 /**
@@ -22,23 +18,6 @@ public class User implements Serializable{
 
 //    Optional
     private boolean isAnonymous = false;
-
-    public User() {
-    }
-
-    public User(String username, String about, String name,
-                String email, boolean isAnonymous) {
-        this.username    = username;
-        this.about       = about;
-        this.name        = name;
-        this.email       = email;
-        this.isAnonymous = isAnonymous;
-    }
-
-//    @ModelAttribute("user")
-//    public User getUser(){
-//        return new User();
-//    }
 
     public long getId() {
         return id;

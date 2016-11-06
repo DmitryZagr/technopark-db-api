@@ -3,7 +3,6 @@ package ru.mail.park.service.interfaces;
 import org.springframework.stereotype.Component;
 import ru.mail.park.model.post.Post;
 import ru.mail.park.model.post.IdPost;
-import ru.mail.park.model.post.VotePost;
 
 /**
  * Created by admin on 08.10.16.

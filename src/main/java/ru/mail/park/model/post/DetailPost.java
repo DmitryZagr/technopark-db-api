@@ -9,8 +9,6 @@ public class DetailPost<U, T, F > {
     private T thread;
     private F forum;
 
-    private static final long serialVersionUID = -5527566248002296042L;
-
     //    Requried
     Integer   id;
     String date;
@@ -49,9 +47,6 @@ public class DetailPost<U, T, F > {
 
     public void setPoints() {
         this.points = likes - dislikes;
-    }
-
-    public DetailPost() {
     }
 
     public String getDate() {

@@ -2,7 +2,6 @@ package ru.mail.park.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,7 +9,7 @@ import java.util.ArrayList;
 /**
  * Created by admin on 08.10.16.
  */
-public class UserDetails implements Serializable{
+public class UserDetails implements Serializable {
 
     private static final long serialVersionUID = -5527566248002296042L;
 
@@ -50,10 +49,6 @@ public class UserDetails implements Serializable{
 
     public void setFollowing(ArrayList<String> following) {
         this.following = following;
-    }
-
-
-    public UserDetails() {
     }
 
 
@@ -107,9 +102,7 @@ public class UserDetails implements Serializable{
 
     @JsonIgnore
     public boolean isEmpty() {
-        if(StringUtils.isEmpty(email) || StringUtils.isEmpty(username) ||
-                StringUtils.isEmpty(about) || StringUtils.isEmpty(name))
-            return true;
-        return false;
+        return StringUtils.isEmpty(email) || StringUtils.isEmpty(username) ||
+                StringUtils.isEmpty(about) || StringUtils.isEmpty(name);
     }
 }

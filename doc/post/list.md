@@ -21,7 +21,7 @@ List posts
 ###Requried
 * forum
 
-   ```str``` forum short_name
+   ```str``` forum shortName
 
 OR
 * thread

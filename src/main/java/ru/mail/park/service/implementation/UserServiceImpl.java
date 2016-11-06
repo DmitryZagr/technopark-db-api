@@ -15,7 +15,6 @@ import ru.mail.park.model.post.VotePost;
 import ru.mail.park.model.user.User;
 import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IUserService;
-import ru.mail.park.util.ConnectionToMySQL;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -29,33 +28,19 @@ import java.util.ArrayList;
 @Transactional
 public class UserServiceImpl implements IUserService, AutoCloseable {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     private ArrayList<UserDetails> usersDetail;
     public UserDetails userDetails;
-
-//    public ArrayList<UserDetails> getUsersDetail() {
-//        return usersDetail;
-//    }
-
-//    private Connection connection;
-//    private Statement statement;
-//    private ResultSet resultSet;
-//    private PreparedStatement preparedStatement;
 
     @Autowired
     private DataSource dataSource;
 
     @Override
     public String create(User user) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-//        if(user.isEmpty())
-//            return ResponseStatus.getMessage(
-//                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
-
-        String sqlInsert = "INSERT INTO " + Table.User.TABLE_USER + " ( " +
+        final String sqlInsert = "INSERT INTO " + Table.User.TABLE_USER + " ( " +
                 Table.User.COLUMN_USERNAME + ',' +
                 Table.User.COLUMN_ABOUT + ',' + Table.User.COLUMN_IS_ANONYMOUS + ',' +
                 Table.User.COLUMN_NAME + ',' + Table.User.COLUMN_EMAIL + " ) " +
@@ -83,19 +68,18 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
             e.printStackTrace();
         }
 
-        String json = (new ResultJson<User>(
+        return (new ResultJson<User>(
                 ResponseStatus.ResponceCode.OK.ordinal(), user)).getStringResult();
-
-        return json;
     }
 
     @Override
     public String follow(String followerFollowee) {
 //        connection =  ConnectionToMySQL.getConnection();
-        String follower, followee;
+        final String follower;
+        final String followee;
 
         try {
-            ObjectNode root = (ObjectNode) mapper.readTree(followerFollowee);
+            final ObjectNode root = (ObjectNode) mapper.readTree(followerFollowee);
             follower = root.get("follower").asText();
             followee = root.get("followee").asText();
             if(followee.equals(follower))
@@ -111,14 +95,14 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                     ResponseStatus.FORMAT_JSON);
         }
 
-        String sql = "INSERT INTO " + Table.Followers.TABLE_FOLLOWERS +
+        final String sql = "INSERT INTO " + Table.Followers.TABLE_FOLLOWERS +
                 " (" + Table.Followers.COLUMN_FOLLOWER + ", " + Table.Followers.COLUMN_FOLLOWEE +
                 ") VALUES (?, ?);" ;
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, follower);
             preparedStatement.setString(2, followee);
             preparedStatement.execute();
@@ -141,20 +125,20 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         String sqlSelectFollowers = "SELECT * "   +
                 "  FROM " + Table.Followers.TABLE_FOLLOWERS +
                 " INNER JOIN " + Table.User.TABLE_USER +
-                " ON " + Table.User.COLUMN_EMAIL + "=" + Table.Followers.COLUMN_FOLLOWER +
+                " ON " + Table.User.COLUMN_EMAIL + '=' + Table.Followers.COLUMN_FOLLOWER +
                 " AND " + Table.Followers.COLUMN_FOLLOWEE + "=?";
 
         if(sinceId != null)
         sqlSelectFollowers =  sqlSelectFollowers +
-               " AND  " + Table.User.COLUMN_ID_USER + ">=" + sinceId.intValue() + " ";
+               " AND  " + Table.User.COLUMN_ID_USER + ">=" + sinceId.intValue() + ' ';
 //
         if(order == null) order = "DESC";
-        sqlSelectFollowers = sqlSelectFollowers + " ORDER BY " + Table.User.COLUMN_NAME + " " + order;
+        sqlSelectFollowers = sqlSelectFollowers + " ORDER BY " + Table.User.COLUMN_NAME + ' ' + order;
 //
         if(limit != null)
         sqlSelectFollowers = sqlSelectFollowers +  " LIMIT " + limit.intValue();
 
-        ArrayList<String> followers = new ArrayList<>();
+        final ArrayList<String> followers = new ArrayList<>();
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
@@ -181,7 +165,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
             details(followers.get(i));
         }
 
-        String json = (new ResultJson<ArrayList<UserDetails>>(
+        final String json = (new ResultJson<ArrayList<UserDetails>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), usersDetail)).getStringResult();
         usersDetail = null;
         return json;
@@ -194,15 +178,15 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         String sqlSelectFollowing = "SELECT * "   +
                 "  FROM " + Table.Followers.TABLE_FOLLOWERS +
                 " INNER JOIN " + Table.User.TABLE_USER +
-                " ON " + Table.User.COLUMN_EMAIL + "=" + Table.Followers.COLUMN_FOLLOWER +
+                " ON " + Table.User.COLUMN_EMAIL + '=' + Table.Followers.COLUMN_FOLLOWER +
                 " AND " + Table.Followers.COLUMN_FOLLOWER + "=?";
 
         if(sinceId != null)
             sqlSelectFollowing =  sqlSelectFollowing +
-                    " AND  " + Table.User.COLUMN_ID_USER + ">=" + sinceId.intValue() + " ";
+                    " AND  " + Table.User.COLUMN_ID_USER + ">=" + sinceId.intValue() + ' ';
 //
         if(order == null) order = "DESC";
-        sqlSelectFollowing = sqlSelectFollowing + " ORDER BY " + Table.User.COLUMN_NAME + " " + order;
+        sqlSelectFollowing = sqlSelectFollowing + " ORDER BY " + Table.User.COLUMN_NAME + ' ' + order;
 //
         if(limit != null)
             sqlSelectFollowing = sqlSelectFollowing +  " LIMIT " + limit.intValue();
@@ -210,7 +194,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 
-        ArrayList<String> followers = new ArrayList<>();
+        final ArrayList<String> followers = new ArrayList<>();
         usersDetail = null;
         try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectFollowing)) {
             preparedStatement.setString(1, user);
@@ -233,7 +217,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
             details(followers.get(i));
         }
 
-        String json = (new ResultJson<ArrayList<UserDetails>>(
+        final String json = (new ResultJson<ArrayList<UserDetails>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), usersDetail)).getStringResult();
         usersDetail = null;
         return json;
@@ -243,7 +227,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         usersDetail = new ArrayList<>();
         for(int i =0; i < emails.size(); i++)
             details(emails.get(i));
-        String json = (new ResultJson<ArrayList<UserDetails>>(
+        final String json = (new ResultJson<ArrayList<UserDetails>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), usersDetail)).getStringResult();
         usersDetail = null;
         return json;
@@ -254,29 +238,31 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 //        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-        String  dateContidion, orderCondition, limitCondition;
+        final String  dateContidion;
+        final String orderCondition;
+        final String limitCondition;
 
         String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
                 Table.VotePost.TABLE_VOTE_POST + " ON " +
-                Table.VotePost.COLUMN_ID_POST + "=" + Table.Post.COLUMN_ID_POST +
+                Table.VotePost.COLUMN_ID_POST + '=' + Table.Post.COLUMN_ID_POST +
                 " AND " + Table.Post.COLUMN_USER + "=? ";
-        dateContidion = (since != null) ?  " AND " + Table.Post.COLUMN_DATE + ">=\'" + since + "\'": " ";
+        dateContidion = (since != null) ?  " AND " + Table.Post.COLUMN_DATE + ">=\'" + since + '\'' : " ";
         sqlSel = sqlSel + dateContidion;
 
         orderCondition = (order != null) ? " ORDER BY " + Table.Post.COLUMN_DATE +
-                " " + order + " ": " ORDER BY " + Table.Post.COLUMN_DATE + " DESC ";
+                ' ' + order + ' ' : " ORDER BY " + Table.Post.COLUMN_DATE + " DESC ";
         sqlSel = sqlSel + orderCondition;
 
         limitCondition = (limit != null) ? " LIMIT "+ limit.longValue()  : " ";
         sqlSel = sqlSel +  limitCondition;
 
-        ArrayList<VotePost> votePosts = new ArrayList<>();
+        final ArrayList<VotePost> votePosts = new ArrayList<>();
 
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel);) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel)) {
             preparedStatement.setString(1, user);
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    VotePost vp = new VotePost();
+                    final VotePost vp = new VotePost();
                     vp.setDate(resultSet.getString("date").replace(".0", ""));
                     vp.setForum(resultSet.getString("forum"));
                     vp.setid(resultSet.getInt("idPost"));
@@ -307,20 +293,19 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
             e.printStackTrace();
         }
 
-        String json = (new ResultJson<ArrayList<VotePost>>(
+        return (new ResultJson<ArrayList<VotePost>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), votePosts)).getStringResult();
-
-        return json;
     }
 
     @Override
     public String unFollow(String followerFollowee) {
 //        connection =  ConnectionToMySQL.getConnection();
 
-        String follower, followee;
+        final String follower;
+        final String followee;
 
         try {
-            ObjectNode root = (ObjectNode) mapper.readTree(followerFollowee);
+            final ObjectNode root = (ObjectNode) mapper.readTree(followerFollowee);
             follower = root.get("follower").asText();
             followee = root.get("followee").asText();
             if(followee.equals(follower))
@@ -336,7 +321,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                     ResponseStatus.FORMAT_JSON);
         }
 
-        String sqlUnFollow = "DELETE FROM " + Table.Followers.TABLE_FOLLOWERS + " WHERE " +
+        final String sqlUnFollow = "DELETE FROM " + Table.Followers.TABLE_FOLLOWERS + " WHERE " +
                 Table.Followers.COLUMN_FOLLOWER + "=? AND " + Table.Followers.COLUMN_FOLLOWEE + "=?;";
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
@@ -366,22 +351,22 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
 //        email = MyJsonUtils.replaceOneQuoteTwoQuotes(email);
 
-        String sqlSelectFollowers = "SELECT * FROM " + Table.User.TABLE_USER + " " +
+        final String sqlSelectFollowers = "SELECT * FROM " + Table.User.TABLE_USER + ' ' +
                 "INNER JOIN " + Table.Followers.TABLE_FOLLOWERS + " ON " +
-                Table.User.COLUMN_EMAIL + "=" + Table.Followers.COLUMN_FOLLOWEE + " AND " +
+                Table.User.COLUMN_EMAIL + '=' + Table.Followers.COLUMN_FOLLOWEE + " AND " +
                 Table.Followers.COLUMN_FOLLOWEE + "=?";
 
-        String sqlSelectFollowing = "SELECT * FROM " + Table.User.TABLE_USER + " " +
+        final String sqlSelectFollowing = "SELECT * FROM " + Table.User.TABLE_USER + ' ' +
                 "INNER JOIN " + Table.Followers.TABLE_FOLLOWERS + " ON " +
-                Table.User.COLUMN_EMAIL + "=" + Table.Followers.COLUMN_FOLLOWER + " AND " +
+                Table.User.COLUMN_EMAIL + '=' + Table.Followers.COLUMN_FOLLOWER + " AND " +
                 Table.Followers.COLUMN_FOLLOWER + "=?";
 
-        String sqlSelectSubscriptions = "SELECT * FROM " + Table.User.TABLE_USER + " " +
+        final String sqlSelectSubscriptions = "SELECT * FROM " + Table.User.TABLE_USER + ' ' +
                 "INNER JOIN " + Table.ThreadSubscribe.TABLE_ThreadSubscribe + " ON " +
-                Table.User.COLUMN_EMAIL + "=" + Table.ThreadSubscribe.COLUMN_USERNAME + " AND " +
+                Table.User.COLUMN_EMAIL + '=' + Table.ThreadSubscribe.COLUMN_USERNAME + " AND " +
                 Table.ThreadSubscribe.COLUMN_USERNAME + "=?";
 
-        String sqlSelectUser= "SELECT * FROM " + Table.User.TABLE_USER + " " +
+        final String sqlSelectUser= "SELECT * FROM " + Table.User.TABLE_USER + ' ' +
                 " WHERE " + Table.User.COLUMN_EMAIL + "=?" ;
 
         userDetails = new UserDetails();
@@ -454,24 +439,25 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
             e.printStackTrace();
         }
         if(this.usersDetail != null) usersDetail.add(userDetails);
-        String json = (new ResultJson<UserDetails>(
-                ResponseStatus.ResponceCode.OK.ordinal(), userDetails)).getStringResult();
 
-        return json;
+        return (new ResultJson<UserDetails>(
+                ResponseStatus.ResponceCode.OK.ordinal(), userDetails)).getStringResult();
     }
 
     @Override
     public String updateProfile(String json) {
 //        connection =  ConnectionToMySQL.getConnection();
 
-        String sql = "UPDATE " + Table.User.TABLE_USER +
+        final String sql = "UPDATE " + Table.User.TABLE_USER +
                 " SET " + Table.User.COLUMN_ABOUT +
                 " =?, " + Table.User.COLUMN_NAME + "=?  WHERE " + Table.User.COLUMN_EMAIL + "=?;";
 
-        String about, user, name;
+        final String about;
+        final String user;
+        final String name;
 
         try {
-            ObjectNode root = (ObjectNode) mapper.readTree(json);
+            final ObjectNode root = (ObjectNode) mapper.readTree(json);
             about = root.get("about").asText();
             user  = root.get("user").asText();
             name  = root.get("name").asText();
@@ -487,7 +473,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         }
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 //            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, about);
             preparedStatement.setString(2, name);

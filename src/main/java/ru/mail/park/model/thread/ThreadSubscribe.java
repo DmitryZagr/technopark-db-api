@@ -11,15 +11,15 @@ import java.io.Serializable;
  */
 public class ThreadSubscribe implements Serializable {
     private static final long serialVersionUID = -5527566248002296042L;
-    private ObjectMapper mapper = new ObjectMapper();
 
     private int thread;
     private String user;
 
     public ThreadSubscribe(String json ) throws IOException {
-        ObjectNode root = (ObjectNode) mapper.readTree(json);
-        setThread(root.get("thread").asInt());
-        setUser(root.get("user").asText());
+        final ObjectMapper mapper = new ObjectMapper();
+        final ObjectNode root = (ObjectNode) mapper.readTree(json);
+        this.thread = root.get("thread").asInt();
+        this.user = root.get("user").asText();
     }
 
 

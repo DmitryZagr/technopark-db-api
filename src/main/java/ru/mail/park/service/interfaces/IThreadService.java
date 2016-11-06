@@ -1,7 +1,6 @@
 package ru.mail.park.service.interfaces;
 
 import org.springframework.stereotype.Component;
-import ru.mail.park.model.post.VotePost;
 import ru.mail.park.model.thread.ThreadID;
 import ru.mail.park.model.thread.ThreadSubscribe;
 import ru.mail.park.model.thread.Thread;

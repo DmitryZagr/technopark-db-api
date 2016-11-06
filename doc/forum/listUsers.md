@@ -20,7 +20,7 @@ Get user with posts on this forum
 ###Requried
 * forum
 
-   ```str``` forum short_name
+   ```str``` forum shortName
 
 
 Requesting http://some.host.ru/db/api/forum/listUsers/?order=desc&forum=forum1:

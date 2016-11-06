@@ -25,7 +25,7 @@ List threads
 OR
 * forum
 
-   ```str``` parent forum short_name
+   ```str``` parent forum shortName
 
 
 Requesting http://some.host.ru/db/api/thread/list/?since=2014-01-01+00%3A00%3A00&order=desc&forum=forum1:

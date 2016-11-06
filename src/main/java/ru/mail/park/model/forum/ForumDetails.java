@@ -10,10 +10,8 @@ public class ForumDetails<U> implements Serializable {
 
     private int id;
     private String name;
-    private String short_name;
+    private String shortName;
     private U user;
-
-    public ForumDetails() {}
 
     public int getId() {
         return id;
@@ -31,12 +29,12 @@ public class ForumDetails<U> implements Serializable {
         this.name = name;
     }
 
-    public String getShort_name() {
-        return short_name;
+    public String getShortName() {
+        return shortName;
     }
 
-    public void setShort_name(String short_name) {
-        this.short_name = short_name;
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
     }
 
     public U getUser() {

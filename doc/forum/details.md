@@ -14,7 +14,7 @@ Get forum details
 ###Requried
 * forum
 
-   ```str``` forum short_name
+   ```str``` forum shortName
 
 
 Requesting http://some.host.ru/db/api/forum/details/?related=user&forum=forum3:
@@ -24,7 +24,7 @@ Requesting http://some.host.ru/db/api/forum/details/?related=user&forum=forum3:
     "response": {
         "id": 4,
         "name": "\u0424\u043e\u0440\u0443\u043c \u0422\u0440\u0438",
-        "short_name": "forum3",
+        "shortName": "forum3",
         "user": {
             "about": "hello im user2",
             "email": "example2@mail.ru",

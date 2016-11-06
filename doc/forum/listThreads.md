@@ -23,7 +23,7 @@ Get threads from this forum
 ###Requried
 * forum
 
-   ```str``` forum short_name
+   ```str``` forum shortName
 
 
 Requesting http://some.host.ru/db/api/forum/listThreads/?related=forum&since=2013-12-31+00%3A00%3A00&order=desc&forum=forum1:
@@ -37,7 +37,7 @@ Requesting http://some.host.ru/db/api/forum/listThreads/?related=forum&since=201
             "forum": {
                 "id": 2,
                 "name": "Forum I",
-                "short_name": "forum1",
+                "shortName": "forum1",
                 "user": "example3@mail.ru"
             },
             "id": 1,

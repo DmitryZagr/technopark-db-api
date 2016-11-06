@@ -23,26 +23,6 @@ public class ThreadVote implements Serializable {
     //    Optional
     private Boolean isDeleted = null;
 
-    public ThreadVote() {}
-
-//    public ThreadVote(long id, String forum, String title,
-//                      boolean isClosed, String user, String date,
-//                      String message, String slug, long likes,
-//                      long dislikes, boolean isDeleted, long posts) {
-//        this.id = id;
-//        this.forum = forum;
-//        this.title = title;
-//        this.isClosed = isClosed;
-//        this.user = user;
-//        this.date = date;
-//        this.message = message;
-//        this.slug = slug;
-//        this.likes = likes;
-//        this.dislikes = dislikes;
-//        this.isDeleted = isDeleted;
-//        this.posts = posts;
-//    }
-
     public int getPosts() {
         return posts;
     }

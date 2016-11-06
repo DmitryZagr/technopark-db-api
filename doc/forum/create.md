@@ -14,7 +14,7 @@ Create new forum
 * name
 
    ```str``` forum name
-* short_name
+* shortName
 
    ```str``` forum slug
 * user
@@ -22,14 +22,14 @@ Create new forum
    ```str``` founder email
 
 
-Requesting http://some.host.ru/db/api/forum/create/ with *{"name": "Forum With Sufficiently Large Name", "short_name": "forumwithsufficientlylargename", "user": "richard.nixon@example.com"}*:
+Requesting http://some.host.ru/db/api/forum/create/ with *{"name": "Forum With Sufficiently Large Name", "shortName": "forumwithsufficientlylargename", "user": "richard.nixon@example.com"}*:
 ```json
 {
     "code": 0,
     "response": {
         "id": 1,
         "name": "Forum With Sufficiently Large Name",
-        "short_name": "forumwithsufficientlylargename",
+        "shortName": "forumwithsufficientlylargename",
         "user": "richard.nixon@example.com"
     }
 }

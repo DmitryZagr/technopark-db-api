@@ -22,8 +22,6 @@ public class ThreadDetails<U, F> {
     //    Optional
     private Boolean isDeleted = null;
 
-    public ThreadDetails() {}
-
     public int getPosts() {
         return posts;
     }

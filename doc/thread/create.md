@@ -17,7 +17,7 @@ Create new thread
 ###Requried
 * forum
 
-   ```str``` parent forum short_name
+   ```str``` parent forum shortName
 * title
 
    ```str``` thread title

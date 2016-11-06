@@ -1,13 +1,12 @@
 package ru.mail.park.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
+import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.thread.Thread;
 import ru.mail.park.model.thread.ThreadID;
 import ru.mail.park.model.thread.ThreadSubscribe;
@@ -22,7 +21,6 @@ import java.io.IOException;
 @RestController
 public class ThreadController {
     private final IThreadService threadService;
-    private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     public ThreadController(ThreadServiceImpl threadService){
@@ -38,7 +36,7 @@ public class ThreadController {
     @RequestMapping(path = "/db/api/thread/update/", method = RequestMethod.POST,
             produces = "application/json")
     public ResponseEntity updateThread(HttpEntity<String> httpEntity) {
-        String json = httpEntity.getBody();
+        final String json = httpEntity.getBody();
         return ResponseEntity.ok(threadService.update(json));
     }
 
@@ -98,7 +96,7 @@ public class ThreadController {
 
     @RequestMapping(path = "/db/api/thread/listPosts/", method = RequestMethod.GET,
             produces = "application/json")
-    public ResponseEntity listPosts(@RequestParam(name = "thread",required = true) Integer thread,
+    public ResponseEntity listPosts(@RequestParam(name = "thread") Integer thread,
                                     @RequestParam(name = "since", required = false) String since,
                                     @RequestParam(name = "limit", required = false) Integer limit,
                                     @RequestParam(name = "sort",  required = false) String sort,
@@ -108,7 +106,7 @@ public class ThreadController {
 
     @RequestMapping(path = "/db/api/thread/details/", method = RequestMethod.GET,
             produces = "application/json")
-    public ResponseEntity detailsThread(@RequestParam(name = "thread",  required = true) Integer thread,
+    public ResponseEntity detailsThread(@RequestParam(name = "thread") Integer thread,
                                    @RequestParam(name = "related", required = false) String related) {
         return ResponseEntity.ok(threadService.details(thread, related));
     }
@@ -118,27 +116,27 @@ public class ThreadController {
     @ExceptionHandler({HttpMessageNotReadableException.class})
     @ResponseBody
     public String resolveException() {
-        return ru.mail.park.api.status.ResponseStatus.getMessage(
-                ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-                ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+        return ResponseStatus.getMessage(
+                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ResponseStatus.FORMAT_JSON
         );
     }
 
     @ExceptionHandler({NullPointerException.class})
     @ResponseBody
     public String resolveNUllException() {
-        return ru.mail.park.api.status.ResponseStatus.getMessage(
-                ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-                ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+        return ResponseStatus.getMessage(
+                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ResponseStatus.FORMAT_JSON
         );
     }
 
     @ExceptionHandler({IOException.class})
     @ResponseBody
     public String resolveIOException() {
-        return ru.mail.park.api.status.ResponseStatus.getMessage(
-                ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-                ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+        return ResponseStatus.getMessage(
+                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ResponseStatus.FORMAT_JSON
         );
     }
 }

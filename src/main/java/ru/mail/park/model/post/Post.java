@@ -1,7 +1,6 @@
 package ru.mail.park.model.post;
 
 import java.io.Serializable;
-import java.util.Calendar;
 
 /**
  * Created by admin on 08.10.16.
@@ -25,17 +24,6 @@ public class Post implements Serializable{
     Boolean isEdited      = null;
     Boolean isSpam        = null;
     Boolean isDeleted     = null;
-
-    public Post() {
-    }
-
-//    public Post(String date, int thread, String message, String user, String forum) {
-//        this.date = date;
-//        this.thread = thread;
-//        this.message = message;
-//        this.user = user;
-//        this.forum = forum;
-//    }
 
     public Integer getid() {
         return id;
@@ -135,7 +123,7 @@ public class Post implements Serializable{
 
     @Override
     public String toString() {
-        return "" +
+        return
                 "\"id\":" + id +
                 ", \"date\": \"" + date + '\"' +
                 ", \"thread\":" + thread +

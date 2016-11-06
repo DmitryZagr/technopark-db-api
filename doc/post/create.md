@@ -44,7 +44,7 @@ Create new post
    ```str``` author email
 * forum
 
-   ```str``` forum short_name
+   ```str``` forum shortName
 
 
 Requesting http://some.host.ru/db/api/post/create/ with *{"isApproved": true, "user": "example@mail.ru", "date": "2014-01-01 00:00:01", "message": "my message 1", "isSpam": false, "isHighlighted": true, "thread": 4, "forum": "forum2", "isDeleted": false, "isEdited": true}*:

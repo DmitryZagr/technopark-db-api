@@ -1,7 +1,5 @@
 package ru.mail.park.model.forum;
 
-import org.springframework.web.bind.annotation.ModelAttribute;
-
 import java.io.Serializable;
 
 /**
@@ -13,21 +11,8 @@ public class Forum implements Serializable{
 
     private int id;
     private String name;
-    private String short_name;
+    private String shortName;
     private String user;
-
-    public Forum(String name, String short_name, String user) {
-        this.name       = name;
-        this.short_name = short_name;
-        this.user       = user;
-    }
-
-    public Forum() {}
-
-//    @ModelAttribute("forum")
-//    public Forum getForum(){
-//        return new Forum();
-//    }
 
     public int getId() {
         return id;
@@ -45,12 +30,12 @@ public class Forum implements Serializable{
         this.name = name;
     }
 
-    public String getShort_name() {
-        return short_name;
+    public String getShortName() {
+        return shortName;
     }
 
-    public void setShort_name(String short_name) {
-        this.short_name = short_name;
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
     }
 
     public String getUser() {
@@ -64,9 +49,9 @@ public class Forum implements Serializable{
     @Override
     public String toString() {
         return "\"id\":" + id +
-                ", \"name\":" + "\"" + name + "\""  +
-                ", \"short_name\":" + "\"" + short_name + "\"" +
-                ", \"user\":" +  "\"" + user + "\"";
+                ", \"name\":" + '"' + name + '"' +
+                ", \"shortName\":" + '"' + shortName + '"' +
+                ", \"user\":" + '"' + user + '"';
     }
 
 }

@@ -2,7 +2,9 @@ package ru.mail.park.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
+import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.service.interfaces.ICommonService;
 
 /**
@@ -21,10 +23,9 @@ public class CommonController {
     @RequestMapping(path = "/db/api/clear/", method = RequestMethod.POST,
                                                 produces = "application/json")
     public ResponseEntity clear() {
-        int code = commonService.clear();
-        String status;
-        status = ru.mail.park.api.status.ResponseStatus.getMessage(code,
-                                        ru.mail.park.api.status.ResponseStatus.FORMAT_JSON);
+        final int code = commonService.clear();
+        final String status = ResponseStatus.getMessage(code,
+                ResponseStatus.FORMAT_JSON);
         return ResponseEntity.ok(status);
     }
 
@@ -34,13 +35,13 @@ public class CommonController {
         return ResponseEntity.ok(commonService.status());
     }
 
-    @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class})
+    @ExceptionHandler({HttpMessageNotReadableException.class})
     @ResponseBody
     public String resolveException() {
         return
-                ru.mail.park.api.status.ResponseStatus.getMessage(
-                        ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-                        ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+                ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                        ResponseStatus.FORMAT_JSON
                 );
     }
 

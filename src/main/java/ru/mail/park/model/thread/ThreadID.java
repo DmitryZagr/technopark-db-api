@@ -11,13 +11,13 @@ import java.io.Serializable;
  */
 public class ThreadID implements Serializable{
     private static final long serialVersionUID = -5527566248002296042L;
-    private ObjectMapper mapper = new ObjectMapper();
 
     private Integer thread;
 
     public ThreadID(String json) throws IOException {
-        ObjectNode root = (ObjectNode) mapper.readTree(json);
-        setThread(root.get("thread").asInt());
+        final ObjectMapper mapper = new ObjectMapper();
+        final ObjectNode root = (ObjectNode) mapper.readTree(json);
+        this.thread = root.get("thread").asInt();
     }
 
     public Integer getThread() {

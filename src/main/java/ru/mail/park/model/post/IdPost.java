@@ -11,13 +11,13 @@ import java.io.Serializable;
  */
 public class IdPost implements Serializable{
     private static final long serialVersionUID = -5527566248002296042L;
-    private ObjectMapper mapper = new ObjectMapper();
 
     Integer id;
 
     public IdPost(String json) throws IOException {
-        ObjectNode root = (ObjectNode) mapper.readTree(json);
-        setid(root.get("post").asInt());
+        final ObjectMapper mapper = new ObjectMapper();
+        final ObjectNode root = (ObjectNode) mapper.readTree(json);
+        this.id = root.get("post").asInt();
     }
 
     public Integer getid() {

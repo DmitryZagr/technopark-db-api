@@ -17,7 +17,6 @@ import ru.mail.park.model.post.DetailPost;
 import ru.mail.park.model.thread.ThreadDetails;
 //import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IForumService;
-import ru.mail.park.util.ConnectionToMySQL;
 //import sun.tools.jconsole.inspector.TableSorter;
 
 import javax.sql.DataSource;
@@ -29,10 +28,7 @@ import java.util.ArrayList;
  */
 @Component
 @Transactional
-public class ForumServiceImpl implements IForumService, AutoCloseable{
-//    private Connection connection;
-//    private PreparedStatement preparedStatement;
-//    private ResultSet resultSet;
+public class ForumServiceImpl implements IForumService, AutoCloseable {
 
     @Autowired
     private DataSource dataSource;
@@ -56,27 +52,26 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 
-        String sqlInsert = "INSERT INTO " + Table.Forum.TABLE_FORUM + " ( " +
+        final String sqlInsert = "INSERT INTO " + Table.Forum.TABLE_FORUM + " ( " +
                 Table.Forum.COLUMN_NAME + ',' +
                 Table.Forum.COLUMN_SHORT_NAME + ',' + Table.Forum.COLUMN_USER + ')' +
                 "VALUES (?, ?, ?);";
 
         try {
-            forum.setId(forumCreateRequest.getExistingId(forum.getName(), forum.getShort_name()));
+            forum.setId(forumCreateRequest.getExistingId(forum.getName(), forum.getShortName()));
             if(forum.getId() == -1)
                 return ResponseStatus.getMessage(
                     ResponseStatus.ResponceCode.UNKNOWN_ERROR.ordinal(),
                     ResponseStatus.FORMAT_JSON);
 
             if(forum.getId() != 0) {
-                String json = (new ResultJson<Forum>(
+                return (new ResultJson<Forum>(
                         ResponseStatus.ResponceCode.OK.ordinal(), forum)).getStringResult();
-                return json;
             }
 
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)){
                 preparedStatement.setString(1, forum.getName());
-                preparedStatement.setString(2, forum.getShort_name());
+                preparedStatement.setString(2, forum.getShortName());
                 preparedStatement.setString(3, forum.getUser());
                 preparedStatement.executeUpdate();
                 try(ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
@@ -99,10 +94,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
             e.printStackTrace();
         }
 
-        String json = (new ResultJson<Forum>(
+        return (new ResultJson<Forum>(
                 ResponseStatus.ResponceCode.OK.ordinal(), forum)).getStringResult();
-
-        return json;
     }
 
     @Override
@@ -111,19 +104,19 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 
-        String sql= "SELECT * FROM " + Table.Forum.TABLE_FORUM +
+        final String sql= "SELECT * FROM " + Table.Forum.TABLE_FORUM +
                 " WHERE " + Table.Forum.COLUMN_SHORT_NAME + "=?";
 
-        ForumDetails<Object> forumDetails = new ForumDetails<>();
+        final ForumDetails<Object> forumDetails = new ForumDetails<>();
 
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 //            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, forum);
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     forumDetails.setId(resultSet.getInt("idForum"));
                     forumDetails.setName(resultSet.getString("name"));
-                    forumDetails.setShort_name(resultSet.getString("short_name"));
+                    forumDetails.setShortName(resultSet.getString("short_name"));
                     forumDetails.setUser(resultSet.getString("user"));
                     if (!StringUtils.isEmpty(related) && related.contains("user")) {
 //                        UserServiceImpl usi = new UserServiceImpl();
@@ -141,10 +134,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
             e.printStackTrace();
         }
 
-        String json = (new ResultJson<ForumDetails<Object>>(
+        return (new ResultJson<ForumDetails<Object>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), forumDetails)).getStringResult();
-
-        return json;
     }
 
     @Override
@@ -169,10 +160,10 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
 
         String sql = "SELECT * FROM " + Table.Post.TABLE_POST +
                 " INNER JOIN " + Table.Forum.TABLE_FORUM + " ON " +
-                Table.Post.COLUMN_FORUM + "=" + Table.Forum.COLUMN_SHORT_NAME +
+                Table.Post.COLUMN_FORUM + '=' + Table.Forum.COLUMN_SHORT_NAME +
                 " AND " + Table.Forum.COLUMN_SHORT_NAME +"=? ";
         if(since != null)
-            sql = sql + " AND " + Table.Post.COLUMN_DATE + ">=" + "\'" + since + "\'";
+            sql = sql + " AND " + Table.Post.COLUMN_DATE + ">=" + '\'' + since + '\'';
 
 //        if(!StringUtils.isEmpty(related) && related.contains("thread")) {
 //            sql = sql + " INNER JOIN " + Table.VotePost.TABLE_VOTE_POST +
@@ -180,17 +171,17 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
 //        }
 
         sql = sql + " INNER  JOIN " + Table.VotePost.TABLE_VOTE_POST + " ON " +
-                Table.VotePost.COLUMN_ID_POST + "=" + Table.Post.COLUMN_ID_POST;
+                Table.VotePost.COLUMN_ID_POST + '=' + Table.Post.COLUMN_ID_POST;
 
         if(order == null)
             sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + " DESC ";
         else sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + order;
 
         if(limit != null)
-            sql = sql + " LIMIT " + limit.intValue();
+            sql = sql + " LIMIT " + limit;
 
 
-        ArrayList<DetailPost<Object, Object, Object >> posts = new ArrayList<>();
+        final ArrayList<DetailPost<Object, Object, Object >> posts = new ArrayList<>();
         DetailPost<Object, Object, Object > post;
         Forum forumObj;
 
@@ -204,7 +195,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                         forumObj = new Forum();
                         forumObj.setId(resultSet.getInt("idForum"));
                         forumObj.setName(resultSet.getString("name"));
-                        forumObj.setShort_name(resultSet.getString("short_name"));
+                        forumObj.setShortName(resultSet.getString("short_name"));
                         forumObj.setUser(resultSet.getString("Forum.user"));
                         post.setForum(forumObj);
                     } else post.setForum(resultSet.getString("forum"));
@@ -247,10 +238,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
             e.printStackTrace();
         }
 
-        String json = (new ResultJson<ArrayList<DetailPost<Object, Object, Object >>> (
+        return (new ResultJson<ArrayList<DetailPost<Object, Object, Object >>> (
                 ResponseStatus.ResponceCode.OK.ordinal(), posts)).getStringResult();
-
-        return json;
     }
 
     @Override
@@ -264,16 +253,16 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                 Table.Post.TABLE_POST +
                 " INNER JOIN " +  Table.User.TABLE_USER + " ON " +
                 Table.Post.COLUMN_FORUM + "=?" + " AND " +
-                Table.User.COLUMN_EMAIL + "=" + Table.Post.COLUMN_USER;
+                Table.User.COLUMN_EMAIL + '=' + Table.Post.COLUMN_USER;
         if(since_id != null)
-            sql = sql +  " AND " + Table.User.COLUMN_ID_USER + ">=" + since_id.intValue();
+            sql = sql +  " AND " + Table.User.COLUMN_ID_USER + ">=" + since_id;
         if(order == null)
             order = " DESC ";
-        sql = sql + " GROUP BY " + Table.User.COLUMN_NAME + " " + order;
+        sql = sql + " GROUP BY " + Table.User.COLUMN_NAME + ' ' + order;
         if(limit != null)
-            sql = sql  + " LIMIT " + limit.intValue();
+            sql = sql  + " LIMIT " + limit;
 
-        ArrayList<String> emails = new ArrayList<>();
+        final ArrayList<String> emails = new ArrayList<>();
 
 //        UserServiceImpl usi = new UserServiceImpl();
 
@@ -291,9 +280,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
             e.printStackTrace();
         }
 
-        String userDetailseList =  userService.getUserDetailsListJSON(emails);
-
-        return userDetailseList;
+        return userService.getUserDetailsListJSON(emails);
     }
 
     @Override
@@ -305,23 +292,23 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
         String sql = "SELECT * FROM " + Table.Forum.TABLE_FORUM +
                 " INNER JOIN " + Table.Thread.TABLE_THREAD + " ON " +
                 Table.Forum.COLUMN_SHORT_NAME + "=? AND " +
-                Table.Thread.COLUMN_FORUM + "=" + Table.Forum.COLUMN_SHORT_NAME;
+                Table.Thread.COLUMN_FORUM + '=' + Table.Forum.COLUMN_SHORT_NAME;
 
         if(since != null)
-            sql = sql + " AND " + Table.Thread.COLUMN_DATE +">=" + "\'" + since + "\'";
+            sql = sql + " AND " + Table.Thread.COLUMN_DATE +">=" + '\'' + since + '\'';
 
         String sqlSort = " GROUP BY " + Table.Thread.COLUMN_DATE ;
         if(since == null ) sqlSort = sqlSort + " DESC";
-        else sqlSort = sqlSort + " " + order;
+        else sqlSort = sqlSort + ' ' + order;
 
         sql = sql + sqlSort;
 
         if(limit != null)
-            sql = sql + " LIMIT " + limit.intValue();
+            sql = sql + " LIMIT " + limit;
 
-        ArrayList<ThreadDetails<Object, Object>> threadDetailses = new ArrayList<>();
+        final ArrayList<ThreadDetails<Object, Object>> threadDetailses = new ArrayList<>();
 
-        ArrayList<Integer> threadId;
+        final ArrayList<Integer> threadId;
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, forum);
@@ -347,17 +334,15 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
             e.printStackTrace();
         }
 
-        String json = (new ResultJson<ArrayList<ThreadDetails<Object, Object>>>(
+        return (new ResultJson<ArrayList<ThreadDetails<Object, Object>>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), threadDetailses)).getStringResult();
-
-        return json;
     }
 
     public Forum getForum(String short_name) throws SQLException {
 //        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-        String sql = "SELECT * FROM " + Table.Forum.TABLE_FORUM +
+        final String sql = "SELECT * FROM " + Table.Forum.TABLE_FORUM +
                 " WHERE " + Table.Forum.COLUMN_SHORT_NAME + "=?";
         forum = new Forum();
             try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -366,7 +351,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable{
                     while (resultSet.next()) {
                         forum.setId(resultSet.getInt("idForum"));
                         forum.setName(resultSet.getString("name"));
-                        forum.setShort_name(resultSet.getString("short_name"));
+                        forum.setShortName(resultSet.getString("short_name"));
                         forum.setUser(resultSet.getString("user"));
                     }
                 }

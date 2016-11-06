@@ -15,7 +15,6 @@ import ru.mail.park.service.interfaces.IUserService;
  */
 @RestController
 public class UserController {
-    private ObjectMapper mapper = new ObjectMapper();
 
     private final IUserService userService;
 
@@ -45,7 +44,7 @@ public class UserController {
     @RequestMapping(path = "/db/api/user/details/", method = RequestMethod.GET,
             produces = "application/json")
     public ResponseEntity detailUser(
-            @RequestParam(name = "user",  required = true) String user) {
+            @RequestParam(name = "user") String user) {
         return ResponseEntity.ok(userService.details(user));
     }
 
@@ -58,7 +57,7 @@ public class UserController {
     @RequestMapping(path = "/db/api/user/listFollowers/", method = RequestMethod.GET,
             produces = "application/json")
     public ResponseEntity listFollowers (
-            @RequestParam(name = "user",  required = true) String user,
+            @RequestParam(name = "user") String user,
             @RequestParam(name = "limit", required = false) Integer limit,
             @RequestParam(name = "order", required = false) String order,
             @RequestParam(name = "since_id", required = false) Integer since_id) {
@@ -68,7 +67,7 @@ public class UserController {
     @RequestMapping(path = "/db/api/user/listFollowing/", method = RequestMethod.GET,
             produces = "application/json")
     public ResponseEntity listFollowing (
-            @RequestParam(name = "user",  required = true) String user,
+            @RequestParam(name = "user") String user,
             @RequestParam(name = "limit", required = false) Integer limit,
             @RequestParam(name = "order", required = false) String order,
             @RequestParam(name = "since_id", required = false) Integer since_id) {
@@ -78,7 +77,7 @@ public class UserController {
     @RequestMapping(path = "/db/api/user/listPosts/", method = RequestMethod.GET,
             produces = "application/json")
     public ResponseEntity listPosts (
-            @RequestParam(name = "user",  required = true) String user,
+            @RequestParam(name = "user") String user,
             @RequestParam(name = "limit", required = false) Integer limit,
             @RequestParam(name = "order", required = false) String order,
             @RequestParam(name = "since", required = false) String since) {

@@ -24,7 +24,7 @@ Get posts from this forum
 ###Requried
 * forum
 
-   ```str``` forum short_name
+   ```str``` forum shortName
 
 
 Requesting http://some.host.ru/db/api/forum/listPosts/?related=thread&related=forum&since=2014-01-01+00%3A00%3A00&order=desc&forum=forum1:
@@ -38,7 +38,7 @@ Requesting http://some.host.ru/db/api/forum/listPosts/?related=thread&related=fo
             "forum": {
                 "id": 2,
                 "name": "Forum I",
-                "short_name": "forum1",
+                "shortName": "forum1",
                 "user": "example3@mail.ru"
             },
             "id": 5,
@@ -74,7 +74,7 @@ Requesting http://some.host.ru/db/api/forum/listPosts/?related=thread&related=fo
             "forum": {
                 "id": 2,
                 "name": "Forum I",
-                "short_name": "forum1",
+                "shortName": "forum1",
                 "user": "example3@mail.ru"
             },
             "id": 4,

@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
+import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.post.Post;
 import ru.mail.park.model.post.IdPost;
 //import ru.mail.park.model.post.VotePost;
@@ -24,7 +25,6 @@ import java.io.IOException;
 @RestController
 public class PostController {
     private final IPostService postService;
-    private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     public PostController(PostServiceImpl postService) {
@@ -77,7 +77,7 @@ public class PostController {
 
     @RequestMapping(path = "/db/api/post/details/", method = RequestMethod.GET,
             produces = "application/json")
-    public ResponseEntity detailsPost(@RequestParam(name = "post", required = true) Integer post,
+    public ResponseEntity detailsPost(@RequestParam(name = "post") Integer post,
                                    @RequestParam(name = "related", required = false) String related) {
         return ResponseEntity.ok(postService.details(post, related));
     }
@@ -86,27 +86,27 @@ public class PostController {
     @ExceptionHandler({HttpMessageNotReadableException.class})
     @ResponseBody
     public String resolveException() {
-        return ru.mail.park.api.status.ResponseStatus.getMessage(
-                ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-                ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+        return ResponseStatus.getMessage(
+                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ResponseStatus.FORMAT_JSON
         );
     }
 
     @ExceptionHandler({NullPointerException.class})
     @ResponseBody
     public String resolveNUllException() {
-        return ru.mail.park.api.status.ResponseStatus.getMessage(
-                ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-                ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+        return ResponseStatus.getMessage(
+                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ResponseStatus.FORMAT_JSON
         );
     }
 
     @ExceptionHandler({IOException.class})
     @ResponseBody
     public String resolveIOException() {
-        return ru.mail.park.api.status.ResponseStatus.getMessage(
-                ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
-                ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+        return ResponseStatus.getMessage(
+                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ResponseStatus.FORMAT_JSON
         );
     }
 }

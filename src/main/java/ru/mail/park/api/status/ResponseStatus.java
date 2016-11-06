@@ -55,28 +55,28 @@ public class ResponseStatus {
     }
 
     private static final class errorMessageJson {
-        public static final String OK = "{" +
-                "\"code\":" + ResponceCode.OK.ordinal() + "," +
+        public static final String OK = '{' +
+                "\"code\":" + ResponceCode.OK.ordinal() + ',' +
                 "\"response\":\"" + errorMessage.OK +
                 "\" }";
-        public static final String NOT_FOUND = "{" +
-                "\"code\":" + ResponceCode.NOT_FOUND.ordinal() + "," +
+        public static final String NOT_FOUND = '{' +
+                "\"code\":" + ResponceCode.NOT_FOUND.ordinal() + ',' +
                 "\"response\":\"" + errorMessage.NOT_FOUND +
                 "\" }";
-        public static final String NOT_VALID = "{" +
-                "\"code\":" + ResponceCode.NOT_VALID.ordinal() + "," +
+        public static final String NOT_VALID = '{' +
+                "\"code\":" + ResponceCode.NOT_VALID.ordinal() + ',' +
                 "\"response\":\"" + errorMessage.NOT_VALID +
                 "\" }";
-        public static final String IVALID_REQUEST = "{" +
-                "\"code\":" + ResponceCode.INVALID_REQUEST.ordinal() + "," +
+        public static final String IVALID_REQUEST = '{' +
+                "\"code\":" + ResponceCode.INVALID_REQUEST.ordinal() + ',' +
                 "\"response\":\"" + errorMessage.IVALID_REQUEST +
                 "\" }";
-        public static final String UNKNOWN_ERROR = "{" +
-                "\"code\":" + ResponceCode.UNKNOWN_ERROR.ordinal() + "," +
+        public static final String UNKNOWN_ERROR = '{' +
+                "\"code\":" + ResponceCode.UNKNOWN_ERROR.ordinal() + ',' +
                 "\"response\":\"" + errorMessage.UNKNOWN_ERROR +
                 "\" }";
-        public static final String USER_EXIST = "{" +
-                "\"code\":" + ResponceCode.USER_EXIST.ordinal() + "," +
+        public static final String USER_EXIST = '{' +
+                "\"code\":" + ResponceCode.USER_EXIST.ordinal() + ',' +
                 "\"response\":\"" + errorMessage.USER_EXIST +
                 "\" }";
     }

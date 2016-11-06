@@ -12,7 +12,6 @@ import java.io.Serializable;
 public class Thread implements Serializable{
 
     private static final long serialVersionUID = -5527566248002296042L;
-    private ObjectMapper mapper = new ObjectMapper();
 
     //    Requried
     private Integer id;
@@ -31,15 +30,18 @@ public class Thread implements Serializable{
     }
 
     public Thread(String json) throws IOException {
-        ObjectNode root = (ObjectNode) mapper.readTree(json);
-        setForum(root.get("forum").asText());
-        setTitle(root.get("title").asText());
-        setClosed(root.get("isClosed").asBoolean());
-        setUser(root.get("user").asText());
-        setDate(root.get("date").asText());
-        setMessage(root.get("message").asText());
-        setSlug(root.get("slug").asText());
-        if(root.has("isDeleted")) setisDeleted(root.get("isDeleted").asBoolean());
+        final ObjectMapper mapper = new ObjectMapper();
+        final ObjectNode root = (ObjectNode) mapper.readTree(json);
+        this.forum = root.get("forum").asText();
+        this.title = root.get("title").asText();
+        isClosed = root.get("isClosed").asBoolean();
+        this.user = root.get("user").asText();
+        this.date = root.get("date").asText();
+        this.message = root.get("message").asText();
+        this.slug = root.get("slug").asText();
+        if(root.has("isDeleted")) {
+            isDeleted = root.get("isDeleted").asBoolean();
+        }
     }
 
 

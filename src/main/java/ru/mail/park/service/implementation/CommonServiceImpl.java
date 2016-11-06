@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.Table;
 import ru.mail.park.service.interfaces.ICommonService;
-import ru.mail.park.util.ConnectionToMySQL;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -24,25 +23,21 @@ import java.sql.Statement;
 @Transactional
 public class CommonServiceImpl implements ICommonService, AutoCloseable{
 
-//    private Connection connection;
-//    private Statement  statement;
-//    private ResultSet  resultSet;
-
     @Autowired
     private DataSource dataSource;
 
     @Override
     public int clear() {
-        String unsafeMod = "SET SQL_SAFE_UPDATES = 0;";
-        String tranckateForum  = "DELETE FROM " + Table.Forum.TABLE_FORUM;
-        String tranckatePost   = "DELETE FROM " + Table.Post.TABLE_POST;
-        String tranckateThread = "DELETE FROM " + Table.Thread.TABLE_THREAD ;
-        String tranckateUser   = "DELETE FROM " + Table.User.TABLE_USER ;
-        String userFollower    = "DELETE FROM " + Table.Followers.TABLE_FOLLOWERS;
-        String threadSubscribe = "DELETE FROM " + Table.ThreadSubscribe.TABLE_ThreadSubscribe;
-        String threadVote      = "DELETE FROM " + Table.ThreadVote.TABLE_THREAD_VOTE;
-        String votePost        = "DELETE FROM " + Table.VotePost.TABLE_VOTE_POST;
-        String safeMode        = "SET SQL_SAFE_UPDATES = 1;";
+        final String unsafeMod = "SET SQL_SAFE_UPDATES = 0;";
+        final String tranckateForum  = "DELETE FROM " + Table.Forum.TABLE_FORUM;
+        final String tranckatePost   = "DELETE FROM " + Table.Post.TABLE_POST;
+        final String tranckateThread = "DELETE FROM " + Table.Thread.TABLE_THREAD ;
+        final String tranckateUser   = "DELETE FROM " + Table.User.TABLE_USER ;
+        final String userFollower    = "DELETE FROM " + Table.Followers.TABLE_FOLLOWERS;
+        final String threadSubscribe = "DELETE FROM " + Table.ThreadSubscribe.TABLE_ThreadSubscribe;
+        final String threadVote      = "DELETE FROM " + Table.ThreadVote.TABLE_THREAD_VOTE;
+        final String votePost        = "DELETE FROM " + Table.VotePost.TABLE_VOTE_POST;
+        final String safeMode        = "SET SQL_SAFE_UPDATES = 1;";
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
@@ -74,16 +69,19 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
     @Override
     public String status() {
 
-        String countStrUser = "SELECT count(" + Table.User.COLUMN_ID_USER + ") from " +
+        final String countStrUser = "SELECT count(" + Table.User.COLUMN_ID_USER + ") from " +
                 Table.User.TABLE_USER;
-        String countStrThread = "SELECT count(" + Table.Thread.COLUMN_ID_THREAD+ ") from " +
+        final String countStrThread = "SELECT count(" + Table.Thread.COLUMN_ID_THREAD+ ") from " +
                 Table.Thread.TABLE_THREAD;
-        String countStrForum = "SELECT count(" + Table.Forum.COLUMN_ID_FORUM + ") from " +
+        final String countStrForum = "SELECT count(" + Table.Forum.COLUMN_ID_FORUM + ") from " +
                 Table.Forum.TABLE_FORUM;
-        String countStrPost= "SELECT count(" + Table.Post.COLUMN_ID_POST + ") from " +
+        final String countStrPost= "SELECT count(" + Table.Post.COLUMN_ID_POST + ") from " +
                 Table.Post.TABLE_POST;
 
-        int countForum, countPost, countThread, countUser;
+        int countForum;
+        int countPost;
+        int countThread;
+        int countUser;
         countForum = countPost = countThread = countUser = 0;
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
@@ -119,15 +117,15 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
                     ResponseStatus.FORMAT_JSON);
         }
 
-        return "{" +
-                    "\"code\":" +  ResponseStatus.ResponceCode.OK.ordinal() + "," +
+        return '{' +
+                    "\"code\":" +  ResponseStatus.ResponceCode.OK.ordinal() + ',' +
                     " \"response\": {" +
-                        "\"user\":"    + countUser +  "," +
-                        " \"thread\":" + countThread  +  "," +
-                        " \"forum\":"  + countForum   +  "," +
+                        "\"user\":"    + countUser + ',' +
+                        " \"thread\":" + countThread  + ',' +
+                        " \"forum\":"  + countForum   + ',' +
                         " \"post\":"   + countPost           +
-                    "}" +
-                "}";
+                '}' +
+                '}';
     }
 
     @Override
