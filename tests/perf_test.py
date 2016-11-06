@@ -121,7 +121,7 @@ class ForumEntity(object):
     @property
     def unique_id(self):
         id_attr_for_type = {
-            'forum': 'short_name',
+            'forum': 'shortName',
             'thread': 'id',
             'post': 'id',
             'user': 'email',
@@ -165,7 +165,7 @@ class Forum(ForumEntity):
     def create(self, fill=False):
         params = {
             'name': facter.name,
-            'short_name': facter.word,
+            'shortName': facter.word,
         }
         location = '/%s/create/' % self.type
         params['user'] = random.choice(state.users)
@@ -418,7 +418,7 @@ class State(object):
         self.users.append(u['email'])
 
     def add_forum(self, f):
-        self.forums.append(f['short_name'])
+        self.forums.append(f['shortName'])
 
     def add_thread(self, t):
         self.threads.append(t['id'])

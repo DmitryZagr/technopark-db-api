@@ -433,7 +433,7 @@ class ForumEntity(object):
     @property
     def unique_id(self):
         id_attr_for_type = {
-            'forum': 'short_name',
+            'forum': 'shortName',
             'thread': 'id',
             'post': 'id',
             'user': 'email',
@@ -550,7 +550,7 @@ class EntitiesList(object):
             if isinstance(obj_value, int) and isinstance(value, (str, unicode)):
                 test_obj = TestScenario.get_obj(obj_type=attr, obj_id=obj_value)
                 if attr in ('forum'):
-                    obj_value = test_obj.short_name
+                    obj_value = test_obj.shortName
                 if attr in ('thread'):
                     obj_value = test_obj.slug
                 if attr in ('user'):
@@ -820,7 +820,7 @@ class TestScenario(object):
             for p in self.posts.values():
                 user = self.users[p.user]
                 forum = self.forums[p.forum]
-                if forum.short_name == params['forum']:
+                if forum.shortName == params['forum']:
                     if user.id not in [u.id for u in objects]:
                         objects.append(user)
             params_cp = copy.deepcopy(params)
