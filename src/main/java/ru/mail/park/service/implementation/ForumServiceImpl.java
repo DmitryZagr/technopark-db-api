@@ -33,7 +33,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
     @Autowired
     private DataSource dataSource;
 
-    private Forum forum;
+//    private Forum forum;
 
     @Autowired
     private ThreadServiceImpl threadService;
@@ -47,8 +47,6 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
     @Override
     public String create(Forum forum) {
 
-//        connection =  ConnectionToMySQL.getConnection();
-
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 
@@ -58,7 +56,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
                 "VALUES (?, ?, ?);";
 
         try {
-            forum.setId(forumCreateRequest.getExistingId(forum.getName(), forum.getShortName()));
+            forum.setId(forumCreateRequest.getExistingId(forum.getName(), forum.getShort_name()));
             if(forum.getId() == -1)
                 return ResponseStatus.getMessage(
                     ResponseStatus.ResponceCode.UNKNOWN_ERROR.ordinal(),
@@ -71,7 +69,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
 
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)){
                 preparedStatement.setString(1, forum.getName());
-                preparedStatement.setString(2, forum.getShortName());
+                preparedStatement.setString(2, forum.getShort_name());
                 preparedStatement.setString(3, forum.getUser());
                 preparedStatement.executeUpdate();
                 try(ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
@@ -81,11 +79,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
             }
 
         }
-//        catch (MySQLIntegrityConstraintViolationException e) {
-//            return ResponseStatus.getMessage(
-//                        ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
-//                        ResponseStatus.FORMAT_JSON);
-//        }
+
         catch (MySQLSyntaxErrorException e) {
             return ResponseStatus.getMessage(
                         ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
@@ -100,27 +94,26 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
 
     @Override
     public String details(String forum, String related) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-
-        final String sql= "SELECT * FROM " + Table.Forum.TABLE_FORUM +
-                " WHERE " + Table.Forum.COLUMN_SHORT_NAME + "=?";
+        final String sql= "SELECT " + Table.Forum.COLUMN_ID_FORUM + ", "
+                + Table.Forum.COLUMN_NAME + ", " + Table.Forum.COLUMN_SHORT_NAME + ", "
+                + Table.Forum.COLUMN_USER
+                + " FROM " + Table.Forum.TABLE_FORUM
+                + " WHERE " + Table.Forum.COLUMN_SHORT_NAME + "=?";
 
         final ForumDetails<Object> forumDetails = new ForumDetails<>();
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-//            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, forum);
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     forumDetails.setId(resultSet.getInt("idForum"));
                     forumDetails.setName(resultSet.getString("name"));
-                    forumDetails.setShortName(resultSet.getString("short_name"));
+                    forumDetails.setShort_name(resultSet.getString("short_name"));
                     forumDetails.setUser(resultSet.getString("user"));
                     if (!StringUtils.isEmpty(related) && related.contains("user")) {
-//                        UserServiceImpl usi = new UserServiceImpl();
-                        forumDetails.setUser(userService.getUserDetatil((String) forumDetails.getUser()));
+                        forumDetails.setUser(userService.getUserDetail((String) forumDetails.getUser()));
                     }
                 }
             }
@@ -141,37 +134,19 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
     @Override
     public String listPosts(String forum, String since, Integer limit,
                             String order, String related) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
+        String sql = "SELECT * " +
 
-//        SELECT * FROM forum.Post inner join forum.Forum on
-//        forum.Post.forum = forum.Forum.short_name
-//
-//        inner join
-//        forum.VotePost on
-//        forum.Post.idPost = forum.VotePost.idPost
-//
-//        inner join forum.Thread on
-//        forum.Post.thread = forum.Thread.idThread
-//
-//        inner join forum.ThreadVote  on
-//        forum.ThreadVote.idThread =forum.Thread.idThread ;
-
-        String sql = "SELECT * FROM " + Table.Post.TABLE_POST +
+                " FROM " + Table.Post.TABLE_POST +
                 " INNER JOIN " + Table.Forum.TABLE_FORUM + " ON " +
                 Table.Post.COLUMN_FORUM + '=' + Table.Forum.COLUMN_SHORT_NAME +
                 " AND " + Table.Forum.COLUMN_SHORT_NAME +"=? ";
         if(since != null)
             sql = sql + " AND " + Table.Post.COLUMN_DATE + ">=" + '\'' + since + '\'';
 
-//        if(!StringUtils.isEmpty(related) && related.contains("thread")) {
-//            sql = sql + " INNER JOIN " + Table.VotePost.TABLE_VOTE_POST +
-//                    " ON " + Table.Post.COLUMN_ID_POST = ;
-//        }
-
-        sql = sql + " INNER  JOIN " + Table.VotePost.TABLE_VOTE_POST + " ON " +
-                Table.VotePost.COLUMN_ID_POST + '=' + Table.Post.COLUMN_ID_POST;
+//        sql = sql + " INNER  JOIN " + Table.VotePost.TABLE_VOTE_POST + " ON " +
+//                Table.VotePost.COLUMN_ID_POST + '=' + Table.Post.COLUMN_ID_POST;
 
         if(order == null)
             sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + " DESC ";
@@ -195,7 +170,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
                         forumObj = new Forum();
                         forumObj.setId(resultSet.getInt("idForum"));
                         forumObj.setName(resultSet.getString("name"));
-                        forumObj.setShortName(resultSet.getString("short_name"));
+                        forumObj.setShort_name(resultSet.getString("short_name"));
                         forumObj.setUser(resultSet.getString("Forum.user"));
                         post.setForum(forumObj);
                     } else post.setForum(resultSet.getString("forum"));
@@ -216,13 +191,10 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
                 }
             }
 
-//            UserServiceImpl usi = new UserServiceImpl();
-//            ThreadServiceImpl tsi = new ThreadServiceImpl();
-
             for(int i = 0; i < posts.size(); i++){
                 if(related != null ) {
                     if(related.contains("user"))
-                        posts.get(i).setUser(userService.getUserDetatil((String) posts.get(i).getUser()));
+                        posts.get(i).setUser(userService.getUserDetail((String) posts.get(i).getUser()));
                     if(related.contains("thread"))
                         posts.get(i).setThread(threadService.getThreadDetatils((Integer) posts.get(i).getThread(), null));
                 }
@@ -244,7 +216,6 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
 
     @Override
     public String listUsers(String forum, Integer limit, String order, Integer since_id) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         String sql = "SELECT " + Table.User.COLUMN_ID_USER + ", " +
@@ -263,8 +234,6 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
             sql = sql  + " LIMIT " + limit;
 
         final ArrayList<String> emails = new ArrayList<>();
-
-//        UserServiceImpl usi = new UserServiceImpl();
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, forum);
@@ -286,18 +255,19 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
     @Override
     public String listThreads(String forum, String since,
                               Integer limit, String order, String related) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-        String sql = "SELECT * FROM " + Table.Forum.TABLE_FORUM +
-                " INNER JOIN " + Table.Thread.TABLE_THREAD + " ON " +
-                Table.Forum.COLUMN_SHORT_NAME + "=? AND " +
-                Table.Thread.COLUMN_FORUM + '=' + Table.Forum.COLUMN_SHORT_NAME;
+        String sql = "SELECT " + Table.Thread.COLUMN_ID_THREAD
+                + " FROM " + Table.Forum.TABLE_FORUM
+                + " INNER JOIN " + Table.Thread.TABLE_THREAD + " ON "
+                + Table.Forum.COLUMN_SHORT_NAME + "=? AND "
+                + Table.Thread.COLUMN_FORUM + '=' + Table.Forum.COLUMN_SHORT_NAME;
 
         if(since != null)
             sql = sql + " AND " + Table.Thread.COLUMN_DATE +">=" + '\'' + since + '\'';
 
         String sqlSort = " GROUP BY " + Table.Thread.COLUMN_DATE ;
+
         if(since == null ) sqlSort = sqlSort + " DESC";
         else sqlSort = sqlSort + ' ' + order;
 
@@ -319,8 +289,6 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
                 }
             }
 
-//            ThreadServiceImpl tsi = new ThreadServiceImpl();
-
             for(int i = 0; i < threadId.size(); i++) {
                 threadDetailses.add(threadService.getThreadDetatils(threadId.get(i), related));
             }
@@ -339,19 +307,21 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
     }
 
     public Forum getForum(String short_name) throws SQLException {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-        final String sql = "SELECT * FROM " + Table.Forum.TABLE_FORUM +
-                " WHERE " + Table.Forum.COLUMN_SHORT_NAME + "=?";
-        forum = new Forum();
+        final String sql = "SELECT "
+                + Table.Forum.COLUMN_ID_FORUM + ", " + Table.Forum.COLUMN_NAME + ", "
+                + Table.Forum.COLUMN_SHORT_NAME + ", " + Table.Forum.COLUMN_USER
+                + " FROM " + Table.Forum.TABLE_FORUM
+                + " WHERE " + Table.Forum.COLUMN_SHORT_NAME + "=?";
+        Forum forum = new Forum();
             try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, short_name);
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         forum.setId(resultSet.getInt("idForum"));
                         forum.setName(resultSet.getString("name"));
-                        forum.setShortName(resultSet.getString("short_name"));
+                        forum.setShort_name(resultSet.getString("short_name"));
                         forum.setUser(resultSet.getString("user"));
                     }
                 }

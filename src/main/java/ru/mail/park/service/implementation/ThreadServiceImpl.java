@@ -35,8 +35,8 @@ import java.util.ArrayList;
 @Transactional
 public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
-    private final ObjectMapper mapper = new ObjectMapper();
-    private ThreadDetails<Object, Object> threadDetails;
+//    private final ObjectMapper mapper = new ObjectMapper();
+//    private ThreadDetails<Object, Object> threadDetails;
 
     @Autowired
     private DataSource dataSource;
@@ -64,9 +64,9 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 Table.Thread.COLUMN_IS_DELETED + " ) " +
                 "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?); " ;
 
-        final String sqlVoteTabel = "INSERT INTO " + Table.ThreadVote.TABLE_THREAD_VOTE + "( " +
-                Table.ThreadVote.COLUMN_ID_THREAD + " ) " +
-                "VALUES (?);" ;
+//        final String sqlVoteTabel = "INSERT INTO " + Table.ThreadVote.TABLE_THREAD_VOTE + "( " +
+//                Table.ThreadVote.COLUMN_ID_THREAD + " ) " +
+//                "VALUES (?);" ;
 
         try {
             try(PreparedStatement preparedStatement =
@@ -84,10 +84,10 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                     while (resultSet.next()) thread.setId(resultSet.getInt(1));
                 }
             }
-            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlVoteTabel)) {
-                preparedStatement.setLong(1, thread.getId());
-                preparedStatement.execute();
-            }
+//            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlVoteTabel)) {
+//                preparedStatement.setLong(1, thread.getId());
+//                preparedStatement.execute();
+//            }
         } catch (MySQLIntegrityConstraintViolationException e) {
             return (new ResultJson<Thread>(
                     ResponseStatus.ResponceCode.OK.ordinal(), thread)).getStringResult();
@@ -95,6 +95,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             return ResponseStatus.getMessage(
                     ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
         } catch (SQLException e) {
+            System.out.println();
             e.printStackTrace();
         }
 
@@ -111,20 +112,23 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                     ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
                     ResponseStatus.FORMAT_JSON);
 
-//        connection =  ConnectionToMySQL.getConnection();
-
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-        final String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_ID_POST + ") AS posts FROM " +
-                Table.Thread.TABLE_THREAD + "INNER JOIN " +
-                Table.ThreadVote.TABLE_THREAD_VOTE + " ON " +
-                Table.Thread.COLUMN_ID_THREAD + '=' + Table.ThreadVote.COLUMN_ID_THREAD + " AND " +
-                Table.Thread.COLUMN_ID_THREAD   + "=?" +
-                " INNER JOIN " + Table.Post.TABLE_POST +
-                " ON " + Table.Post.COLUMN_THREAD + '=' + Table.Thread.COLUMN_ID_THREAD +
-                " AND " + Table.Post.COLUMN_IS_DELETED + "= FALSE " ;
+        final String sqlSel = "SELECT "
+                + Table.Thread.COLUMN_FORUM + "," + Table.Thread.COLUMN_DATE + ","
+                + Table.Thread.COLUMN_ID_THREAD + "," + Table.Thread.COLUMN_IS_CLOSED + ","
+                + Table.Thread.COLUMN_IS_DELETED + "," +  Table.Thread.COLUMN_MESSAGE + ","
+                + Table.Thread.COLUMN_SLUG + "," + Table.Thread.COLUMN_TITLE + ","
+                + Table.Thread.COLUMN_USER + "," + Table.Thread.COLUMN_LIKES + ","
+                + Table.Thread.COLUMN_DISLIKES + ", "
+                + "COUNT(" + Table.Post.COLUMN_ID_POST + ") AS posts FROM "
+                + Table.Thread.TABLE_THREAD
+                + " INNER JOIN " + Table.Post.TABLE_POST
+                + " ON " + Table.Thread.COLUMN_ID_THREAD   + "=? AND "
+                + Table.Post.COLUMN_THREAD + '=' + Table.Thread.COLUMN_ID_THREAD
+                + " AND " + Table.Post.COLUMN_IS_DELETED + "= FALSE " ;
 
-        threadDetails = new ThreadDetails<>();
+        ThreadDetails<Object, Object> threadDetails = new ThreadDetails<>();
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel)) {
             preparedStatement.setLong(1, thread.intValue());
@@ -147,13 +151,11 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                     threadDetails.setPoints();
 
                     if (!StringUtils.isEmpty(related) && related.contains("user")) {
-//                        UserServiceImpl usi = new UserServiceImpl();
-                        threadDetails.setUser(userService.getUserDetatil((String) threadDetails.getUser()));
+                        threadDetails.setUser(userService.getUserDetail((String) threadDetails.getUser()));
                     }
 
                     if (!StringUtils.isEmpty(related) && related.contains("forum")) {
-//                        ForumServiceImpl fsi = new ForumServiceImpl();
-                        threadDetails.setForum(forumService.getForum((String) threadDetails.getForum()));
+                        threadDetails.setForum(forumService.getForum(threadDetails.getForum().toString()));
                     }
                 }
             }
@@ -171,7 +173,6 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     @Override
     public String subscribeUnSub(ThreadSubscribe threadSubscribe, boolean subs) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         final String sqlInsert = "INSERT INTO " + Table.ThreadSubscribe.TABLE_ThreadSubscribe +
@@ -205,7 +206,6 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     @Override
     public String open(ThreadID thread) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         final String sql = "UPDATE " + Table.Thread.TABLE_THREAD +
@@ -236,7 +236,6 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     @Override
     public String close(ThreadID thread) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         final String sql = "UPDATE " + Table.Thread.TABLE_THREAD +
@@ -265,7 +264,6 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     @Override
     public String remove(ThreadID thread) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         final String sqlUpdTH = "UPDATE " + Table.Thread.TABLE_THREAD +
@@ -279,7 +277,6 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
         final String json;
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(sqlUpdTH)) {
-//            preparedStatement = connection.prepareStatement(sqlUpdTH);
             if(preparedStatement.executeUpdate() == 0)
                 return ResponseStatus.getMessage(
                         ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
@@ -300,7 +297,6 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     @Override
     public String restore(ThreadID thread) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         final String sqlUpdTH = "UPDATE " + Table.Thread.TABLE_THREAD +
@@ -334,34 +330,14 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     @Override
     public String vote(String voteThread) {
-//        connection =  ConnectionToMySQL.getConnection();
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
-
-
-//       SELECT *, COUNT(idPost) as posts
-//        FROM `forum`.`Thread`
-//        INNER JOIN`forum`.`ThreadVote` ON
-//        forum.Thread.idThread=forum.ThreadVote.idThread AND
-//        forum.Thread.idThread = 45
-//        INNER JOIN forum.Post ON
-//        forum.Post.thread = forum.Thread.idThread
-//        GROUP BY Thread.idThread ";
-
-
-        final String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_ID_POST + ") AS posts FROM " +
-                Table.Thread.TABLE_THREAD + "INNER JOIN " +
-                Table.ThreadVote.TABLE_THREAD_VOTE + " ON " +
-                Table.Thread.COLUMN_ID_THREAD + '=' + Table.ThreadVote.COLUMN_ID_THREAD + " AND " +
-                Table.Thread.COLUMN_ID_THREAD   + "=?" +
-                " INNER JOIN " + Table.Post.TABLE_POST +
-                " ON " + Table.Post.COLUMN_THREAD + '=' + Table.Thread.COLUMN_ID_THREAD +
-                " AND " + Table.Post.COLUMN_IS_DELETED + "!= FALSE " ;
 
         final int _vote;
         final int idThread;
 
         try {
+            final ObjectMapper mapper = new ObjectMapper();
             final ObjectNode root = (ObjectNode) mapper.readTree(voteThread);
             _vote = root.get("vote").asInt();
             idThread = root.get("thread").asInt();
@@ -379,16 +355,30 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                     ResponseStatus.FORMAT_JSON);
         }
 
-        final String sqlCol = (_vote == 1) ? Table.ThreadVote.COLUMN_LIKES : Table.ThreadVote.COLUMN_DISLIKES;
+        final String sqlCol = (_vote == 1) ? Table.Thread.COLUMN_LIKES : Table.Thread.COLUMN_DISLIKES;
 
-        final String sqlUpd = "UPDATE " + Table.ThreadVote.TABLE_THREAD_VOTE + " SET " +
+        final String sqlUpd = "UPDATE " + Table.Thread.TABLE_THREAD + " SET " +
                 sqlCol + "=? WHERE " +
-                Table.ThreadVote.COLUMN_ID_THREAD + "=?;";
+                Table.Thread.COLUMN_ID_THREAD + "=?;";
         final ThreadVote threadVote = new ThreadVote();
         try {
+
+            final String sqlSel = "SELECT "
+                    + Table.Thread.COLUMN_FORUM + "," + Table.Thread.COLUMN_DATE + ","
+                    + Table.Thread.COLUMN_ID_THREAD + "," + Table.Thread.COLUMN_IS_CLOSED + ","
+                    + Table.Thread.COLUMN_IS_DELETED + "," +  Table.Thread.COLUMN_MESSAGE + ","
+                    + Table.Thread.COLUMN_SLUG + "," + Table.Thread.COLUMN_TITLE + ","
+                    + Table.Thread.COLUMN_USER + "," + Table.Thread.COLUMN_LIKES + ","
+                    + Table.Thread.COLUMN_DISLIKES + ", "
+                    + "COUNT(" + Table.Post.COLUMN_ID_POST + ") AS posts FROM "
+                    + Table.Thread.TABLE_THREAD
+                    + " INNER JOIN " + Table.Post.TABLE_POST
+                    + " ON " + Table.Thread.COLUMN_ID_THREAD   + "=? AND "
+                    + Table.Post.COLUMN_THREAD + '=' + Table.Thread.COLUMN_ID_THREAD
+                    + " AND " + Table.Post.COLUMN_IS_DELETED + "!= FALSE " ;
+
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel)){
                 preparedStatement.setLong(1, idThread);
-//            preparedStatement.setLong(2, idThread);
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         threadVote.setDate(resultSet.getString("date"));
@@ -425,7 +415,6 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     @Override
     public String list(String user, String forum, String since, Integer limit, String order) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         final String reqCondition;
@@ -434,19 +423,25 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
         final String limitCondition;
         reqCondition = (forum != null) ? Table.Thread.COLUMN_FORUM : Table.Thread.COLUMN_USER;
 
-        String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_THREAD + ") AS posts  FROM " +
-                Table.Thread.TABLE_THREAD + "INNER JOIN " +
-                Table.ThreadVote.TABLE_THREAD_VOTE + " ON " +
-                Table.ThreadVote.COLUMN_ID_THREAD + '=' + Table.Thread.COLUMN_ID_THREAD +
-                " AND " + reqCondition + "=? "  ;
+        String sqlSel = "SELECT "
+                + Table.Thread.COLUMN_FORUM + "," + Table.Thread.COLUMN_DATE + ","
+                + Table.Thread.COLUMN_ID_THREAD + "," + Table.Thread.COLUMN_IS_CLOSED + ","
+                + Table.Thread.COLUMN_IS_DELETED + "," +  Table.Thread.COLUMN_MESSAGE + ","
+                + Table.Thread.COLUMN_SLUG + "," + Table.Thread.COLUMN_TITLE + ","
+                + Table.Thread.COLUMN_USER + "," + Table.Thread.COLUMN_LIKES + ","
+                + Table.Thread.COLUMN_DISLIKES + ","
+                + "COUNT(" + Table.Post.COLUMN_THREAD + ") AS posts  FROM "
+                + Table.Thread.TABLE_THREAD   ;
 
         dateContidion = (since != null) ?  " AND " + Table.Thread.COLUMN_DATE + ">=\'"
                 + since + '\'' : " ";
-        sqlSel = sqlSel + dateContidion;
+//        sqlSel = sqlSel + dateContidion;
 
-        sqlSel = sqlSel + " LEFT JOIN " + Table.Post.TABLE_POST +
-        " ON " + Table.Post.COLUMN_THREAD + '=' + Table.Thread.COLUMN_ID_THREAD +
+        sqlSel = sqlSel + " INNER JOIN " + Table.Post.TABLE_POST +
+                " ON " + reqCondition + "=? AND "
+                + Table.Post.COLUMN_THREAD + '=' + Table.Thread.COLUMN_ID_THREAD +
                 " AND " + Table.Post.COLUMN_IS_DELETED + "= FALSE ";
+        sqlSel = sqlSel + dateContidion;
 
         sqlSel = sqlSel + " GROUP BY " + Table.Thread.COLUMN_ID_THREAD + ' ';
 
@@ -499,26 +494,20 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
     @Override
     public String update(String updJson) {
-//        connection =  ConnectionToMySQL.getConnection();
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 
-        final String sql = "UPDATE " + Table.Thread.TABLE_THREAD + " SET " +
+        final String sqlUpd = "UPDATE " + Table.Thread.TABLE_THREAD + " SET " +
                 Table.Thread.COLUMN_MESSAGE + "=?, " + Table.Thread.COLUMN_SLUG + " =? " +
                 "WHERE " + Table.Thread.COLUMN_ID_THREAD + "=?; ";
-
-        final String sqlSel = "SELECT *, COUNT(" + Table.Post.COLUMN_THREAD + ") AS posts FROM " +
-                Table.Thread.TABLE_THREAD + " INNER JOIN " +
-                Table.ThreadVote.TABLE_THREAD_VOTE + " ON " +
-                Table.ThreadVote.COLUMN_ID_THREAD   + "=? LEFT JOIN " + Table.Post.TABLE_POST +
-                " ON " + Table.Post.COLUMN_THREAD + "=? AND " + Table.Post.COLUMN_IS_DELETED + "!= FALSE " ;
 
         final String message;
         final String slug;
         final int thread;
 
         try {
+            final ObjectMapper mapper = new ObjectMapper();
             final ObjectNode root = (ObjectNode) mapper.readTree(updJson);
             message = root.get("message").asText();
             slug    = root.get("slug").asText();
@@ -535,7 +524,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
         final ThreadVote threadVote = new ThreadVote();
         try {
-            try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlUpd)) {
                 preparedStatement.setString(1, message);
                 preparedStatement.setString(2, slug);
                 preparedStatement.setLong(3, thread);
@@ -545,6 +534,21 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                             ResponseStatus.FORMAT_JSON);
                 }
             }
+
+            final String sqlSel = "SELECT "
+                    + Table.Thread.COLUMN_FORUM + "," + Table.Thread.COLUMN_DATE + ","
+                    + Table.Thread.COLUMN_ID_THREAD + "," + Table.Thread.COLUMN_IS_CLOSED + ","
+                    + Table.Thread.COLUMN_IS_DELETED + "," +  Table.Thread.COLUMN_MESSAGE + ","
+                    + Table.Thread.COLUMN_SLUG + "," + Table.Thread.COLUMN_TITLE + ","
+                    + Table.Thread.COLUMN_USER + "," + Table.Thread.COLUMN_LIKES + ","
+                    + Table.Thread.COLUMN_DISLIKES + ", "
+                    + "COUNT(" + Table.Post.COLUMN_THREAD + ") AS posts FROM "
+                    + Table.Thread.TABLE_THREAD
+                    + " INNER JOIN " + Table.Post.TABLE_POST
+                    + " ON " + Table.Thread.COLUMN_ID_THREAD   + "=? AND "
+                    + Table.Post.COLUMN_THREAD + "=? AND "
+                    + Table.Post.COLUMN_IS_DELETED + "!= FALSE;";
+
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel)){
                 preparedStatement.setLong(1, thread);
                 preparedStatement.setLong(2, thread);
@@ -577,19 +581,19 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
     @Override
     public String listPosts(Integer thread, String since,
                             Integer limit, String sort, String order) {
-//        connection =  ConnectionToMySQL.getConnection();
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-//        String sql = "Select * FROM " + Table.Post.TABLE_POST + " INNER JOIN " +
-//                Table.VotePost.TABLE_VOTE_POST + " ON " + Table.Post.COLUMN_ID_POST +
-//                "=" + Table.VotePost.COLUMN_ID_POST + " AND " +
-//                Table.Post.COLUMN_THREAD + "=?";
-
-        String sql = "Select * FROM " + Table.Post.TABLE_POST + " INNER JOIN " +
-                Table.VotePost.TABLE_VOTE_POST + " ON " + Table.Post.COLUMN_ID_POST +
-                '=' + Table.VotePost.COLUMN_ID_POST + " AND " +
-                Table.Post.COLUMN_THREAD + "=?";
+        String sql = "Select "
+                + Table.Post.COLUMN_ID_POST + "," + Table.Post.COLUMN_FORUM + ","
+                + Table.Post.COLUMN_DATE + "," + Table.Post.COLUMN_IS_APPROVED + ","
+                + Table.Post.COLUMN_IS_DELETED + "," + Table.Post.COLUMN_IS_EDITED + ","
+                + Table.Post.COLUMN_IS_HIGHLIGHED + "," + Table.Post.COLUMN_IS_SPAM + ","
+                + Table.Post.COLUMN_MESSAGE + "," + Table.Post.COLUMN_PARENT + ","
+                + Table.Post.COLUMN_THREAD + "," + Table.Post.COLUMN_USER + ","
+                + Table.Post.COLUMN_LIKE + "," + Table.Post.COLUMN_DISLIKE + " "
+                + "FROM " + Table.Post.TABLE_POST + " WHERE "
+                + Table.Post.COLUMN_THREAD + "=?";
 
         String sqlSince = null;
 
@@ -665,10 +669,9 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-
-        String sqlSelect = "SELECT * " +
-                " FROM " + Table.Post.TABLE_POST +
-                " WHERE " + Table.Post.COLUMN_THREAD + "=? ";
+        String sqlSelect = "SELECT " + Table.Post.COLUMN_ID_POST
+                + " FROM " + Table.Post.TABLE_POST
+                + " WHERE " + Table.Post.COLUMN_THREAD + "=? ";
         if(since != null)
             sqlSelect = sqlSelect + " AND " + Table.Post.COLUMN_DATE +
                     ">=" + '\'' + since + "' ";
@@ -699,11 +702,9 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 }
             }
 
-//            PostServiceImpl psi = new PostServiceImpl();
-
             for(int i = 0; i < postsID.size(); i++ ) {
-                postService.details(postsID.get(i), null);
-                posts.add(postService.getVotePost());
+//                postService.details(postsID.get(i), null);
+                posts.add(postService.getPostDetails(postsID.get(i), null));
             }
 
         } catch (SQLException e) {
@@ -719,10 +720,10 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 
-        String sqlSelect = "SELECT * " +
-                " FROM " + Table.Post.TABLE_POST +
-                " WHERE " + Table.Post.COLUMN_THREAD + "=? " +
-                " AND " + Table.Post.COLUMN_PARENT + " IS NULL ";
+        String sqlSelect = "SELECT " + Table.Post.COLUMN_ID_POST
+                + " FROM " + Table.Post.TABLE_POST
+                + " WHERE " + Table.Post.COLUMN_THREAD + "=? "
+                + " AND " + Table.Post.COLUMN_PARENT + " IS NULL ";
         if(since != null)
             sqlSelect = sqlSelect + " AND " + Table.Post.COLUMN_DATE +
                     ">=" + '\'' + since + "' ";
@@ -749,13 +750,9 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 }
             }
 
-//            PostServiceImpl psi = new PostServiceImpl();
-
             for(int i = 0; i < rootId.size(); i++ ) {
-                postService.details(rootId.get(i), null);
-                posts.add(postService.getVotePost());
-
-
+//                postService.details(rootId.get(i), null);
+                posts.add(postService.getPostDetails(rootId.get(i), null));
 
                 final String childs = " Select * from forum.Post " +
                         " WHERE   parent is not null and path like concat('" +
@@ -776,8 +773,9 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
                 }
 
                 for(int j = 0; j < child.size(); j++ ) {
-                    postService.details(child.get(j), null);
-                    posts.add(postService.getVotePost());
+//                    postService.details(child.get(j), null);
+//                    posts.add(postService.getVotePost());
+                    posts.add(postService.getPostDetails(child.get(j), null));
                 }
 
             }
@@ -792,8 +790,72 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
 
     public ThreadDetails getThreadDetatils(Integer thread, String related) {
-        details(thread, related);
-        return this.threadDetails;
+//        details(thread, related);
+//        return this.threadDetails;
+
+//        if(related != null && !((related.equals("user") || related.equals("forum") ||
+//                related.equals("user,forum") || related.equals("forum,user"))))
+//            return ResponseStatus.getMessage(
+//                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
+//                    ResponseStatus.FORMAT_JSON);
+
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+        final String sqlSel = "SELECT "
+                + Table.Thread.COLUMN_FORUM + "," + Table.Thread.COLUMN_DATE + ","
+                + Table.Thread.COLUMN_ID_THREAD + "," + Table.Thread.COLUMN_IS_CLOSED + ","
+                + Table.Thread.COLUMN_IS_DELETED + "," +  Table.Thread.COLUMN_MESSAGE + ","
+                + Table.Thread.COLUMN_SLUG + "," + Table.Thread.COLUMN_TITLE + ","
+                + Table.Thread.COLUMN_USER + "," + Table.Thread.COLUMN_LIKES + ","
+                + Table.Thread.COLUMN_DISLIKES + ", "
+                + "COUNT(" + Table.Post.COLUMN_ID_POST + ") AS posts FROM "
+                + Table.Thread.TABLE_THREAD
+                + " INNER JOIN " + Table.Post.TABLE_POST
+                + " ON " + Table.Thread.COLUMN_ID_THREAD   + "=? AND "
+                + Table.Post.COLUMN_THREAD + '=' + Table.Thread.COLUMN_ID_THREAD
+                + " AND " + Table.Post.COLUMN_IS_DELETED + "= FALSE " ;
+
+        ThreadDetails<Object, Object> threadDetails = new ThreadDetails<>();
+
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel)) {
+            preparedStatement.setLong(1, thread.intValue());
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    if (resultSet.getObject("forum") == null)
+                        throw new NullPointerException();
+                    threadDetails.setDate(resultSet.getString("date").replace(".0", ""));
+                    threadDetails.setForum(resultSet.getString("forum"));
+                    threadDetails.setId(resultSet.getInt("idThread"));
+                    threadDetails.setClosed((Boolean) resultSet.getObject("isClosed"));
+                    threadDetails.setisDeleted((Boolean) resultSet.getObject("isDeleted"));
+                    threadDetails.setMessage(resultSet.getString("message"));
+                    threadDetails.setPosts(resultSet.getInt("posts"));
+                    threadDetails.setSlug(resultSet.getString("slug"));
+                    threadDetails.setTitle(resultSet.getString("title"));
+                    threadDetails.setUser(resultSet.getString("user"));
+                    threadDetails.setLikes(resultSet.getInt("likes"));
+                    threadDetails.setDislikes(resultSet.getInt("dislikes"));
+                    threadDetails.setPoints();
+
+                    if (!StringUtils.isEmpty(related) && related.contains("user")) {
+                        threadDetails.setUser(userService.getUserDetail((String) threadDetails.getUser()));
+                    }
+
+                    if (!StringUtils.isEmpty(related) && related.contains("forum")) {
+                        threadDetails.setForum(forumService.getForum(threadDetails.getForum().toString()));
+                    }
+                }
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return threadDetails;
+
+//        return (new ResultJson<>(
+//                ResponseStatus.ResponceCode.OK.ordinal(), threadDetails)).getStringResult();
     }
 
 

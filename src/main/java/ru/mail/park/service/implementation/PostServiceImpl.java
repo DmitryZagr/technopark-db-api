@@ -17,8 +17,6 @@ import ru.mail.park.model.post.IdPost;
 import ru.mail.park.model.post.Post;
 import ru.mail.park.model.Table;
 import ru.mail.park.model.post.VotePost;
-import ru.mail.park.model.thread.ThreadVote;
-import ru.mail.park.model.user.UserDetails;
 import ru.mail.park.service.interfaces.IPostService;
 
 import javax.sql.DataSource;
@@ -33,30 +31,32 @@ import java.util.ArrayList;
 @Transactional
 public class PostServiceImpl implements IPostService, AutoCloseable{
 
-    private ObjectMapper mapper = new ObjectMapper();
-    private DetailPost<Object,Object,Object> votePost ;
+//    private ObjectMapper mapper = new ObjectMapper();
+//    private DetailPost<Object,Object,Object> votePost ;
 
     @Autowired
     private DataSource dataSource;
 
     @Autowired
     private ThreadServiceImpl threadService;
+
     @Autowired
     private ForumServiceImpl forumService;
+
     @Autowired
     private UserServiceImpl userService;
 
-    public DetailPost<Object, Object, Object> getVotePost() {
-        return votePost;
-    }
+//    public DetailPost<Object, Object, Object> getVotePost() {
+//        return votePost;
+//    }
 
     @Override
     public String create(Post post) {
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 
-        final String sqlApproveThread = "SELECT * FROM " + Table.Thread.TABLE_THREAD +
-                " WHERE " + Table.Thread.COLUMN_ID_THREAD + '=' + post.getThread();
+//        final String sqlApproveThread = "SELECT * FROM " + Table.Thread.TABLE_THREAD +
+//                " WHERE " + Table.Thread.COLUMN_ID_THREAD + '=' + post.getThread();
 
         final String sqlInsert = "INSERT INTO " + Table.Post.TABLE_POST + " ( " +
                 Table.Post.COLUMN_DATE + ',' + Table.Post.COLUMN_THREAD + ',' +
@@ -72,10 +72,10 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 " WHERE " + Table.Post.COLUMN_ID_POST +
                 "=?";
 
-        final String insertInVotePost =  "INSERT INTO " + Table.VotePost.TABLE_VOTE_POST +
-                " ( " + Table.VotePost.COLUMN_ID_POST + ')' + "VALUES (?);";
+//        final String insertInVotePost =  "INSERT INTO " + Table.VotePost.TABLE_VOTE_POST +
+//                " ( " + Table.VotePost.COLUMN_ID_POST + ')' + "VALUES (?);";
         try {
-            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlApproveThread)) {
+            /*try(PreparedStatement preparedStatement = connection.prepareStatement(sqlApproveThread)) {
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
                         if (resultSet.getBoolean("isDeleted"))
@@ -87,7 +87,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                                 ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
                                 ResponseStatus.FORMAT_JSON);
                 }
-            }
+            } */
 
             try(PreparedStatement preparedStatement =
                         connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)) {
@@ -125,11 +125,11 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 preparedStatement.executeUpdate();
             }
 
-            try(PreparedStatement preparedStatement = connection.prepareStatement(insertInVotePost,
-                    Statement.RETURN_GENERATED_KEYS)) {
-                preparedStatement.setLong(1, post.getid());
-                preparedStatement.execute();
-            }
+//            try(PreparedStatement preparedStatement = connection.prepareStatement(insertInVotePost,
+//                    Statement.RETURN_GENERATED_KEYS)) {
+//                preparedStatement.setLong(1, post.getid());
+//                preparedStatement.execute();
+//            }
         } catch (MySQLIntegrityConstraintViolationException e) {
 //            return ResponseStatus.getMessage(
 //                        ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
@@ -149,7 +149,6 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
     @Override
     public String removeOrRestore(IdPost idPost, boolean isDeleted) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         final String sql = "UPDATE " + Table.Post.TABLE_POST + " SET " +
@@ -169,17 +168,24 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
     @Override
     public String vote(String vote) {
-//        connection =  ConnectionToMySQL.getConnection();
 
-        final String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
-                Table.VotePost.TABLE_VOTE_POST + " ON " +
-                Table.VotePost.COLUMN_ID_POST + "=? AND " + Table.Post.COLUMN_ID_POST + '=' +
-                Table.VotePost.COLUMN_ID_POST + ';';
+        final String sqlSel = "SELECT "
+                + Table.Post.COLUMN_ID_POST + "," + Table.Post.COLUMN_FORUM + ","
+                + Table.Post.COLUMN_DATE + "," + Table.Post.COLUMN_IS_APPROVED + ","
+                + Table.Post.COLUMN_IS_DELETED + "," + Table.Post.COLUMN_IS_EDITED + ","
+                + Table.Post.COLUMN_IS_HIGHLIGHED + "," + Table.Post.COLUMN_IS_SPAM + ","
+                + Table.Post.COLUMN_MESSAGE + "," + Table.Post.COLUMN_PARENT + ","
+                + Table.Post.COLUMN_THREAD + "," + Table.Post.COLUMN_USER + ","
+                + Table.Post.COLUMN_LIKE + "," + Table.Post.COLUMN_DISLIKE + " "
+                + "FROM " + Table.Post.TABLE_POST + " WHERE "
+
+                + Table.Post.COLUMN_ID_POST + "=? " + ';';
 
         final int _vote;
         final int idPost;
 
         try {
+            final ObjectMapper mapper = new ObjectMapper();
             final ObjectNode root = (ObjectNode) mapper.readTree(vote);
             _vote = root.get("vote").asInt();
             idPost = root.get("post").asInt();
@@ -197,11 +203,11 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                     ResponseStatus.FORMAT_JSON);
         }
 
-        final String sqlCol = (_vote == 1) ? Table.VotePost.COLUMN_LIKE : Table.VotePost.COLUMN_DISLIKE;
+        final String sqlCol = (_vote == 1) ? Table.Post.COLUMN_LIKE : Table.Post.COLUMN_DISLIKE;
 
-        final String sqlUpd = "UPDATE " + Table.VotePost.TABLE_VOTE_POST + " SET " +
+        final String sqlUpd = "UPDATE " + Table.Post.TABLE_POST+ " SET " +
                 sqlCol + "=? WHERE " +
-                Table.VotePost.COLUMN_ID_POST + "=? ;";
+                Table.Post.COLUMN_ID_POST + "=? ;";
         final VotePost votePost = new VotePost();
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
@@ -247,17 +253,23 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
     @Override
     public String update(String update) {
-//        connection =  ConnectionToMySQL.getConnection();
 
-        final String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
-                Table.VotePost.TABLE_VOTE_POST + " ON " +
-                Table.VotePost.COLUMN_ID_POST + "=? AND " +
-                Table.VotePost.COLUMN_ID_POST + '=' + Table.Post.COLUMN_ID_POST;
+        final String sqlSel = "SELECT "
+                + Table.Post.COLUMN_ID_POST + "," + Table.Post.COLUMN_FORUM + ","
+                + Table.Post.COLUMN_DATE + "," + Table.Post.COLUMN_IS_APPROVED + ","
+                + Table.Post.COLUMN_IS_DELETED + "," + Table.Post.COLUMN_IS_EDITED + ","
+                + Table.Post.COLUMN_IS_HIGHLIGHED + "," + Table.Post.COLUMN_IS_SPAM + ","
+                + Table.Post.COLUMN_MESSAGE + "," + Table.Post.COLUMN_PARENT + ","
+                + Table.Post.COLUMN_THREAD + "," + Table.Post.COLUMN_USER + ","
+                + Table.Post.COLUMN_LIKE + "," + Table.Post.COLUMN_DISLIKE + " "
+                + "FROM " + Table.Post.TABLE_POST + " WHERE "
+                + Table.Post.COLUMN_ID_POST + "=?; ";
 
         final String message;
         final int idPost;
 
         try {
+            final ObjectMapper mapper = new ObjectMapper();
             final ObjectNode root = (ObjectNode) mapper.readTree(update);
             message = root.get("message").asText();
             idPost = root.get("post").asInt();
@@ -324,17 +336,22 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
     @Override
     public String list(String forum, Long thread, String since, Long limit, String order) {
-//        connection =  ConnectionToMySQL.getConnection();
         final String reqCondition;
         final String dateContidion;
         final String orderCondition;
         final String limitCondition;
         reqCondition = (forum != null) ? Table.Post.COLUMN_FORUM : Table.Post.COLUMN_THREAD;
 
-        String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
-                Table.VotePost.TABLE_VOTE_POST + " ON " +
-                Table.VotePost.COLUMN_ID_POST + '=' + Table.Post.COLUMN_ID_POST +
-                " AND " + reqCondition + "=?"  ;
+        String sqlSel = "SELECT "
+                + Table.Post.COLUMN_ID_POST + "," + Table.Post.COLUMN_FORUM + ","
+                + Table.Post.COLUMN_DATE + "," + Table.Post.COLUMN_IS_APPROVED + ","
+                + Table.Post.COLUMN_IS_DELETED + "," + Table.Post.COLUMN_IS_EDITED + ","
+                + Table.Post.COLUMN_IS_HIGHLIGHED + "," + Table.Post.COLUMN_IS_SPAM + ","
+                + Table.Post.COLUMN_MESSAGE + "," + Table.Post.COLUMN_PARENT + ","
+                + Table.Post.COLUMN_THREAD + "," + Table.Post.COLUMN_USER + ","
+                + Table.Post.COLUMN_LIKE + "," + Table.Post.COLUMN_DISLIKE + " "
+                + "FROM " + Table.Post.TABLE_POST + " WHERE "
+                + "  " + reqCondition + "=?"  ;
 
         dateContidion = (since != null) ?  " AND " + Table.Post.COLUMN_DATE + ">=\'" + since + '\'' : " ";
         sqlSel = sqlSel + dateContidion;
@@ -349,7 +366,6 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
         final ArrayList<VotePost> votePosts = new ArrayList<>();
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
-
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel)) {
             if(forum != null) preparedStatement.setString(1, forum);
@@ -391,22 +407,22 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 ResponseStatus.ResponceCode.OK.ordinal(), votePosts)).getStringResult();
     }
 
-    @Override
-    public String details(Integer post, String related) {
-//        connection =  ConnectionToMySQL.getConnection();
+    public DetailPost<Object, Object, Object> getPostDetails(Integer post, String related) {
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
-        final String sqlSel = "SELECT * FROM " + Table.Post.TABLE_POST + "INNER JOIN " +
-                Table.VotePost.TABLE_VOTE_POST + " ON " +
-                Table.Post.COLUMN_ID_POST + '=' + Table.VotePost.COLUMN_ID_POST + " AND " +
-                Table.VotePost.COLUMN_ID_POST + "=?;";
+        final String sqlSel = "SELECT "
+                + Table.Post.COLUMN_ID_POST + "," + Table.Post.COLUMN_FORUM + ","
+                + Table.Post.COLUMN_DATE + "," + Table.Post.COLUMN_IS_APPROVED + ","
+                + Table.Post.COLUMN_IS_DELETED + "," + Table.Post.COLUMN_IS_EDITED + ","
+                + Table.Post.COLUMN_IS_HIGHLIGHED + "," + Table.Post.COLUMN_IS_SPAM + ","
+                + Table.Post.COLUMN_MESSAGE + "," + Table.Post.COLUMN_PARENT + ","
+                + Table.Post.COLUMN_THREAD + "," + Table.Post.COLUMN_USER + ","
+                + Table.Post.COLUMN_LIKE + "," + Table.Post.COLUMN_DISLIKE + " "
+                + "FROM " + Table.Post.TABLE_POST + " WHERE "
+                + Table.Post.COLUMN_ID_POST + "=?;";
 
         final DetailPost<Object, Object, Object> postDetail = new DetailPost<>();
-//        UserDetails userDetails = new UserDetails();
-//        ThreadVote threadVote = new ThreadVote();
-//        VotePost votePost = new VotePost();
 
-        this.votePost = null;
 
         try {
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel)) {
@@ -430,19 +446,81 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                         postDetail.setPoints();
 
                         if (!StringUtils.isEmpty(related) && related.contains("forum")) {
-//                    ForumServiceImpl fsi = new ForumServiceImpl();
                             postDetail.setForum(forumService.getForum((String) postDetail.getForum()));
                         }
 
                         if (!StringUtils.isEmpty(related) && related.contains("thread")) {
-//                    ThreadServiceImpl tsi = new ThreadServiceImpl();
                             postDetail.setThread(threadService.getThreadDetatils((Integer) postDetail.getThread(), null));
                         }
 
                         if (!StringUtils.isEmpty(related) && related.contains("user")) {
-//                            UserServiceImpl usi = new UserServiceImpl();
-                            userService.getUserDetatil((String) postDetail.getUser());
-                            postDetail.setUser(userService.getUserDetatil((String) postDetail.getUser()));
+                            userService.getUserDetail((String) postDetail.getUser());
+                            postDetail.setUser(userService.getUserDetail((String) postDetail.getUser()));
+                        }
+                    }
+                }
+            }
+        } catch (MySQLIntegrityConstraintViolationException e) {
+            e.printStackTrace();
+        } catch (MySQLSyntaxErrorException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return postDetail;
+    }
+
+
+    @Override
+    public String details(Integer post, String related) {
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+
+        final String sqlSel = "SELECT "
+                + Table.Post.COLUMN_ID_POST + "," + Table.Post.COLUMN_FORUM + ","
+                + Table.Post.COLUMN_DATE + "," + Table.Post.COLUMN_IS_APPROVED + ","
+                + Table.Post.COLUMN_IS_DELETED + "," + Table.Post.COLUMN_IS_EDITED + ","
+                + Table.Post.COLUMN_IS_HIGHLIGHED + "," + Table.Post.COLUMN_IS_SPAM + ","
+                + Table.Post.COLUMN_MESSAGE + "," + Table.Post.COLUMN_PARENT + ","
+                + Table.Post.COLUMN_THREAD + "," + Table.Post.COLUMN_USER + ","
+                + Table.Post.COLUMN_LIKE + "," + Table.Post.COLUMN_DISLIKE + " "
+                + "FROM " + Table.Post.TABLE_POST + " WHERE "
+                + Table.Post.COLUMN_ID_POST + "=?;";
+
+        final DetailPost<Object, Object, Object> postDetail = new DetailPost<>();
+
+        try {
+            try(PreparedStatement preparedStatement = connection.prepareStatement(sqlSel)) {
+                preparedStatement.setLong(1, post.intValue());
+                try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        postDetail.setDate(resultSet.getString("date").replace(".0", ""));
+                        postDetail.setForum(resultSet.getString("forum"));
+                        postDetail.setid((Integer) resultSet.getObject("idPost"));
+                        postDetail.setApproved(resultSet.getBoolean("isApproved"));
+                        postDetail.setDeleted(resultSet.getBoolean("isDeleted"));
+                        postDetail.setEdited(resultSet.getBoolean("isEdited"));
+                        postDetail.setHighlighted(resultSet.getBoolean("isHighlighted"));
+                        postDetail.setSpam(resultSet.getBoolean("isSpam"));
+                        postDetail.setMessage(resultSet.getString("message"));
+                        postDetail.setParent((Integer) resultSet.getObject("parent"));
+                        postDetail.setThread(resultSet.getInt("thread"));
+                        postDetail.setUser(resultSet.getString("user"));
+                        postDetail.setLikes(resultSet.getInt("like"));
+                        postDetail.setDislikes(resultSet.getInt("dislike"));
+                        postDetail.setPoints();
+
+                        if (!StringUtils.isEmpty(related) && related.contains("forum")) {
+                            postDetail.setForum(forumService.getForum((String) postDetail.getForum()));
+                        }
+
+                        if (!StringUtils.isEmpty(related) && related.contains("thread")) {
+                            postDetail.setThread(threadService.getThreadDetatils((Integer) postDetail.getThread(), null));
+                        }
+
+                        if (!StringUtils.isEmpty(related) && related.contains("user")) {
+                            userService.getUserDetail((String) postDetail.getUser());
+                            postDetail.setUser(userService.getUserDetail((String) postDetail.getUser()));
                         }
                     }
                 }
@@ -464,23 +542,23 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                     ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
                     ResponseStatus.FORMAT_JSON);
 
-        this.votePost = postDetail;
+//        this.votePost = postDetail;
 
         return (new ResultJson<DetailPost<Object, Object, Object>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), postDetail)).getStringResult();
     }
 
     private String getPath(Integer parent, Integer idPost) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
-
 
         if(parent == null)
             return Integer.toString(idPost.intValue());
 
         String matPath = "";
 
-        final String sql = " Select * FROM " + Table.Post.TABLE_POST +
+        final String sql = " Select " +
+                Table.Post.COLUMN_PATH + " " +
+                "FROM " + Table.Post.TABLE_POST +
                 " WHERE " + Table.Post.COLUMN_ID_POST + "=?";
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {

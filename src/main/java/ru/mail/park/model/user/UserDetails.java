@@ -5,6 +5,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by admin on 08.10.16.
@@ -23,31 +24,31 @@ public class UserDetails implements Serializable {
     //    Optional
     private boolean isAnonymous = false;
 
-    protected ArrayList<String> followers = new ArrayList<>();
-    protected ArrayList<String> following = new ArrayList<>();
-    protected ArrayList<Integer> subscriptions = new ArrayList<>();
+    protected List<String> followers = new ArrayList<>();
+    protected List<String> following = new ArrayList<>();
+    protected List<Integer> subscriptions = new ArrayList<>();
 
-    public ArrayList<String> getFollowers() {
+    public List<String> getFollowers() {
         return followers;
     }
 
-    public ArrayList<Integer> getSubscriptions() {
+    public List<Integer> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(ArrayList<Integer> subscriptions) {
+    public void setSubscriptions(List<Integer> subscriptions) {
         this.subscriptions = subscriptions;
     }
 
-    public void setFollowers(ArrayList<String> followers) {
+    public void setFollowers(List<String> followers) {
         this.followers = followers;
     }
 
-    public ArrayList<String> getFollowing() {
+    public List<String> getFollowing() {
         return following;
     }
 
-    public void setFollowing(ArrayList<String> following) {
+    public void setFollowing(List<String> following) {
         this.following = following;
     }
 

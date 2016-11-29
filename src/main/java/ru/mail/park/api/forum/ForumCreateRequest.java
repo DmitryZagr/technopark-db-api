@@ -26,7 +26,8 @@ public class ForumCreateRequest implements AutoCloseable{
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
 
-        final String sql = "select * from " + Table.Forum.TABLE_FORUM +
+        final String sql = "select  " + Table.Forum.COLUMN_ID_FORUM +
+                " from " + Table.Forum.TABLE_FORUM +
                 " WHERE " + Table.Forum.COLUMN_NAME + "=? OR " + Table.Forum.COLUMN_SHORT_NAME + "=?";
 
         int id = 0;

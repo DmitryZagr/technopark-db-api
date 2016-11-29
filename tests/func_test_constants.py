@@ -3,19 +3,19 @@
 FORUMS = [
             { 
                 'name': 'Forum With Sufficiently Large Name',
-                'shortName': 'forumwithsufficientlylargename'
+                'short_name': 'forumwithsufficientlylargename'
             },
             { 
                 'name': 'Forum I',
-                'shortName': 'forum1'
+                'short_name': 'forum1'
             },
             { 
                 'name': 'Forum II',
-                'shortName': 'forum2'
+                'short_name': 'forum2'
             },
             { 
                 'name': u'Форум Три',
-                'shortName': 'forum3'
+                'short_name': 'forum3'
             },
 ]
 

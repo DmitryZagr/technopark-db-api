@@ -35,8 +35,8 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
         final String tranckateUser   = "DELETE FROM " + Table.User.TABLE_USER ;
         final String userFollower    = "DELETE FROM " + Table.Followers.TABLE_FOLLOWERS;
         final String threadSubscribe = "DELETE FROM " + Table.ThreadSubscribe.TABLE_ThreadSubscribe;
-        final String threadVote      = "DELETE FROM " + Table.ThreadVote.TABLE_THREAD_VOTE;
-        final String votePost        = "DELETE FROM " + Table.VotePost.TABLE_VOTE_POST;
+//        final String threadVote      = "DELETE FROM " + Table.ThreadVote.TABLE_THREAD_VOTE;
+//        final String votePost        = "DELETE FROM " + Table.VotePost.TABLE_VOTE_POST;
         final String safeMode        = "SET SQL_SAFE_UPDATES = 1;";
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
@@ -50,8 +50,8 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
             statement.execute(tranckateThread);
             statement.execute(tranckatePost);
             statement.execute(threadSubscribe);
-            statement.execute(threadVote);
-            statement.execute(votePost);
+//            statement.execute(threadVote);
+//            statement.execute(votePost);
             statement.execute(userFollower);
             statement.execute(safeMode);
 

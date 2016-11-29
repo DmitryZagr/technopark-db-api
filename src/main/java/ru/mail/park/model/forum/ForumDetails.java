@@ -29,11 +29,11 @@ public class ForumDetails<U> implements Serializable {
         this.name = name;
     }
 
-    public String getShortName() {
+    public String getShort_name() {
         return shortName;
     }
 
-    public void setShortName(String shortName) {
+    public void setShort_name(String shortName) {
         this.shortName = shortName;
     }
 

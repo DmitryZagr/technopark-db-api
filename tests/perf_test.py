@@ -19,7 +19,6 @@ settings = tools.Configuration(CONFIG_PATH).get_section('perf_test')
 
 class TestLog(object):
     def __init__(self, verbose=False):
-        self.test_log = []
         self.verbose = verbose
 
     def write(self, message, level='info'):
@@ -27,7 +26,6 @@ class TestLog(object):
         msg = time + message
         if self.verbose:
             print message
-        self.test_log.append({'message': message, 'level': level})
 
     def print_out(self, message):
         print "[%s] %s" % (datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"), message)
@@ -121,7 +119,7 @@ class ForumEntity(object):
     @property
     def unique_id(self):
         id_attr_for_type = {
-            'forum': 'shortName',
+            'forum': 'short_name',
             'thread': 'id',
             'post': 'id',
             'user': 'email',
@@ -165,7 +163,7 @@ class Forum(ForumEntity):
     def create(self, fill=False):
         params = {
             'name': facter.name,
-            'shortName': facter.word,
+            'short_name': facter.word,
         }
         location = '/%s/create/' % self.type
         params['user'] = random.choice(state.users)
@@ -418,7 +416,7 @@ class State(object):
         self.users.append(u['email'])
 
     def add_forum(self, f):
-        self.forums.append(f['shortName'])
+        self.forums.append(f['short_name'])
 
     def add_thread(self, t):
         self.threads.append(t['id'])

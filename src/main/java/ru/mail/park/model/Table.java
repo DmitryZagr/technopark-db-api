@@ -29,14 +29,16 @@ public class Table {
         public static final String COLUMN_IS_DELETED = "`forum`.`Post`.`isDeleted`";
         public static final String COLUMN_PATH      = "`forum`.`Post`.`path`";
         public static final String COLUMN_ROOT      = "`forum`.`Post`.`root`";
+        public static final String COLUMN_LIKE = "`forum`.`Post`.`like`";
+        public static final String COLUMN_DISLIKE = "`forum`.`Post`.`dislike`";
     }
 
-    public static final class VotePost {
-        public static final String TABLE_VOTE_POST = "`forum`.`VotePost`";
-        public static final String COLUMN_ID_POST = "`forum`.`VotePost`.`idPost`";
-        public static final String COLUMN_LIKE = "`forum`.`VotePost`.`like`";
-        public static final String COLUMN_DISLIKE = "`forum`.`VotePost`.`dislike`";
-    }
+//    public static final class VotePost {
+//        public static final String TABLE_VOTE_POST = "`forum`.`VotePost`";
+//        public static final String COLUMN_ID_POST = "`forum`.`VotePost`.`idPost`";
+//        public static final String COLUMN_LIKE = "`forum`.`VotePost`.`like`";
+//        public static final String COLUMN_DISLIKE = "`forum`.`VotePost`.`dislike`";
+//    }
 
 
     public static final class Thread {
@@ -50,6 +52,8 @@ public class Table {
         public static final String COLUMN_MESSAGE = "`forum`.`Thread`.`message`";
         public static final String COLUMN_SLUG = "`forum`.`Thread`.`slug`";
         public static final String COLUMN_IS_DELETED = "`forum`.`Thread`.`isDeleted`";
+        public static final String COLUMN_LIKES      = "`forum`.`Thread`.`likes`";
+        public static final String COLUMN_DISLIKES   = "`forum`.`Thread`.`dislikes`";
     }
 
     public static final class User {
@@ -74,11 +78,11 @@ public class Table {
         public static final String COLUMN_USERNAME       = "`forum`.`ThreadSubscribe`.`user`";
     }
 
-    public static final class ThreadVote{
-        public static final String TABLE_THREAD_VOTE = "`forum`.`ThreadVote`";
-        public static final String COLUMN_ID_THREAD  = "`forum`.`ThreadVote`.`idThread`";
-        public static final String COLUMN_LIKES      = "`forum`.`ThreadVote`.`likes`";
-        public static final String COLUMN_DISLIKES   = "`forum`.`ThreadVote`.`dislikes`";
-    }
+//    public static final class ThreadVote{
+//        public static final String TABLE_THREAD_VOTE = "`forum`.`ThreadVote`";
+//        public static final String COLUMN_ID_THREAD  = "`forum`.`ThreadVote`.`idThread`";
+//        public static final String COLUMN_LIKES      = "`forum`.`ThreadVote`.`likes`";
+//        public static final String COLUMN_DISLIKES   = "`forum`.`ThreadVote`.`dislikes`";
+//    }
 
 }
