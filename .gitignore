@@ -5,6 +5,8 @@ tests/test.py
 
 *.py[cod]
 
+*httperf_scenario
+
 # C extensions
 *.so
 

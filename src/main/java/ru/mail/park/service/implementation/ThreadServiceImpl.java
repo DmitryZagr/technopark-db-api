@@ -585,7 +585,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
 
         if(sort != null) {
             if(sort.contains("flat"))
-                sql = sql +  " GROUP BY " +
+                sql = sql +  " ORDER BY " +
                         Table.Post.COLUMN_DATE + ' ' + sqlOrder;
 
             if(sort.contains("parent_tree")) {
