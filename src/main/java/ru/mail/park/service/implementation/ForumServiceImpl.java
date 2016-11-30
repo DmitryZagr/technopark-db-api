@@ -33,8 +33,6 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
     @Autowired
     private DataSource dataSource;
 
-//    private Forum forum;
-
     @Autowired
     private ThreadServiceImpl threadService;
 
@@ -56,22 +54,23 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
                 "VALUES (?, ?, ?);";
 
         try {
-            forum.setId(forumCreateRequest.getExistingId(forum.getName(), forum.getShort_name()));
-            if(forum.getId() == -1)
-                return ResponseStatus.getMessage(
-                    ResponseStatus.ResponceCode.UNKNOWN_ERROR.ordinal(),
-                    ResponseStatus.FORMAT_JSON);
-
-            if(forum.getId() != 0) {
-                return (new ResultJson<Forum>(
-                        ResponseStatus.ResponceCode.OK.ordinal(), forum)).getStringResult();
-            }
+//            forum.setId(forumCreateRequest.getExistingId(forum.getName(), forum.getShort_name()));
+//            if(forum.getId() == -1)
+//                return ResponseStatus.getMessage(
+//                    ResponseStatus.ResponceCode.UNKNOWN_ERROR.ordinal(),
+//                    ResponseStatus.FORMAT_JSON);
+//
+//            if(forum.getId() != 0) {
+//                return (new ResultJson<Forum>(
+//                        ResponseStatus.ResponceCode.OK.ordinal(), forum)).getStringResult();
+//            }
 
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)){
                 preparedStatement.setString(1, forum.getName());
                 preparedStatement.setString(2, forum.getShort_name());
                 preparedStatement.setString(3, forum.getUser());
                 preparedStatement.executeUpdate();
+                connection.commit();
                 try(ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
                     while (resultSet.next())
                         forum.setId(resultSet.getInt(1));
@@ -145,12 +144,9 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
         if(since != null)
             sql = sql + " AND " + Table.Post.COLUMN_DATE + ">=" + '\'' + since + '\'';
 
-//        sql = sql + " INNER  JOIN " + Table.VotePost.TABLE_VOTE_POST + " ON " +
-//                Table.VotePost.COLUMN_ID_POST + '=' + Table.Post.COLUMN_ID_POST;
-
         if(order == null)
-            sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + " DESC ";
-        else sql = sql + " GROUP BY " + Table.Post.COLUMN_DATE + order;
+            sql = sql + " ORDER BY " + Table.Post.COLUMN_DATE + " DESC ";
+        else sql = sql + " ORDER BY " + Table.Post.COLUMN_DATE + order;
 
         if(limit != null)
             sql = sql + " LIMIT " + limit;
@@ -332,7 +328,5 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
 
     @Override
     public void close() throws Exception {
-//        preparedStatement.close();
-//        connection.close();
     }
 }

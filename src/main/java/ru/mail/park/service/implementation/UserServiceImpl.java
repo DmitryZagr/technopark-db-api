@@ -30,11 +30,6 @@ import java.util.List;
 @Transactional
 public class UserServiceImpl implements IUserService, AutoCloseable {
 
-//    private final ObjectMapper mapper = new ObjectMapper();
-
-//    private ArrayList<UserDetails> usersDetail;
-//    private UserDetails userDetails;
-
     @Autowired
     private DataSource dataSource;
 
@@ -56,14 +51,17 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
             preparedStatement.setString(4, user.getName());
             preparedStatement.setString(5, user.getEmail());
             preparedStatement.executeUpdate();
+            connection.commit();
             try(ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
                 while (resultSet.next())
                     user.setId(resultSet.getLong(1));
             }
         } catch (MySQLIntegrityConstraintViolationException e) {
+//            e.printStackTrace();
             return ResponseStatus.getMessage(
                     ResponseStatus.ResponceCode.USER_EXIST.ordinal(), ResponseStatus.FORMAT_JSON);
         } catch (MySQLSyntaxErrorException e) {
+//            e.printStackTrace();
             return ResponseStatus.getMessage(
                     ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(), ResponseStatus.FORMAT_JSON);
         } catch (SQLException e) {
@@ -76,7 +74,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String follow(String followerFollowee) {
-//        connection =  ConnectionToMySQL.getConnection();
         final String follower;
         final String followee;
 
@@ -123,7 +120,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String listFollowers(String user, Integer limit, String order, Integer sinceId) {
-//        connection =  ConnectionToMySQL.getConnection();
 
         String sqlSelectFollowers = "SELECT  " + Table.Followers.COLUMN_FOLLOWER   +
                 "  FROM " + Table.Followers.TABLE_FOLLOWERS +
@@ -134,10 +130,10 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         if(sinceId != null)
         sqlSelectFollowers =  sqlSelectFollowers +
                " AND  " + Table.User.COLUMN_ID_USER + ">=" + sinceId.intValue() + ' ';
-//
+
         if(order == null) order = "DESC";
         sqlSelectFollowers = sqlSelectFollowers + " ORDER BY " + Table.User.COLUMN_NAME + ' ' + order;
-//
+
         if(limit != null)
         sqlSelectFollowers = sqlSelectFollowers +  " LIMIT " + limit.intValue();
 
@@ -166,7 +162,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
         for(int i = 0; i < followers.size(); i++) {
             usersDetail.add(this.getUserDetail(followers.get(i)));
-//            details(followers.get(i));
         }
 
         final String json = (new ResultJson<ArrayList<UserDetails>>(
@@ -177,7 +172,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String listFollowing(String user, Integer limit, String order, Integer sinceId) {
-//        connection =  ConnectionToMySQL.getConnection();
 
         String sqlSelectFollowing = "SELECT " + Table.Followers.COLUMN_FOLLOWEE +
                 "  FROM " + Table.Followers.TABLE_FOLLOWERS +
@@ -188,10 +182,10 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         if(sinceId != null)
             sqlSelectFollowing =  sqlSelectFollowing +
                     " AND  " + Table.User.COLUMN_ID_USER + ">=" + sinceId.intValue() + ' ';
-//
+
         if(order == null) order = "DESC";
         sqlSelectFollowing = sqlSelectFollowing + " ORDER BY " + Table.User.COLUMN_NAME + ' ' + order;
-//
+
         if(limit != null)
             sqlSelectFollowing = sqlSelectFollowing +  " LIMIT " + limit.intValue();
 
@@ -219,7 +213,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
         for(int i = 0; i < followers.size(); i++) {
             usersDetail.add(getUserDetail(followers.get(i)));
-//            details(followers.get(i));
         }
 
         final String json = (new ResultJson<ArrayList<UserDetails>>(
@@ -232,7 +225,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         ArrayList<UserDetails> usersDetail = new ArrayList<>();
         for(int i =0; i < emails.size(); i++)
             usersDetail.add(getUserDetail(emails.get(i)));
-//            details(emails.get(i));
         final String json = (new ResultJson<ArrayList<UserDetails>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), usersDetail)).getStringResult();
         usersDetail = null;
@@ -241,7 +233,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String listPosts(String user, String since, Integer limit, String order) {
-//        connection =  ConnectionToMySQL.getConnection();
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         final String  dateContidion;
@@ -312,7 +303,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String unFollow(String followerFollowee) {
-//        connection =  ConnectionToMySQL.getConnection();
 
         final String follower;
         final String followee;
@@ -381,9 +371,9 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                 "LEFT JOIN `forum`.`ThreadSubscribe` ON \n" +
                 "\t`forum`.`User`.`email` = `forum`.`ThreadSubscribe`.`user`\n" +
                 "  \n" +
-                "  where `forum`.`User`.`email`=?\n" +
-                "  \n" +
-                "group by `forum`.`User`.`email`;" ;
+                "  where `forum`.`User`.`email`=?\n"; //+
+//                "  \n" +
+//                "group by `forum`.`User`.`email`;" ;
 
         UserDetails userDetails = new UserDetails();
 
@@ -441,7 +431,6 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public String updateProfile(String json) {
-//        connection =  ConnectionToMySQL.getConnection();
 
         final String sql = "UPDATE " + Table.User.TABLE_USER +
                 " SET " + Table.User.COLUMN_ABOUT +
@@ -507,8 +496,8 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
                 "\t`forum`.`User`.`email` = `forum`.`ThreadSubscribe`.`user`\n" +
                 "  \n" +
                 "  where `forum`.`User`.`email`=?\n" +
-                "  \n" +
-                "group by `forum`.`User`.`email`;" ;
+                "  \n" ;//+
+               // "group by `forum`.`User`.`email`;" ;
 
         UserDetails userDetails = new UserDetails();
 
@@ -563,8 +552,5 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
 
     @Override
     public void close() throws Exception {
-//        statement.close();
-//        resultSet.close();
-//        preparedStatement.close();
     }
 }

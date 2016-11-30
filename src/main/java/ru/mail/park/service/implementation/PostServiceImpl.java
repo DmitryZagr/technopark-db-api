@@ -23,6 +23,9 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by admin on 08.10.16.
@@ -30,9 +33,6 @@ import java.util.ArrayList;
 @Component
 @Transactional
 public class PostServiceImpl implements IPostService, AutoCloseable{
-
-//    private ObjectMapper mapper = new ObjectMapper();
-//    private DetailPost<Object,Object,Object> votePost ;
 
     @Autowired
     private DataSource dataSource;
@@ -46,17 +46,9 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
     @Autowired
     private UserServiceImpl userService;
 
-//    public DetailPost<Object, Object, Object> getVotePost() {
-//        return votePost;
-//    }
-
     @Override
     public String create(Post post) {
         final Connection connection = DataSourceUtils.getConnection(dataSource);
-
-
-//        final String sqlApproveThread = "SELECT * FROM " + Table.Thread.TABLE_THREAD +
-//                " WHERE " + Table.Thread.COLUMN_ID_THREAD + '=' + post.getThread();
 
         final String sqlInsert = "INSERT INTO " + Table.Post.TABLE_POST + " ( " +
                 Table.Post.COLUMN_DATE + ',' + Table.Post.COLUMN_THREAD + ',' +
@@ -72,22 +64,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 " WHERE " + Table.Post.COLUMN_ID_POST +
                 "=?";
 
-//        final String insertInVotePost =  "INSERT INTO " + Table.VotePost.TABLE_VOTE_POST +
-//                " ( " + Table.VotePost.COLUMN_ID_POST + ')' + "VALUES (?);";
         try {
-            /*try(PreparedStatement preparedStatement = connection.prepareStatement(sqlApproveThread)) {
-                try(ResultSet resultSet = preparedStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        if (resultSet.getBoolean("isDeleted"))
-                            return ResponseStatus.getMessage(
-                                    ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
-                                    ResponseStatus.FORMAT_JSON);
-                    } else
-                        return ResponseStatus.getMessage(
-                                ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
-                                ResponseStatus.FORMAT_JSON);
-                }
-            } */
 
             try(PreparedStatement preparedStatement =
                         connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)) {
@@ -104,6 +81,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 preparedStatement.setBoolean(10, post.getisSpam());
                 preparedStatement.setBoolean(11, post.getisDeleted());
                 preparedStatement.executeUpdate();
+                connection.commit();
                 try(ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
                     if (resultSet.next()) post.setid(resultSet.getInt(1));
                 }
@@ -111,29 +89,22 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
 
             final String path = getPath(post.getParent(), post.getid());
 
-            String root = "";
+            int root = 0;
             if(path != null && path.contains(".")) {
-                root = path.substring(0, path.indexOf('.'));
+                root = Integer.parseInt(path.substring(0, path.indexOf('.')));
             }
 
             try(PreparedStatement preparedStatement = connection.prepareStatement(sqlUpdPath)) {
                 preparedStatement.setString(1, path);
                 if (post.getParent() == null)
                     preparedStatement.setString(2, Integer.toString(post.getid().intValue()));
-                else preparedStatement.setString(2, root);
+                else preparedStatement.setInt(2, root);
                 preparedStatement.setInt(3, post.getid().intValue());
                 preparedStatement.executeUpdate();
+                connection.commit();
             }
 
-//            try(PreparedStatement preparedStatement = connection.prepareStatement(insertInVotePost,
-//                    Statement.RETURN_GENERATED_KEYS)) {
-//                preparedStatement.setLong(1, post.getid());
-//                preparedStatement.execute();
-//            }
         } catch (MySQLIntegrityConstraintViolationException e) {
-//            return ResponseStatus.getMessage(
-//                        ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
-//                        ResponseStatus.FORMAT_JSON);
             e.printStackTrace();
         } catch (MySQLSyntaxErrorException e) {
             return ResponseStatus.getMessage(
@@ -542,8 +513,6 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                     ResponseStatus.ResponceCode.NOT_FOUND.ordinal(),
                     ResponseStatus.FORMAT_JSON);
 
-//        this.votePost = postDetail;
-
         return (new ResultJson<DetailPost<Object, Object, Object>>(
                 ResponseStatus.ResponceCode.OK.ordinal(), postDetail)).getStringResult();
     }
@@ -567,20 +536,64 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 while (resultSet.next()) {
                     matPath = resultSet.getString("path");
                 }
-                matPath = matPath + '.' + idPost.intValue();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
+        final String sqlPath = " Select " +
+                Table.Post.COLUMN_PATH + " " +
+                "FROM " + Table.Post.TABLE_POST +
+                " WHERE " + Table.Post.COLUMN_PATH + " LIKE " + "?";
+
+        List<String> paths = new ArrayList<>(100);
+
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sqlPath)) {
+            //^(STRING)([.])([0-9]{3})$
+            preparedStatement.setString(1,   matPath.concat(".___"));
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    paths.add(resultSet.getString("path"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if(paths.size() == 0) {
+            matPath = matPath + ".000";
+        } else {
+            String lastPath = paths.get(paths.size() - 1);
+            for(int i = 0; i < paths.size(); i++) {
+            }
+            String subPath = Integer.toString(
+                    Integer.parseInt(
+                        lastPath.substring(lastPath.lastIndexOf('.') + 1, lastPath.length() )) + 1);
+            if(subPath.length() != 3)
+                subPath = addStrZero(subPath);
+
+            matPath = matPath + "." + subPath;
+        }
+
         return matPath;
+    }
+
+    private String addStrZero(String str) {
+        if(!StringUtils.isEmpty(str) && str.length() != 3) {
+            switch (str.length()) {
+                case 0: { str = "000"; break;}
+                case 1: { str = "00" + str; break;}
+                case 2: { str = "0" + str; break;}
+//                case 3: { str = "0" + str; break;}
+            }
+
+        }
+        return str;
     }
 
 
 
     @Override
     public void close() throws Exception {
-//        preparedStatement.close();
-//        connection.close();
     }
 }

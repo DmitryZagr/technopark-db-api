@@ -28,32 +28,23 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
 
     @Override
     public int clear() {
-        final String unsafeMod = "SET SQL_SAFE_UPDATES = 0;";
-        final String tranckateForum  = "DELETE FROM " + Table.Forum.TABLE_FORUM;
-        final String tranckatePost   = "DELETE FROM " + Table.Post.TABLE_POST;
-        final String tranckateThread = "DELETE FROM " + Table.Thread.TABLE_THREAD ;
-        final String tranckateUser   = "DELETE FROM " + Table.User.TABLE_USER ;
-        final String userFollower    = "DELETE FROM " + Table.Followers.TABLE_FOLLOWERS;
-        final String threadSubscribe = "DELETE FROM " + Table.ThreadSubscribe.TABLE_ThreadSubscribe;
-//        final String threadVote      = "DELETE FROM " + Table.ThreadVote.TABLE_THREAD_VOTE;
-//        final String votePost        = "DELETE FROM " + Table.VotePost.TABLE_VOTE_POST;
-        final String safeMode        = "SET SQL_SAFE_UPDATES = 1;";
+        final String tranckateForum  = "TRUNCATE " + Table.Forum.TABLE_FORUM + ";";
+        final String tranckatePost   = "TRUNCATE " + Table.Post.TABLE_POST + ";";
+        final String tranckateThread = "TRUNCATE " + Table.Thread.TABLE_THREAD + ";";
+        final String tranckateUser   = "TRUNCATE " + Table.User.TABLE_USER + ";";
+        final String userFollower    = "TRUNCATE " + Table.Followers.TABLE_FOLLOWERS + ";";
+        final String threadSubscribe = "TRUNCATE " + Table.ThreadSubscribe.TABLE_ThreadSubscribe + ";";
 
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         try(Statement statement = connection.createStatement()) {
-//            connection = ConnectionToMySQL.getConnection();
-
-            statement.execute(unsafeMod);
             statement.execute(tranckateUser);
             statement.execute(tranckateForum);
             statement.execute(tranckateThread);
             statement.execute(tranckatePost);
             statement.execute(threadSubscribe);
-//            statement.execute(threadVote);
-//            statement.execute(votePost);
             statement.execute(userFollower);
-            statement.execute(safeMode);
+            connection.commit();
 
         } catch (MySQLIntegrityConstraintViolationException e) {
             e.printStackTrace();
@@ -87,7 +78,6 @@ public class CommonServiceImpl implements ICommonService, AutoCloseable{
         final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         try(Statement statement = connection.createStatement()) {
-//            connection = ConnectionToMySQL.getConnection();
 
             try(ResultSet resultSet = statement.executeQuery(countStrUser)) {
                 while (resultSet.next()) countUser = resultSet.getInt(1);
