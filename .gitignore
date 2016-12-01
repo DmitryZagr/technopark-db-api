@@ -5,8 +5,6 @@ tests/test.py
 
 *.py[cod]
 
-*httperf_scenario
-
 # C extensions
 *.so
 
@@ -48,3 +46,7 @@ nosetests.xml
 *.imi
 target
 .idea
+
+#generated
+nohup.out
+*httperf_scenario
