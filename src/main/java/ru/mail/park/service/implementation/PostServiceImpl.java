@@ -55,7 +55,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
                 Table.Post.COLUMN_MESSAGE   + ',' + Table.Post.COLUMN_USER + ',' +
                 Table.Post.COLUMN_FORUM    + ',' + Table.Post.COLUMN_PARENT + ',' +
                 Table.Post.COLUMN_IS_APPROVED  + ',' + Table.Post.COLUMN_IS_HIGHLIGHED + ',' +
-                Table.Post.COLUMN_IS_EDITED   + ',' + Table.Post.COLUMN_IS_SPAM+ ',' +
+                Table.Post.COLUMN_IS_EDITED   + ',' + Table.Post.COLUMN_IS_SPAM + ',' +
                 Table.Post.COLUMN_IS_DELETED  +  ')' +
                 "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
@@ -518,16 +518,17 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
     }
 
     private String getPath(Integer parent, Integer idPost) {
-        final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         if(parent == null)
             return Integer.toString(idPost.intValue());
+
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
 
         String matPath = "";
 
         final String sql = " Select " +
                 Table.Post.COLUMN_PATH + " " +
-                "FROM " + Table.Post.TABLE_POST +
+                " FROM " + Table.Post.TABLE_POST +
                 " WHERE " + Table.Post.COLUMN_ID_POST + "=?";
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -541,31 +542,29 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             e.printStackTrace();
         }
 
-        final String sqlPath = " Select " +
-                Table.Post.COLUMN_PATH + " " +
-                "FROM " + Table.Post.TABLE_POST +
-                " WHERE " + Table.Post.COLUMN_PATH + " LIKE " + "?";
+        final String sqlPath = " Select "
+                + Table.Post.COLUMN_PATH + " "
+                + "FROM " + Table.Post.TABLE_POST
+                + " WHERE " + Table.Post.COLUMN_PATH + " LIKE " + "?"
+                + " ORDER BY " + Table.Post.COLUMN_PATH + " DESC LIMIT 1";
 
-        List<String> paths = new ArrayList<>(100);
+        String lastPath = null;
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(sqlPath)) {
             //^(STRING)([.])([0-9]{3})$
             preparedStatement.setString(1,   matPath.concat(".___"));
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    paths.add(resultSet.getString("path"));
+                    lastPath = resultSet.getString("path");
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        if(paths.size() == 0) {
+        if(lastPath == null) {
             matPath = matPath + ".000";
         } else {
-            String lastPath = paths.get(paths.size() - 1);
-            for(int i = 0; i < paths.size(); i++) {
-            }
             String subPath = Integer.toString(
                     Integer.parseInt(
                         lastPath.substring(lastPath.lastIndexOf('.') + 1, lastPath.length() )) + 1);
