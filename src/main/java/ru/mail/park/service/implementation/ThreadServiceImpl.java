@@ -715,10 +715,10 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             sqlSelect = sqlSelect + " AND " + Table.Post.COLUMN_DATE +
                     ">=" + '\'' + since + "' ";
         if(order == null)
-            sqlSelect = sqlSelect + " ORDER BY "
+            sqlSelect = sqlSelect + " GROUP BY "
                     + Table.Post.COLUMN_ID_POST + " DESC ";
         else
-            sqlSelect = sqlSelect + " ORDER BY "
+            sqlSelect = sqlSelect + " GROUP BY "
                     + Table.Post.COLUMN_ID_POST + ' ' + order;
 
         if(limit != null)
