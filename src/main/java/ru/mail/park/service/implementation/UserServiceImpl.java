@@ -59,7 +59,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
         } catch (MySQLIntegrityConstraintViolationException e) {
 //            e.printStackTrace();
             return ResponseStatus.getMessage(
-                    ResponseStatus.ResponceCode.USER_EXIST.ordinal(), ResponseStatus.FORMAT_JSON);
+                    ResponseStatus.ResponceCode.EXIST.ordinal(), ResponseStatus.FORMAT_JSON);
         } catch (MySQLSyntaxErrorException e) {
 //            e.printStackTrace();
             return ResponseStatus.getMessage(
@@ -287,7 +287,7 @@ public class UserServiceImpl implements IUserService, AutoCloseable {
             }
         } catch (MySQLIntegrityConstraintViolationException e) {
             return ResponseStatus.getMessage(
-                    ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
+                    ResponseStatus.ResponceCode.EXIST.ordinal(),
                     ResponseStatus.FORMAT_JSON);
         } catch (MySQLSyntaxErrorException e) {
             return ResponseStatus.getMessage(

@@ -23,9 +23,6 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by admin on 08.10.16.
@@ -364,7 +361,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             }
         } catch (MySQLIntegrityConstraintViolationException e) {
             return ResponseStatus.getMessage(
-                    ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
+                    ResponseStatus.ResponceCode.EXIST.ordinal(),
                     ResponseStatus.FORMAT_JSON);
         } catch (MySQLSyntaxErrorException e) {
             return ResponseStatus.getMessage(
@@ -498,7 +495,7 @@ public class PostServiceImpl implements IPostService, AutoCloseable{
             }
         } catch (MySQLIntegrityConstraintViolationException e) {
             return ResponseStatus.getMessage(
-                    ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
+                    ResponseStatus.ResponceCode.EXIST.ordinal(),
                     ResponseStatus.FORMAT_JSON);
         } catch (MySQLSyntaxErrorException e) {
             return ResponseStatus.getMessage(

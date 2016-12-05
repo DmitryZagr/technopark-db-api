@@ -456,7 +456,7 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             }
         } catch (MySQLIntegrityConstraintViolationException e) {
             return ResponseStatus.getMessage(
-                    ResponseStatus.ResponceCode.USER_EXIST.ordinal(),
+                    ResponseStatus.ResponceCode.EXIST.ordinal(),
                     ResponseStatus.FORMAT_JSON);
         } catch (MySQLSyntaxErrorException e) {
             return ResponseStatus.getMessage(
@@ -837,28 +837,29 @@ public class ThreadServiceImpl implements IThreadService, AutoCloseable{
             preparedStatement.setLong(1, thread.intValue());
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    if (resultSet.getObject("forum") == null)
-                        throw new NullPointerException();
-                    threadDetails.setDate(resultSet.getString("date").replace(".0", ""));
-                    threadDetails.setForum(resultSet.getString("forum"));
-                    threadDetails.setId(resultSet.getInt("idThread"));
-                    threadDetails.setClosed((Boolean) resultSet.getObject("isClosed"));
-                    threadDetails.setisDeleted((Boolean) resultSet.getObject("isDeleted"));
-                    threadDetails.setMessage(resultSet.getString("message"));
-                    threadDetails.setPosts(resultSet.getInt("posts"));
-                    threadDetails.setSlug(resultSet.getString("slug"));
-                    threadDetails.setTitle(resultSet.getString("title"));
-                    threadDetails.setUser(resultSet.getString("user"));
-                    threadDetails.setLikes(resultSet.getInt("likes"));
-                    threadDetails.setDislikes(resultSet.getInt("dislikes"));
-                    threadDetails.setPoints();
+                    if (resultSet.getObject("forum") != null) {
+//                        throw new NullPointerException();
+                        threadDetails.setDate(resultSet.getString("date").replace(".0", ""));
+                        threadDetails.setForum(resultSet.getString("forum"));
+                        threadDetails.setId(resultSet.getInt("idThread"));
+                        threadDetails.setClosed((Boolean) resultSet.getObject("isClosed"));
+                        threadDetails.setisDeleted((Boolean) resultSet.getObject("isDeleted"));
+                        threadDetails.setMessage(resultSet.getString("message"));
+                        threadDetails.setPosts(resultSet.getInt("posts"));
+                        threadDetails.setSlug(resultSet.getString("slug"));
+                        threadDetails.setTitle(resultSet.getString("title"));
+                        threadDetails.setUser(resultSet.getString("user"));
+                        threadDetails.setLikes(resultSet.getInt("likes"));
+                        threadDetails.setDislikes(resultSet.getInt("dislikes"));
+                        threadDetails.setPoints();
 
-                    if (!StringUtils.isEmpty(related) && related.contains("user")) {
-                        threadDetails.setUser(userService.getUserDetail((String) threadDetails.getUser()));
-                    }
+                        if (!StringUtils.isEmpty(related) && related.contains("user")) {
+                            threadDetails.setUser(userService.getUserDetail((String) threadDetails.getUser()));
+                        }
 
-                    if (!StringUtils.isEmpty(related) && related.contains("forum")) {
-                        threadDetails.setForum(forumService.getForum(threadDetails.getForum().toString()));
+                        if (!StringUtils.isEmpty(related) && related.contains("forum")) {
+                            threadDetails.setForum(forumService.getForum(threadDetails.getForum().toString()));
+                        }
                     }
                 }
             }

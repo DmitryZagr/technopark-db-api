@@ -7,7 +7,7 @@ public class ResponseStatus {
 
     public enum ResponceCode {
         OK, NOT_FOUND, NOT_VALID,
-        INVALID_REQUEST, UNKNOWN_ERROR, USER_EXIST
+        INVALID_REQUEST, UNKNOWN_ERROR, EXIST
     }
 
     public static final String FORMAT_JSON = "JSON";
@@ -76,7 +76,7 @@ public class ResponseStatus {
                 "\"response\":\"" + errorMessage.UNKNOWN_ERROR +
                 "\" }";
         public static final String USER_EXIST = '{' +
-                "\"code\":" + ResponceCode.USER_EXIST.ordinal() + ',' +
+                "\"code\":" + ResponceCode.EXIST.ordinal() + ',' +
                 "\"response\":\"" + errorMessage.USER_EXIST +
                 "\" }";
     }

@@ -1,5 +1,6 @@
 package ru.mail.park.service.implementation;
 
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 //import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +84,13 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
             return ResponseStatus.getMessage(
                         ResponseStatus.ResponceCode.INVALID_REQUEST.ordinal(),
                         ResponseStatus.FORMAT_JSON);
-        } catch (SQLException e) {
+        }
+        catch (MySQLIntegrityConstraintViolationException e) {
+            return ResponseStatus.getMessage(
+                    ResponseStatus.ResponceCode.EXIST.ordinal(),
+                    ResponseStatus.FORMAT_JSON);
+        }
+        catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -225,7 +232,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
             sql = sql +  " AND " + Table.User.COLUMN_ID_USER + ">=" + since_id;
         if(order == null)
             order = " DESC ";
-        sql = sql + " GROUP BY " + Table.User.COLUMN_NAME + ' ' + order;
+        sql = sql + " GROUP BY " + Table.User.COLUMN_NAME + ' ' + order + ", "
+                + Table.User.COLUMN_ID_USER + ", " + Table.User.COLUMN_EMAIL;
         if(limit != null)
             sql = sql  + " LIMIT " + limit;
 
@@ -268,6 +276,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
         else sqlSort = sqlSort + ' ' + order;
 
         sql = sql + sqlSort;
+
+        sql = sql + ", " + Table.Thread.COLUMN_ID_THREAD;
 
         if(limit != null)
             sql = sql + " LIMIT " + limit;
