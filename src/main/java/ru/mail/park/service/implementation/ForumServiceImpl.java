@@ -232,8 +232,8 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
             sql = sql +  " AND " + Table.User.COLUMN_ID_USER + ">=" + since_id;
         if(order == null)
             order = " DESC ";
-        sql = sql + " GROUP BY " + Table.User.COLUMN_NAME + ' ' + order + ", "
-                + Table.User.COLUMN_ID_USER + ", " + Table.User.COLUMN_EMAIL;
+        sql = sql + " GROUP BY " + Table.User.COLUMN_NAME + ' ' + order /*+ ", "
+                + Table.User.COLUMN_ID_USER + ", " + Table.User.COLUMN_EMAIL*/;
         if(limit != null)
             sql = sql  + " LIMIT " + limit;
 
@@ -277,7 +277,7 @@ public class ForumServiceImpl implements IForumService, AutoCloseable {
 
         sql = sql + sqlSort;
 
-        sql = sql + ", " + Table.Thread.COLUMN_ID_THREAD;
+//        sql = sql + ", " + Table.Thread.COLUMN_ID_THREAD;
 
         if(limit != null)
             sql = sql + " LIMIT " + limit;
