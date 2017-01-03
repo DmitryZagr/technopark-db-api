@@ -3,7 +3,9 @@ package ru.mail.park.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.service.interfaces.ICommonService;
 
@@ -38,6 +40,26 @@ public class CommonController {
     @ExceptionHandler({HttpMessageNotReadableException.class})
     @ResponseBody
     public String resolveException() {
+        return
+                ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                        ResponseStatus.FORMAT_JSON
+                );
+    }
+
+    @ExceptionHandler({NoHandlerFoundException.class})
+    @ResponseBody
+    public String resolve404Exception() {
+        return
+                ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                        ResponseStatus.FORMAT_JSON
+                );
+    }
+
+    @ExceptionHandler({MissingServletRequestParameterException.class})
+    @ResponseBody
+    public String resolve400Exception() {
         return
                 ResponseStatus.getMessage(
                         ResponseStatus.ResponceCode.NOT_VALID.ordinal(),

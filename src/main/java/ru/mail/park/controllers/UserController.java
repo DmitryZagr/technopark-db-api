@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import ru.mail.park.api.status.*;
 import ru.mail.park.model.user.User;
 import ru.mail.park.service.implementation.UserServiceImpl;
 import ru.mail.park.service.interfaces.IUserService;
@@ -83,6 +87,38 @@ public class UserController {
             @RequestParam(name = "since", required = false) String since) {
         return ResponseEntity.ok(userService.listPosts(user, since, limit, order));
     }
+
+
+    @ExceptionHandler({NoHandlerFoundException.class})
+    @ResponseBody
+    public String resolve404Exception() {
+        return
+                ru.mail.park.api.status.ResponseStatus.getMessage(
+                        ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                        ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+                );
+    }
+
+    @ExceptionHandler({MissingServletRequestParameterException.class})
+    @ResponseBody
+    public String resolve400Exception() {
+        return
+                ru.mail.park.api.status.ResponseStatus.getMessage(
+                        ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                        ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+                );
+    }
+
+
+    @ExceptionHandler({NumberFormatException.class})
+    @ResponseBody
+    public String resolveNumberFormatExceptionException() {
+        return ru.mail.park.api.status.ResponseStatus.getMessage(
+                ru.mail.park.api.status.ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ru.mail.park.api.status.ResponseStatus.FORMAT_JSON
+        );
+    }
+
 
 }
 

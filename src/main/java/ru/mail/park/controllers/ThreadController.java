@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import ru.mail.park.api.status.ResponseStatus;
 import ru.mail.park.model.thread.Thread;
 import ru.mail.park.model.thread.ThreadID;
@@ -134,6 +136,36 @@ public class ThreadController {
     @ExceptionHandler({IOException.class})
     @ResponseBody
     public String resolveIOException() {
+        return ResponseStatus.getMessage(
+                ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                ResponseStatus.FORMAT_JSON
+        );
+    }
+
+    @ExceptionHandler({NoHandlerFoundException.class})
+    @ResponseBody
+    public String resolve404Exception() {
+        return
+                ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                        ResponseStatus.FORMAT_JSON
+                );
+    }
+
+    @ExceptionHandler({MissingServletRequestParameterException.class})
+    @ResponseBody
+    public String resolve400Exception() {
+        return
+                ResponseStatus.getMessage(
+                        ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
+                        ResponseStatus.FORMAT_JSON
+                );
+    }
+
+
+    @ExceptionHandler({NumberFormatException.class})
+    @ResponseBody
+    public String resolveNumberFormatExceptionException() {
         return ResponseStatus.getMessage(
                 ResponseStatus.ResponceCode.NOT_VALID.ordinal(),
                 ResponseStatus.FORMAT_JSON
